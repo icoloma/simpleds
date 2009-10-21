@@ -7,7 +7,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 
 import org.junit.Test;
-import org.simpleds.metadata.AbstractDatastoreTest;
+import org.simpleds.test.AbstractDatastoreTest;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;

@@ -28,7 +28,7 @@ configurations {
 
 repositories {
     mavenCentral()
-    flatDir name: 'lib', dirs: this.appengineHome + '/lib/impl'
+    flatDir name: 'lib', dirs: [ this.appengineHome + '/lib/impl', this.appengineHome + '/lib/user' ]
 }
 
 task 'gen-lib'(description: 'Copies the 3rd party libraries from maven to src/gen-lib') << {
@@ -47,12 +47,13 @@ dependencies {
 	compile ":appengine-api-labs"
 	compile ":appengine-local-runtime"
 	compile ":appengine-api-stubs"
+	compile ":appengine-api-1.0-sdk:1.2.5"
 	
 	compile "com.google.collections:google-collections:1.0-rc3"
 	compile "org.springframework:spring:2.5.6"
 	compile "commons-logging:commons-logging:1.1.1"
 	compile "org.apache.geronimo.specs:geronimo-jpa_3.0_spec:1.1.1"
-	testCompile "junit:junit:4.4"
+	compile "junit:junit:4.4"
 	
 	sources "com.google.collections:google-collections:1.0-rc3:sources"
 	sources "org.springframework:spring:2.5.6:sources"

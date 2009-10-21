@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.metadata.AbstractDatastoreTest;
+import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
 
 import com.google.appengine.api.datastore.Key;

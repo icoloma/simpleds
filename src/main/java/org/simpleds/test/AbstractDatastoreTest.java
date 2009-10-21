@@ -1,10 +1,9 @@
-package org.simpleds.metadata;
+package org.simpleds.test;
 
 import java.io.File;
 
 import org.junit.After;
 import org.junit.Before;
-import org.simpleds.test.TestEnvironment;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
