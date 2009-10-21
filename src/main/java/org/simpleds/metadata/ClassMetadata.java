@@ -72,7 +72,7 @@ public class ClassMetadata {
 	public void validateConstraints(Entity entity) {
 		for (String propertyName : requiredProperties) {
 			if (entity.getProperty(propertyName) == null) {
-				throw new RequiredFieldException("Required property " + propertyName + " is not set");
+				throw new RequiredFieldException("Required property '" + propertyName + "' is not set");
 			}
 		}
 	}
