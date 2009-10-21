@@ -1,0 +1,5 @@
+Define the environment variable APPENGINE_HOME
+To download jars for eclipse: "gradle gen-lib"
+To generate simpleds.jar: "gradle jar"
+
+Minimum gradle version: 0.8

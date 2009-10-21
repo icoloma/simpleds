@@ -1,0 +1,72 @@
+// required gradle version: 0.8
+
+usePlugin 'java'
+usePlugin 'maven'
+
+project.group='com.google.code'
+project.version='0.8'
+
+try {
+	this["appengineHome"]
+} catch(MissingPropertyException e) {
+	this.appengineHome = System.getenv("APPENGINE_HOME") 
+	if (!this.appengineHome) {
+		ant.fail """
+Cannot find Appengine home. 
+Either set the appengineHome property or the APPENGINE_HOME environment variable to the root folder:
+
+gradle -P appengineHome=/usr/local/java/appengine-java-sdk-1.2.5/
+export APPENGINE_HOME=/usr/local/java/appengine-java-sdk-1.2.5/
+		"""
+	}
+}
+
+configurations {
+    deployerJars
+    sources { transitive=false }
+}
+
+repositories {
+    mavenCentral()
+    flatDir name: 'lib', dirs: this.appengineHome + '/lib/impl'
+}
+
+task 'gen-lib'(description: 'Copies the 3rd party libraries from maven to src/gen-lib') << {
+
+	copy {
+		into "src/gen-lib"
+		from configurations.testRuntime.files
+		from configurations.sources.files
+		//from this.appengineHome + "/lib/impl"
+	}
+}
+
+dependencies {
+    deployerJars "org.apache.maven.wagon:wagon-ssh:1.0-beta-2"
+    
+	compile ":appengine-api-labs"
+	compile ":appengine-local-runtime"
+	compile ":appengine-api-stubs"
+	
+	compile "com.google.collections:google-collections:1.0-rc3"
+	compile "org.springframework:spring:2.5.6"
+	compile "commons-logging:commons-logging:1.1.1"
+	compile "org.apache.geronimo.specs:geronimo-jpa_3.0_spec:1.1.1"
+	testCompile "junit:junit:4.4"
+	
+	sources "com.google.collections:google-collections:1.0-rc3:sources"
+	sources "org.springframework:spring:2.5.6:sources"
+	sources "commons-logging:commons-logging:1.1.1:sources"
+	sources "org.apache.geronimo.specs:geronimo-jpa_3.0_spec:1.1.1:sources"
+	sources "junit:junit:4.4:sources"
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        name = 'sshDeployer' // optional
+        configuration = configurations.deployerJars
+        repository(url: "scp://repos.mycompany.com/releases") {
+            authentication(userName: "me", password: "myPassword")
+        }
+    }
+}

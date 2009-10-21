@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="src/gen-lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="src/gen-lib/geronimo-jpa_3.0_spec-1.1.1.jar"/>
+	<classpathentry kind="lib" path="src/gen-lib/google-collections-1.0-rc3.jar"/>
+	<classpathentry kind="lib" path="src/gen-lib/spring-2.5.6.jar"/>
+	<classpathentry kind="lib" path="src/gen-lib/appengine-local-runtime.jar"/>
+	<classpathentry kind="lib" path="src/gen-lib/appengine-api-stubs.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
