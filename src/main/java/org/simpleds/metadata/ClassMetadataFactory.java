@@ -18,7 +18,7 @@ import javax.persistence.Transient;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.simpleds.annotations.RelationIndex;
+import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.Relations;
 import org.simpleds.converter.ConverterFactory;
 
@@ -42,12 +42,12 @@ public class ClassMetadataFactory {
 			
 			// process any RelationIndex
 			if (clazz.getAnnotation(Relations.class) != null) {
-				for (RelationIndex index : clazz.getAnnotation(Relations.class).value()) {
+				for (MultivaluedIndex index : clazz.getAnnotation(Relations.class).value()) {
 					addRelationIndex(classMetadata, index);
 				}
 			}
-			if (clazz.getAnnotation(RelationIndex.class) != null) {
-				addRelationIndex(classMetadata, clazz.getAnnotation(RelationIndex.class));
+			if (clazz.getAnnotation(MultivaluedIndex.class) != null) {
+				addRelationIndex(classMetadata, clazz.getAnnotation(MultivaluedIndex.class));
 			}
 			
 			// add standard javabean properties
@@ -79,8 +79,8 @@ public class ClassMetadataFactory {
 		}
 	}
 
-	private void addRelationIndex(ClassMetadata classMetadata, RelationIndex index) {
-		RelationIndexMetadata metadata = new RelationIndexMetadata();
+	private void addRelationIndex(ClassMetadata classMetadata, MultivaluedIndex index) {
+		MultivaluedIndexMetadata metadata = new MultivaluedIndexMetadata();
 		metadata.setName(index.value());
 		metadata.setConverter(ConverterFactory.getCollectionConverter(index.collectionClass(), index.itemClass()));
 		classMetadata.add(metadata);

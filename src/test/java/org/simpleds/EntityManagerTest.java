@@ -123,17 +123,6 @@ public class EntityManagerTest extends AbstractDatastoreTest {
 		assertEquals("foo", result.get(0).getName());
 	}
 	
-	@Test
-	public void testRelationIndex() throws Exception {
-		Dummy1 dummy = createDummy();
-		entityManager.put(dummy);
-		assertTrue(entityManager.getRelationIndex(dummy.getKey(), "friends").isEmpty());
-		Dummy1 friend1 = createDummy();
-		entityManager.put(friend1);
-		entityManager.setRelationIndex(dummy.getKey(), "friends", Sets.newHashSet(friend1.getKey()));
-		assertTrue(entityManager.getRelationIndex(dummy.getKey(), "friends").contains(friend1.getKey()));
-	}
-	
 	@Test(expected=IllegalArgumentException.class)
 	public void testFindByUnmappedProperty() throws Exception {
 		entityManager.find(new SimpleQuery(Dummy1.class).equal("xxx", "foo"));

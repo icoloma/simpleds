@@ -9,12 +9,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import org.simpleds.annotations.RelationIndex;
+import org.simpleds.annotations.MultivaluedIndex;
 
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-@RelationIndex("friends")
+@MultivaluedIndex("friends")
 public class Dummy1 {
 
 	enum EnumValues {

@@ -93,21 +93,6 @@ public interface EntityManager {
 	int count(SimpleQuery q);
 
 	/**
-	 * Get the value of a relation index
-	 * @param entityKey the key of the persistent entity
-	 * @param indexName the name of the relation index
-	 */
-	<T extends Collection> T getRelationIndex(Key entityKey, String indexName);
-
-	/**
-	 * Store the value of a relation index
-	 * @param entityKey the key of the persistent entity
-	 * @param indexName the name of the relation index
-	 * @param indexValue the value of the relation index
-	 */
-	void setRelationIndex(Key entityKey, String indexName, Collection<?> indexValue);
-
-	/**
 	 * Return the list of children that have a provided parent instance
 	 * @param parentKey the key of the parent instance
 	 * @param childrenClass the class of the children to return

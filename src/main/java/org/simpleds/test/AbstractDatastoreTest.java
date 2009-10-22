@@ -21,7 +21,7 @@ public abstract class AbstractDatastoreTest {
 	@Before
 	public void setupDatastore() {
 		ApiProxy.setEnvironmentForCurrentThread(new TestEnvironment());
-		ApiProxyLocalImpl impl = new ApiProxyLocalImpl(new File("testSimpleDS")) { /**/ };
+		ApiProxyLocalImpl impl = new ApiProxyLocalImpl(new File("src/test")) { /**/ };
 		impl.setProperty(LocalDatastoreService.NO_STORAGE_PROPERTY, Boolean.toString(!storeChanges));
 		ApiProxy.setDelegate(impl);
 		datastoreService = DatastoreServiceFactory.getDatastoreService();

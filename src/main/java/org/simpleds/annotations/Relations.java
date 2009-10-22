@@ -16,6 +16,6 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Relations {
 
-	RelationIndex[] value() default {};
+	MultivaluedIndex[] value() default {};
 	
 }

@@ -11,7 +11,7 @@ import javax.persistence.Transient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
-import org.simpleds.annotations.RelationIndex;
+import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.Relations;
 import org.simpleds.converter.AbstractCollectionConverter;
 import org.simpleds.converter.NullConverter;
@@ -30,7 +30,7 @@ public class ClassMetadataFactoryTest {
 		ClassMetadata metadata = factory.createMetadata(MyClass.class);
 		assertNotNull(metadata.getProperty("foo"));
 		assertNotNull(metadata.getProperty("bar"));
-		RelationIndexMetadata index = metadata.getRelationIndex("dummies1");
+		MultivaluedIndexMetadata index = metadata.getRelationIndex("dummies1");
 		assertNotNull(index);
 		assertTrue(((AbstractCollectionConverter)index.getConverter()).getItemConverter() instanceof NullConverter);
 	}
@@ -61,7 +61,7 @@ public class ClassMetadataFactoryTest {
 		private Integer foo;
 	}
 	
-	@Relations(@RelationIndex(value="dummies1"))
+	@Relations(@MultivaluedIndex(value="dummies1"))
 	public static class MyClass extends Parent {
 		
 		@Id

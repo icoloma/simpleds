@@ -41,7 +41,7 @@ public class ClassMetadata {
 	private Set<String> requiredProperties = Sets.newHashSet();
 	
 	/** relation indexes */
-	private Map<String, RelationIndexMetadata> relationIndexes = Maps.newHashMap();
+	private Map<String, MultivaluedIndexMetadata> relationIndexes = Maps.newHashMap();
 	
 	/**
 	 * Convert a value from Google representation to a Java value
@@ -183,15 +183,15 @@ public class ClassMetadata {
 		throw new IllegalArgumentException("Persistent property " + kind + "." + propertyName + " not found");
 	}
 	
-	public RelationIndexMetadata getRelationIndex(String relationIndexName) {
-		RelationIndexMetadata index = relationIndexes.get(relationIndexName);
+	public MultivaluedIndexMetadata getRelationIndex(String relationIndexName) {
+		MultivaluedIndexMetadata index = relationIndexes.get(relationIndexName);
 		if (index == null) {
 			throw new IllegalArgumentException("RelationIndex with name '" + relationIndexName + "' cannot be found");
 		}
 		return index;
 	}
 	
-	public void add(RelationIndexMetadata metadata) {
+	public void add(MultivaluedIndexMetadata metadata) {
 		relationIndexes.put(metadata.getName(), metadata);
 	}
 	

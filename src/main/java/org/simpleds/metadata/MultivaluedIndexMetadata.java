@@ -13,7 +13,7 @@ import com.google.appengine.api.datastore.KeyFactory;
  * Relation Index has been introduced here: http://www.youtube.com/watch?v=AgaL6NGpkB8 
  * @author icoloma
  */
-public class RelationIndexMetadata {
+public class MultivaluedIndexMetadata {
 
 	/** the name of this index */
 	private String name;

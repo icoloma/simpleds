@@ -11,17 +11,19 @@ import java.util.Set;
 import com.google.appengine.api.datastore.Key;
 
 /**
- * Annotation to specify a single Relation Index for one persistent entity.
+ * Annotation to specify a detached multivalued index for one persistent entity.
  * Relation indexes have been explained at Google I/O 2009: http://www.youtube.com/watch?v=AgaL6NGpkB8
- * By using this annotation, you can specify a persistent attribute that will contain a list or 
- * set of the specified type, but that will not be stored/retrieved with the persistent entity 
- * itself, thus saving the serialization/deserialization costs. 
+ * By using this annotation, you can specify a persistent attribute that will 
+ * contain a collection of items of the specified type, but that will not be 
+ * stored/retrieved with the persistent entity itself, thus saving the 
+ * serialization/deserialization costs.
+ *  
  * @author icoloma
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Documented
-public @interface RelationIndex {
+public @interface MultivaluedIndex {
 
 	/** the name of this index */
 	String value();
