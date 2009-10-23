@@ -35,7 +35,7 @@ public interface EntityManager {
 
 	/**
 	 * Persists a java object to the datastore. This method is equivalent to invoking merge(null, javaObject)
-	 * @param entity the entity to persist.
+	 * @param javaObject the instance to persist.
 	 * @return the allocated/existing key
 	 */
 	Key put(Object javaObject);
@@ -44,16 +44,16 @@ public interface EntityManager {
 	 * Persists a java object to the datastore. 
 	 * If the primary key has not yet been assigned, a new one will be generated and assigned.
 	 * The entity will also be checked for missing required fields 
-	 * @param parentKey
-	 * @param javaObject
+	 * @param parentKey the parent entity key. Will be used to generate the persisted entity key.
+	 * @param javaObject the instance to persist.
 	 * @return the allocated/existing key
 	 */
 	Key put(Key parentKey, Object javaObject);
 
 	/**
-	 * Return a persistent entity, by key
+	 * Return a persistent java instance by key
 	 * @param key the key of the persistent entity to retrieve
-	 * @return the persistent entity
+	 * @return the persistent java instance
 	 */
 	<T> T get(Key key);
 
@@ -78,6 +78,10 @@ public interface EntityManager {
 	 * Wrapper method around DatastoreService.delete()
 	 */
 	void delete(Key... keys);
+	
+	/**
+	 * Wrapper method around DatastoreService.delete()
+	 */
 	void delete(Iterable<Key> keys);
 
 	/**
@@ -88,7 +92,8 @@ public interface EntityManager {
 	<T> T findSingle(SimpleQuery q);
 
 	/**
-	 * Wrapper method around PreparedStatement.count()
+	 * Counts the number of instances returned from the specified query. Does not retrieve the
+	 * entities themselves.
 	 */
 	int count(SimpleQuery q);
 
@@ -114,9 +119,9 @@ public interface EntityManager {
 	void put(Collection javaObjects);
 
 	/**
-	 * Store a set of persistent objects in the datastore
+	 * Store a set of persistent objects in the datastore. 
 	 * @param parentKey the key of the parent objects. If not null, all the provided objects 
-	 * will a primary key automatically generated, providing they all have the same type
+	 * will get a primary key automatically generated
 	 * @param javaObjects the list of java objects to store
 	 */
 	void put(Key parentKey, Collection javaObjects);

@@ -8,10 +8,10 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 /**
- * Creates a {@link EntityManager} instance
+ * Creates a {@link IndexManager} instance
  * @author icoloma
  */
-public class EntityManagerFactory implements FactoryBean {
+public class IndexManagerFactory implements FactoryBean {
 
 	@Autowired(required=false)
 	private DatastoreService datastoreService;
@@ -19,27 +19,23 @@ public class EntityManagerFactory implements FactoryBean {
 	@Autowired(required=false)
 	private PersistenceMetadataRepositoryFactory repositoryFactory;
 	
-	/** true to check the schema constraints before persisting changes to the database, default true */
-	private boolean enforceSchemaConstraints = true;
-	
 	@Override
-	public EntityManager getObject() {
+	public IndexManager getObject() {
 		if (repositoryFactory == null) {
-			throw new IllegalArgumentException("repositoryFactory cannot be null. Either set repositoryFactory or the locations attribute");
+			throw new IllegalArgumentException("repositoryFactory cannot be null.");
 		}
 		if (datastoreService == null) {
 			datastoreService = DatastoreServiceFactory.getDatastoreService();
 		}
-		EntityManagerImpl instance = new EntityManagerImpl();
+		IndexManagerImpl instance = new IndexManagerImpl();
 		instance.setDatastoreService(datastoreService);
 		instance.setRepository(repositoryFactory.createRepository());
-		instance.setEnforceSchemaConstraints(enforceSchemaConstraints);
 		return instance;
 	}
 	
 	@Override
 	public Class getObjectType() {
-		return EntityManager.class;
+		return IndexManager.class;
 	}
 	
 	@Override
@@ -47,27 +43,12 @@ public class EntityManagerFactory implements FactoryBean {
 		return true;
 	}
 	
-	/**
-	 * Set the list of locations to search for persistent classes
-	 * @param locations a list of locations like "classpath*:com/acme/model/**"
-	 */
-	public void setLocations(String[] locations) {
-		if (this.repositoryFactory == null) {
-			this.repositoryFactory = new PersistenceMetadataRepositoryFactory();
-		}
-		this.repositoryFactory.setLocations(locations);
-	}
-
 	public void setDatastoreService(DatastoreService datastoreService) {
 		this.datastoreService = datastoreService;
 	}
 
 	public void setRepositoryFactory(PersistenceMetadataRepositoryFactory repositoryFactory) {
 		this.repositoryFactory = repositoryFactory;
-	}
-
-	public void setEnforceSchemaConstraints(boolean checkSchemaConstraints) {
-		this.enforceSchemaConstraints = checkSchemaConstraints;
 	}
 
 }

@@ -12,6 +12,11 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Transaction;
 
+/**
+ * Transaction support is not yet operative, do not rely on this class yet.
+ * @author icoloma
+ *
+ */
 public class TransactionManager implements PlatformTransactionManager {
 
 	@Autowired
@@ -42,7 +47,7 @@ public class TransactionManager implements PlatformTransactionManager {
 			newTransaction = true;
 		}
 		return new DefaultTransactionStatus(tx, newTransaction, 
-				/* ¿? */ newTransaction /* ¿? */, false, log.isDebugEnabled(), null);
+				/* ??? */ newTransaction /* ??? */, false, log.isDebugEnabled(), null);
 	}
 
 	@Override

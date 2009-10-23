@@ -97,7 +97,6 @@ public class SimpleQuery {
 	 * but not "%foo%"
 	 * @param propertyName the name of the property
 	 * @param value the value of the property, without any '%' character.
-	 * @return
 	 */
 	public SimpleQuery like(String propertyName, String value) {
 		if (value != null) {

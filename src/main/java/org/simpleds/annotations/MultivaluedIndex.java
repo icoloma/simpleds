@@ -12,7 +12,8 @@ import com.google.appengine.api.datastore.Key;
 
 /**
  * Annotation to specify a detached multivalued index for one persistent entity.
- * Relation indexes have been explained at Google I/O 2009: http://www.youtube.com/watch?v=AgaL6NGpkB8
+ * Relation indexes have been explained at <a href="http://www.youtube.com/watch?v=AgaL6NGpkB8">Google I/O 2009</a>
+ * <p>
  * By using this annotation, you can specify a persistent attribute that will 
  * contain a collection of items of the specified type, but that will not be 
  * stored/retrieved with the persistent entity itself, thus saving the 

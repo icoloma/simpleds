@@ -33,7 +33,7 @@ public interface IndexManager {
 	 * this value, the call will succeed anyway
 	 * @return the collection of index values stored in the database after adding the value.
 	 */
-	<T extends Collection> T add(Key entityKey, String indexName, Object indexValue);
+	<T extends Collection> T addIndexValue(Key entityKey, String indexName, Object indexValue);
 
 	/**
 	 * Removes the provided value from the list of values stored for this MultivaluedIndex,
@@ -45,7 +45,7 @@ public interface IndexManager {
 	 * this value, the call will succeed anyway
 	 * @return the collection of index values stored in the database after removing the value.
 	 */
-	<T extends Collection> T remove(Key entityKey, String indexName, Object indexValue);
+	<T extends Collection> T deleteIndexValue(Key entityKey, String indexName, Object indexValue);
 
 	
 	

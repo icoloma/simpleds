@@ -41,11 +41,11 @@ public class ClassMetadata {
 	private Set<String> requiredProperties = Sets.newHashSet();
 	
 	/** relation indexes */
-	private Map<String, MultivaluedIndexMetadata> relationIndexes = Maps.newHashMap();
+	private Map<String, MultivaluedIndexMetadata> multivaluedIndexes = Maps.newHashMap();
 	
 	/**
 	 * Convert a value from Google representation to a Java value
-	 * @param value the value persistent in the google datastore
+	 * @param entity the persistent {@link Entity} from the google datastore
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T datastoreToJava(Entity entity) {
@@ -102,9 +102,9 @@ public class ClassMetadata {
 
 	}
 	/**
-	 * Convert a value from Java representation to a Datastore value
+	 * Convert a value from Java representation to a Datastore {@link Entity}
 	 * @param javaObject the Java property value
-	 * @param parentKey the parent key, if not null
+	 * @param parentKey the parent {@link Key} (may be null)
 	 */
 	@SuppressWarnings("unchecked")
 	public Entity javaToDatastore(Key parentKey, Object javaObject) {
@@ -183,16 +183,16 @@ public class ClassMetadata {
 		throw new IllegalArgumentException("Persistent property " + kind + "." + propertyName + " not found");
 	}
 	
-	public MultivaluedIndexMetadata getRelationIndex(String relationIndexName) {
-		MultivaluedIndexMetadata index = relationIndexes.get(relationIndexName);
+	public MultivaluedIndexMetadata getMultivaluedIndex(String relationIndexName) {
+		MultivaluedIndexMetadata index = multivaluedIndexes.get(relationIndexName);
 		if (index == null) {
-			throw new IllegalArgumentException("RelationIndex with name '" + relationIndexName + "' cannot be found");
+			throw new IllegalArgumentException("MultivaluedIndex with name '" + relationIndexName + "' cannot be found");
 		}
 		return index;
 	}
 	
 	public void add(MultivaluedIndexMetadata metadata) {
-		relationIndexes.put(metadata.getName(), metadata);
+		multivaluedIndexes.put(metadata.getName(), metadata);
 	}
 	
 	public Iterator<String> getPropertyNames() {

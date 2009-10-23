@@ -24,7 +24,7 @@ public class IndexManagerImpl implements IndexManager {
 	@SuppressWarnings("unchecked")
 	public <T extends Collection> T get(Key entityKey, String indexName) {
 		ClassMetadata metadata = repository.get(entityKey.getKind());
-		MultivaluedIndexMetadata relationIndex = metadata.getRelationIndex(indexName);
+		MultivaluedIndexMetadata relationIndex = metadata.getMultivaluedIndex(indexName);
 		try {
 			Entity entity = datastoreService.get(relationIndex.createIndexKey(entityKey));
 			return (T) entity.getProperty("contents");
@@ -34,16 +34,16 @@ public class IndexManagerImpl implements IndexManager {
 	}
 	
 	@Override
-	public <T extends Collection> T add(Key entityKey, String indexName, Object indexValue) {
-		T indexValues = get(entityKey, indexName);
+	public <T extends Collection> T addIndexValue(Key entityKey, String indexName, Object indexValue) {
+		T indexValues = (T) get(entityKey, indexName);
 		indexValues.add(indexValue);
 		put(entityKey, indexName, indexValues);
 		return indexValues;
 	}
 	
 	@Override
-	public <T extends Collection> T remove(Key entityKey, String indexName, Object indexValue) {
-		T indexValues = get(entityKey, indexName);
+	public <T extends Collection> T deleteIndexValue(Key entityKey, String indexName, Object indexValue) {
+		T indexValues = (T) get(entityKey, indexName);
 		indexValues.remove(indexValue);
 		put(entityKey, indexName, indexValues);
 		return indexValues;
@@ -52,7 +52,7 @@ public class IndexManagerImpl implements IndexManager {
 	@Override
 	public void put(Key entityKey, String indexName, Collection indexValue) {
 		ClassMetadata metadata = repository.get(entityKey.getKind());
-		MultivaluedIndexMetadata relationIndex = metadata.getRelationIndex(indexName);
+		MultivaluedIndexMetadata relationIndex = metadata.getMultivaluedIndex(indexName);
 		Entity entity = new Entity(relationIndex.createIndexKey(entityKey));
 		entity.setProperty("contents", indexValue);
 		datastoreService.put(entity);

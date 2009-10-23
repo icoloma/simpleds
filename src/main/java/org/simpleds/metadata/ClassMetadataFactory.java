@@ -19,7 +19,7 @@ import javax.persistence.Transient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.simpleds.annotations.MultivaluedIndex;
-import org.simpleds.annotations.Relations;
+import org.simpleds.annotations.MultivaluedIndexes;
 import org.simpleds.converter.ConverterFactory;
 
 public class ClassMetadataFactory {
@@ -41,8 +41,8 @@ public class ClassMetadataFactory {
 			}
 			
 			// process any RelationIndex
-			if (clazz.getAnnotation(Relations.class) != null) {
-				for (MultivaluedIndex index : clazz.getAnnotation(Relations.class).value()) {
+			if (clazz.getAnnotation(MultivaluedIndexes.class) != null) {
+				for (MultivaluedIndex index : clazz.getAnnotation(MultivaluedIndexes.class).value()) {
 					addRelationIndex(classMetadata, index);
 				}
 			}

@@ -7,14 +7,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to specify multiple Index Relationships at one persistent entity.
- * Relation indexes have been explained at Google I/O 2009: http://www.youtube.com/watch?v=AgaL6NGpkB8
+ * Annotation to specify several {@link MultivaluedIndex} annotations for 
+ * the same persistent class.
  * @author icoloma
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Documented
-public @interface Relations {
+public @interface MultivaluedIndexes {
 
 	MultivaluedIndex[] value() default {};
 	

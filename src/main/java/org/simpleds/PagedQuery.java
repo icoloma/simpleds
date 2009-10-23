@@ -7,16 +7,15 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 
 /**
- * Paged query
+ * Paged query.
  * This is a simple class to implement paged queries using FetchOptions. 
- * Notice that these queries are limited to a maximum of 1000 rows.
- * Invoking EntityManager.count() with a PagedQuery will return the total 
- * number of matching rows (not limited to the current page).
+ * These queries are limited to a maximum of 1000 rows.
+ * <p>
  * PagedQuery.getFetchOptions() will return a FetchOptions instance that 
- * corresponds to the current page.  
+ * corresponds to the current page.
+ * <p>  
  * 
- * Paging has been explained at
- * http://code.google.com/appengine/articles/paging.html
+ * Paging has been explained <a href="http://code.google.com/appengine/articles/paging.html">here</a>
  * 
  * @author icoloma
  *
