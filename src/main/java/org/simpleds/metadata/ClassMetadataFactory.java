@@ -43,11 +43,11 @@ public class ClassMetadataFactory {
 			// process any RelationIndex
 			if (clazz.getAnnotation(MultivaluedIndexes.class) != null) {
 				for (MultivaluedIndex index : clazz.getAnnotation(MultivaluedIndexes.class).value()) {
-					addRelationIndex(classMetadata, index);
+					addMultivaluedIndex(classMetadata, index);
 				}
 			}
 			if (clazz.getAnnotation(MultivaluedIndex.class) != null) {
-				addRelationIndex(classMetadata, clazz.getAnnotation(MultivaluedIndex.class));
+				addMultivaluedIndex(classMetadata, clazz.getAnnotation(MultivaluedIndex.class));
 			}
 			
 			// add standard javabean properties
@@ -79,10 +79,12 @@ public class ClassMetadataFactory {
 		}
 	}
 
-	private void addRelationIndex(ClassMetadata classMetadata, MultivaluedIndex index) {
+	private void addMultivaluedIndex(ClassMetadata classMetadata, MultivaluedIndex index) {
 		MultivaluedIndexMetadata metadata = new MultivaluedIndexMetadata();
 		metadata.setName(index.value());
+		metadata.setKind(classMetadata.getKind() + "_" + index.value());
 		metadata.setConverter(ConverterFactory.getCollectionConverter(index.collectionClass(), index.itemClass()));
+		metadata.setClassMetadata(classMetadata);
 		classMetadata.add(metadata);
 	}
 

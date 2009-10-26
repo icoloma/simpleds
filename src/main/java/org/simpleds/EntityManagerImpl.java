@@ -199,13 +199,13 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	public Map<Key, Object> get(Iterable<Key> keys) {
+	public <T> List<T> get(Iterable<Key> keys) {
 		Map<Key, Entity> entities = datastoreService.get(keys);
-		Map<Key, Object> result = Maps.newHashMap();
+		List<T> result = Lists.newArrayList();
 		for (Map.Entry<Key, Entity> entry : entities.entrySet()) {
-			Key key = entry.getKey();
-			Object javaObject = repository.get(key.getKind()).datastoreToJava(entry.getValue());
-			result.put(key, javaObject);
+			ClassMetadata metadata = repository.get(entry.getKey().getKind());
+			T javaObject = (T) metadata.datastoreToJava(entry.getValue());
+			result.add(javaObject);
 		}
 		return result;
 	}

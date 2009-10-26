@@ -25,9 +25,10 @@ public class PagedList<T> {
 		this.data = data;
 	}
 	
-	public void setTotalResults(int totalResults) {
+	public PagedList<T> setTotalResults(int totalResults) {
 		this.totalResults = totalResults;
 		this.totalPages = (int) Math.ceil((double)totalResults / query.getPageSize());
+		return this;
 	}
 	
 	/**
@@ -49,8 +50,9 @@ public class PagedList<T> {
 		return data;
 	}
 	
-	public void setData(List<T> data) {
+	public PagedList<T> setData(List<T> data) {
 		this.data = data;
+		return this;
 	}
 	
 	public int getTotalResults() {

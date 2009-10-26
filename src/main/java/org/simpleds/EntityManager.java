@@ -62,7 +62,7 @@ public interface EntityManager {
 	 * @param keys the keys of the persistent entities to retrieve
 	 * @return a Map of the retrieved entities, by Key
 	 */
-	Map<Key, Object> get(Iterable<Key> keys);
+	<T> List<T> get(Iterable<Key> keys);
 	
 	/**
 	 * Wrapper method around DatastoreService.beginTransaction()
@@ -132,5 +132,6 @@ public interface EntityManager {
 	 * @return the result of the query
 	 */
 	<T> PagedList<T> findPaged(PagedQuery query);
+
 
 }

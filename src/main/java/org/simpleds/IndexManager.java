@@ -1,6 +1,7 @@
 package org.simpleds;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.simpleds.annotations.MultivaluedIndex;
 
@@ -46,6 +47,22 @@ public interface IndexManager {
 	 * @return the collection of index values stored in the database after removing the value.
 	 */
 	<T extends Collection> T deleteIndexValue(Key entityKey, String indexName, Object indexValue);
+
+	/**
+	 * Create a new IndexQuery
+	 * @param entityClazz the persistent entity containing the index
+	 * @param indexName the name of the index
+	 * @return a IndexQuery for the provided index
+	 */
+	IndexQuery newQuery(Class entityClazz, String indexName);
+
+	/**
+	 * Return a list of persistent instances that satisfy the provided {@link IndexQuery}
+	 * @param <T>
+	 * @param factory
+	 * @return
+	 */
+	<T> List<T> find(IndexQuery factory);
 
 	
 	

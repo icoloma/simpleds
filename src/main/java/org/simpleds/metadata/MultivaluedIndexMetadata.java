@@ -24,13 +24,15 @@ public class MultivaluedIndexMetadata {
 	/** the Converter to transform the entire collection*/
 	private CollectionConverter converter;
 
+	/** the containing class */
+	private ClassMetadata classMetadata;
+	
 	public String getName() {
 		return name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
-		this.kind = "_" + name;
 	}
 
 	/**
@@ -54,6 +56,22 @@ public class MultivaluedIndexMetadata {
 
 	public CollectionConverter getConverter() {
 		return converter;
+	}
+
+	public String getKind() {
+		return kind;
+	}
+
+	public void setKind(String kind) {
+		this.kind = kind;
+	}
+
+	public ClassMetadata getClassMetadata() {
+		return classMetadata;
+	}
+
+	public void setClassMetadata(ClassMetadata classMetadata) {
+		this.classMetadata = classMetadata;
 	}
 	
 }

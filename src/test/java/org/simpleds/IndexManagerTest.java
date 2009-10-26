@@ -31,6 +31,9 @@ public class IndexManagerTest extends AbstractDatastoreTest {
 	private IndexManagerImpl indexManager;
 	private EntityManagerImpl entityManager;
 
+	private Dummy1 dummy;
+	private Dummy1 friend1;
+	
 	@Before
 	public void setup() {
 		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
@@ -43,18 +46,26 @@ public class IndexManagerTest extends AbstractDatastoreTest {
 		entityManager = new EntityManagerImpl();
 		entityManager.setRepository(repository);
 		entityManager.setDatastoreService(DatastoreServiceFactory.getDatastoreService());
-	}
-	
-	
-	@Test
-	public void testIndex() throws Exception {
-		Dummy1 dummy = createDummy();
+		
+		dummy = createDummy();
 		entityManager.put(dummy);
 		assertTrue(indexManager.get(dummy.getKey(), "friends").isEmpty());
-		Dummy1 friend1 = createDummy();
+		friend1 = createDummy();
 		entityManager.put(friend1);
 		indexManager.put(dummy.getKey(), "friends", Sets.newHashSet(friend1.getKey()));
 		assertTrue(indexManager.get(dummy.getKey(), "friends").contains(friend1.getKey()));
+	}
+	
+	@Test
+	public void testFind() throws Exception {
+		IndexQuery query = indexManager.newQuery(Dummy1.class, "friends").equal(friend1.getKey());
+		List<Dummy1> l = indexManager.find(query);
+		assertEquals(1, l.size());
+		assertEquals(dummy.getKey(), l.get(0).getKey());
+		
+		List<Key> l2 = indexManager.find(query.keysOnly());
+		assertEquals(1, l2.size());
+		assertEquals(dummy.getKey(), l2.get(0));
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
