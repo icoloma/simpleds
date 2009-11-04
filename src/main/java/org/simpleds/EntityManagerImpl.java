@@ -88,7 +88,7 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public int count(SimpleQuery q) {
-		return datastoreService.prepare(q.getQuery()).countEntities();
+		return datastoreService.prepare(q.keysOnly().getQuery()).countEntities();
 	}
 	
 	@Override
