@@ -17,7 +17,7 @@ Either set the appengineHome property or the APPENGINE_HOME environment variable
 
 gradle -P appengineHome=/usr/local/java/appengine-java-sdk-1.2.5/
 export APPENGINE_HOME=/usr/local/java/appengine-java-sdk-1.2.5/
-		"""
+"""
 	}
 }
 
@@ -47,7 +47,7 @@ dependencies {
 	compile ":appengine-api-labs"
 	compile ":appengine-local-runtime"
 	compile ":appengine-api-stubs"
-	compile ":appengine-api-1.0-sdk:1.2.5"
+	compile ":appengine-api-1.0-sdk:latest.integration"
 	
 	compile "com.google.collections:google-collections:1.0-rc3"
 	compile "org.springframework:spring:2.5.6"
