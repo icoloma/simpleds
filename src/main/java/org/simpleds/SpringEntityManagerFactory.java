@@ -15,7 +15,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 public class SpringEntityManagerFactory implements FactoryBean, InitializingBean {
 
 	/** delegate factory class */
-	private EntityManagerFactory factory;
+	private EntityManagerFactory factory = new EntityManagerFactory();
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
