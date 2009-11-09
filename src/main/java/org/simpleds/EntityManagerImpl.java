@@ -9,7 +9,6 @@ import java.util.Map;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PropertyMetadata;
-import org.simpleds.metadata.MultivaluedIndexMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -20,7 +19,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.repackaged.com.google.common.collect.Maps;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -88,7 +86,9 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public int count(SimpleQuery q) {
-		return datastoreService.prepare(q.keysOnly().getQuery()).countEntities();
+		if (!q.isKeysOnly())
+			q = q.clone().keysOnly();
+		return datastoreService.prepare(q.getQuery()).countEntities();
 	}
 	
 	@Override

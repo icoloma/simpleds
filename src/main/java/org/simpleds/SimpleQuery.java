@@ -1,17 +1,21 @@
 package org.simpleds;
 
+import java.util.List;
+
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.Query.SortPredicate;
 
 /**
  * Provides an easy way to create a Datastore {@link Query} 
  * and its associated {@link FetchOptions} instance.
  * @author icoloma
  */
-public class SimpleQuery {
+public class SimpleQuery implements Cloneable {
 
 	/** the constructed query */
 	private Query query;
@@ -44,6 +48,28 @@ public class SimpleQuery {
 			query.addFilter(propertyName, FilterOperator.EQUAL, value);
 		}
 		return this;
+	}
+	
+	@Override
+	public SimpleQuery clone() {
+		SimpleQuery copy = new SimpleQuery(query.getAncestor(), query.getKind());
+		for (FilterPredicate fpredicate : query.getFilterPredicates()) {
+			copy.addFilter(fpredicate.getPropertyName(), fpredicate.getOperator(), fpredicate.getValue());
+		}
+		for (SortPredicate spredicate : query.getSortPredicates()) {
+			copy.order(spredicate.getPropertyName(), spredicate.getDirection());
+		}
+		if (fetchOptions != null) {
+			if (fetchOptions.getChunkSize() != null)
+				copy.withChunkSize(fetchOptions.getChunkSize());
+			if (fetchOptions.getLimit() != null)
+				copy.withLimit(fetchOptions.getLimit());
+			if (fetchOptions.getOffset() != null)
+				copy.withOffset(fetchOptions.getOffset());
+			if (fetchOptions.getPrefetchSize() != null)
+				copy.withPrefetchSize(fetchOptions.getPrefetchSize());
+		}
+		return copy;
 	}
 	
 	public SimpleQuery addFilter(String propertyName, FilterOperator operator, Object value) {
@@ -144,6 +170,18 @@ public class SimpleQuery {
 	public SimpleQuery withOffset(int offset) {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withOffset(offset) : fetchOptions.offset(offset);
 		return this;
+	}
+
+	public List<FilterPredicate> getFilterPredicates() {
+		return query.getFilterPredicates();
+	}
+
+	public List<SortPredicate> getSortPredicates() {
+		return query.getSortPredicates();
+	}
+	
+	public boolean isKeysOnly() {
+		return query.isKeysOnly();
 	}
 	
 	public Query getQuery() {

@@ -1,17 +1,13 @@
 package org.simpleds;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.exception.RequiredFieldException;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
 import org.simpleds.test.AbstractDatastoreTest;
@@ -21,7 +17,6 @@ import org.simpleds.testdb.Dummy3;
 
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.collect.Sets;
 
 public class IndexManagerTest extends AbstractDatastoreTest {

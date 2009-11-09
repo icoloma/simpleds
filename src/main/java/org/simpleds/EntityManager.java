@@ -2,7 +2,6 @@ package org.simpleds;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.simpleds.exception.EntityNotFoundException;
 
@@ -92,8 +91,8 @@ public interface EntityManager {
 	<T> T findSingle(SimpleQuery q);
 
 	/**
-	 * Counts the number of instances returned from the specified query. Does not retrieve the
-	 * entities themselves.
+	 * Counts the number of instances returned from the specified query. This method will only
+	 * retrieve the matching keys, not the entities themselves.
 	 */
 	int count(SimpleQuery q);
 

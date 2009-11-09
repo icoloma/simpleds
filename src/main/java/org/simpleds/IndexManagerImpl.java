@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.simpleds.metadata.ClassMetadata;
-import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.MultivaluedIndexMetadata;
+import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.appengine.api.datastore.DatastoreService;

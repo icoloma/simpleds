@@ -22,7 +22,6 @@ import org.simpleds.testdb.Dummy3;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.common.collect.Sets;
 
 public class EntityManagerTest extends AbstractDatastoreTest {
 

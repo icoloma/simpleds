@@ -3,10 +3,8 @@ package org.simpleds;
 import org.simpleds.metadata.MultivaluedIndexMetadata;
 
 import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.api.datastore.Query.SortDirection;
 
 /**
  * Query for a multivalued index. This query will return instances of the entity containing the index, instead of the index itself

@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
 import org.simpleds.converter.ConverterFactory;
+import org.simpleds.exception.ConfigException;
 
 public class ClassMetadataFactory {
 
@@ -73,7 +74,7 @@ public class ClassMetadataFactory {
 			visit(clazz.getSuperclass(), classMetadata, visitedPropertyNames);
 			
 		} catch (RuntimeException e) {
-			throw new RuntimeException("Could not process " + clazz.getSimpleName() + "." + name + ": " + e.getMessage(), e);
+			throw new ConfigException("Could not process " + clazz.getSimpleName() + "." + name + ": " + e.getMessage(), e);
 		} catch (IntrospectionException e) {
 			throw new RuntimeException(e);
 		}

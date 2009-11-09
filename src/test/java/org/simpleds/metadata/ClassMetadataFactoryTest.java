@@ -15,6 +15,7 @@ import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
 import org.simpleds.converter.AbstractCollectionConverter;
 import org.simpleds.converter.NullConverter;
+import org.simpleds.exception.ConfigException;
 
 import com.google.appengine.api.datastore.Key;
 
@@ -47,12 +48,12 @@ public class ClassMetadataFactoryTest {
 		metadata.getProperty("xxx");
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected=ConfigException.class)
 	public void testDoublePrimaryKey() throws Exception {
 		ClassMetadata metadata = factory.createMetadata(Error1.class);
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected=ConfigException.class)
 	public void testNoPrimaryKey() throws Exception {
 		ClassMetadata metadata = factory.createMetadata(Error2.class);
 	}

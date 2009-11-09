@@ -25,7 +25,8 @@ public class PagedQueryTest extends AbstractDatastoreTest {
 	public void setup() {
 		EntityManagerFactory factory = new EntityManagerFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		entityManager = factory.getObject();
+		factory.initializeEntityManager();
+		entityManager = EntityManagerFactory.getEntityManager();
 		
 		// clear the database
 		List<Key> keys = entityManager.find(new SimpleQuery(Dummy1.class).keysOnly());
