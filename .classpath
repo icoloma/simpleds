@@ -5,7 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="src/gen-lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="src/gen-lib/geronimo-jpa_3.0_spec-1.1.1.jar"/>
-	<classpathentry kind="lib" path="src/gen-lib/google-collections-1.0-rc3.jar"/>
+	<classpathentry kind="lib" path="src/gen-lib/google-collections-1.0-rc3.jar" sourcepath="src/gen-lib/google-collections-1.0-rc3-sources.jar"/>
 	<classpathentry kind="lib" path="src/gen-lib/spring-2.5.6.jar"/>
 	<classpathentry kind="lib" path="src/gen-lib/appengine-local-runtime.jar"/>
 	<classpathentry kind="lib" path="src/gen-lib/appengine-api-stubs.jar"/>
