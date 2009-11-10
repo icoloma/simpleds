@@ -62,7 +62,7 @@ public class ClassMetadataFactoryTest {
 		private Integer foo;
 	}
 	
-	@MultivaluedIndexes(@MultivaluedIndex(value="dummies1"))
+	@MultivaluedIndexes(@MultivaluedIndex(name="dummies1", itemClass=Key.class))
 	public static class MyClass extends Parent {
 		
 		@Id

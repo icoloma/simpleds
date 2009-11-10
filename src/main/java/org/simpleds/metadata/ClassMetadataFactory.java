@@ -82,8 +82,8 @@ public class ClassMetadataFactory {
 
 	private void addMultivaluedIndex(ClassMetadata classMetadata, MultivaluedIndex index) {
 		MultivaluedIndexMetadata metadata = new MultivaluedIndexMetadata();
-		metadata.setName(index.value());
-		metadata.setKind(classMetadata.getKind() + "_" + index.value());
+		metadata.setName(index.name());
+		metadata.setKind(classMetadata.getKind() + "_" + index.name());
 		metadata.setConverter(ConverterFactory.getCollectionConverter(index.collectionClass(), index.itemClass()));
 		metadata.setClassMetadata(classMetadata);
 		classMetadata.add(metadata);

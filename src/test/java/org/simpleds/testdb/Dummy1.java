@@ -14,7 +14,7 @@ import org.simpleds.annotations.MultivaluedIndex;
 import com.google.appengine.api.datastore.Key;
 
 @Entity
-@MultivaluedIndex("friends")
+@MultivaluedIndex(name="friends", itemClass=Key.class)
 public class Dummy1 {
 
 	enum EnumValues {

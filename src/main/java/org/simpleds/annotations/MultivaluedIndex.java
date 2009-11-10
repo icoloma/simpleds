@@ -8,8 +8,6 @@ import java.lang.annotation.Target;
 import java.util.Collection;
 import java.util.Set;
 
-import com.google.appengine.api.datastore.Key;
-
 /**
  * Annotation to specify a detached multivalued index for one persistent entity.
  * Relation indexes have been explained at <a href="http://www.youtube.com/watch?v=AgaL6NGpkB8">Google I/O 2009</a>
@@ -26,15 +24,13 @@ import com.google.appengine.api.datastore.Key;
 @Documented
 public @interface MultivaluedIndex {
 
-	/** the name of this index */
-	String value();
+	/** The name of this index */
+	String name();
 	
-	/** the type of the collection container, defaults to Set. SortedSet, Set and List are supported */
+	/** The type of the collection container, defaults to Set. SortedSet, Set and List are supported */
 	Class<? extends Collection> collectionClass() default Set.class;
 	
-	/** the type of each item inside the collection, defaults to Key. Any simple data type is supported */
-	Class<?> itemClass() default Key.class;
-	
-	
+	/** The type of each item inside the collection. Any simple data type is supported */
+	Class<?> itemClass();
 	
 }
