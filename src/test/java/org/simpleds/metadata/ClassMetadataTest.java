@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.simpleds.SimpleQuery;
 import org.simpleds.converter.IntegerConverter;
 import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
@@ -77,6 +78,30 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 		assertEquals(key, entity.getKey());
 		assertNull(entity.getProperty("id"));
 		assertEquals("foo", entity.getProperty("name"));
+	}
+	
+	@Test
+	public void testValidateSimpleQueryOK() throws Exception {
+		SimpleQuery query = new SimpleQuery(Dummy1.class);
+		query.equal("date", new Date());
+		query.equal("name", null);
+		query.equal("__key__", KeyFactory.createKey(Dummy1.class.getSimpleName(), 1));
+		query.orderAsc("name");
+		metadata.validateConstraints(query.getQuery());
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testValidateSimpleQueryWrongSortName() throws Exception {
+		SimpleQuery query = new SimpleQuery(Dummy1.class);
+		query.orderAsc("xxx");
+		metadata.validateConstraints(query.getQuery());
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testValidateSimpleQueryWrongPropertyClass() throws Exception {
+		SimpleQuery query = new SimpleQuery(Dummy1.class);
+		query.equal("date", 1);
+		metadata.validateConstraints(query.getQuery());
 	}
 	
 }

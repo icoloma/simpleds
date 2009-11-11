@@ -86,16 +86,24 @@ public class ClassMetadata {
 			throw new IllegalArgumentException("The provided query kind '" + query.getKind() + "' does not match the expected kind '" + kind + "'");
 		}
 		
-		Set<String> propertySet = properties.keySet();
 		for (FilterPredicate predicate : query.getFilterPredicates()) {
 			String propertyName = predicate.getPropertyName();
-			if (!"__key__".equals(propertyName) && !propertySet.contains(propertyName)) {
-				throwPropertyNotFoundException(propertyName);
+			Class<?> expectedClass;
+			if (!"__key__".equals(propertyName)) {
+				PropertyMetadata propertyMetadata = getProperty(propertyName);
+				expectedClass = propertyMetadata.getPropertyType();
+			} else {
+				expectedClass = Key.class;
+			}
+			Object value = predicate.getValue();
+			if (value != null && !expectedClass.isAssignableFrom(value.getClass())) {
+				throw new IllegalArgumentException("Value of " + propertyName + " of type " + value.getClass().getSimpleName() + 
+						" cannot be converted to " + expectedClass.getSimpleName());
 			}
 		}
 		for (SortPredicate predicate : query.getSortPredicates()) {
 			String propertyName = predicate.getPropertyName();
-			if (!"__key__".equals(propertyName) && !propertySet.contains(propertyName)) {
+			if (!"__key__".equals(propertyName) && !properties.containsKey(propertyName)) {
 				throwPropertyNotFoundException(propertyName);
 			}
 		}

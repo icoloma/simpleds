@@ -19,7 +19,7 @@ public class KeysFactory {
 	 * @param kind the kind of keys to produce.
 	 * @param ids the long values to use as keys
 	 */
-	public static Collection<Key> create(Key parentKey, String kind, Collection<Long> ids) {
+	public static List<Key> create(Key parentKey, String kind, Collection<Long> ids) {
 		List<Key> keys = Lists.newArrayListWithCapacity(ids.size());
 		for (Long id : ids) {
 			keys.add(KeyFactory.createKey(parentKey, kind, id));
@@ -27,15 +27,15 @@ public class KeysFactory {
 		return keys;
 	}
 	
-	public static Collection<Key> create(String kind, Collection<Long> ids) {
+	public static List<Key> create(String kind, Collection<Long> ids) {
 		return create(null, kind, ids);
 	}
 	
-	public static Collection<Key> create(Key parentKey, Class<?> clazz, Collection<Long> ids) {
+	public static List<Key> create(Key parentKey, Class<?> clazz, Collection<Long> ids) {
 		return create(parentKey, clazz.getSimpleName(), ids);
 	}
 	
-	public static Collection<Key> create(Class<?> clazz, Collection<Long> ids) {
+	public static List<Key> create(Class<?> clazz, Collection<Long> ids) {
 		return create(clazz.getSimpleName(), ids);
 	}
 	
