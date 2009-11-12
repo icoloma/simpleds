@@ -21,7 +21,10 @@ public interface IndexManager {
 	<T extends Collection> T get(Key entityKey, String indexName);
 
 	/**
-	 * Stores the list of values stored for this MultivaluedIndex
+	 * Stores the list of values stored for this MultivaluedIndex.
+	 * When schema contraints validation is on, this method will check only 
+	 * the first value of the collection because we expect that all the collection values 
+	 * share the same class.
 	 */
 	void put(Key entityKey, String indexName, Collection indexValues);
 
@@ -63,7 +66,5 @@ public interface IndexManager {
 	 * @return
 	 */
 	<T> List<T> find(IndexQuery factory);
-
-	
 	
 }

@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.simpleds.converter.CollectionConverter;
+import org.simpleds.converter.Converter;
 import org.simpleds.exception.RequiredFieldException;
 
 import com.google.appengine.api.datastore.Entity;
@@ -91,14 +93,15 @@ public class ClassMetadata {
 			Class<?> expectedClass;
 			if (!"__key__".equals(propertyName)) {
 				PropertyMetadata propertyMetadata = getProperty(propertyName);
-				expectedClass = propertyMetadata.getPropertyType();
+				Converter<?, ?> converter = propertyMetadata.getConverter();
+				expectedClass = converter instanceof CollectionConverter? ((CollectionConverter)converter).getItemType() : propertyMetadata.getPropertyType();
 			} else {
 				expectedClass = Key.class;
 			}
 			Object value = predicate.getValue();
 			if (value != null && !expectedClass.isAssignableFrom(value.getClass())) {
-				throw new IllegalArgumentException("Value of " + propertyName + " of type " + value.getClass().getSimpleName() + 
-						" cannot be converted to " + expectedClass.getSimpleName());
+				throw new IllegalArgumentException("Value of " + propertyName + " has wrong type. Expected " + expectedClass.getSimpleName() + 
+						" but the query provided " + value.getClass().getSimpleName() + " (" + value + ")");
 			}
 		}
 		for (SortPredicate predicate : query.getSortPredicates()) {

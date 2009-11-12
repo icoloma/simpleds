@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import org.simpleds.annotations.MultivaluedIndex;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 
 @Entity
 @MultivaluedIndex(name="friends", itemClass=Key.class)
@@ -36,6 +37,13 @@ public class Dummy1 {
 	
 	@Embedded
 	private Embedded1 embedded;
+	
+	/**
+	 * Create a simple dummy key
+	 */
+	public static Key createDummyKey() {
+		return KeyFactory.createKey(Dummy1.class.getSimpleName(), 1);
+	}
 	
 	public String getName() {
 		return name;

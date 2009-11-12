@@ -73,5 +73,15 @@ public class MultivaluedIndexMetadata {
 	public void setClassMetadata(ClassMetadata classMetadata) {
 		this.classMetadata = classMetadata;
 	}
+
+	/**
+	 * Validate a value to be added/removed from this index
+	 * @throws IllegalArgumentException if the index value is not valid
+	 */
+	public void validateIndexValue(Object indexValue) {
+		if (!converter.getItemType().isAssignableFrom(indexValue.getClass())) {
+			throw new IllegalArgumentException("Value " + indexValue + " is not of a valid type. Expected " + converter.getItemType().getSimpleName() + ", found " + indexValue.getClass().getSimpleName());
+		}
+	}
 	
 }

@@ -24,22 +24,30 @@ public class IndexManagerImpl implements IndexManager {
 	
 	@Autowired 
 	private PersistenceMetadataRepository repository; 
+	
+	/** true to validate schema constraints, default true */
+	private boolean enforceSchemaConstraints = true;
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends Collection> T get(Key entityKey, String indexName) {
-		MultivaluedIndexMetadata relationIndex = getIndexMetadata(entityKey.getKind(), indexName);
+		MultivaluedIndexMetadata indexMetadata = getIndexMetadata(entityKey.getKind(), indexName);
 		try {
-			Entity entity = datastoreService.get(relationIndex.createIndexKey(entityKey));
+			Entity entity = datastoreService.get(indexMetadata.createIndexKey(entityKey));
 			T result = (T) entity.getProperty("contents");
-			return result == null? (T) relationIndex.createEmptyIndex() : result;
+			return result == null? (T) indexMetadata.createEmptyIndex() : result;
 		} catch (EntityNotFoundException e) {
-			return (T) relationIndex.createEmptyIndex();
+			return (T) indexMetadata.createEmptyIndex();
 		}
 	}
 	
 	@Override
 	public <T extends Collection> T addIndexValue(Key entityKey, String indexName, Object indexValue) {
+		if (enforceSchemaConstraints) {
+			MultivaluedIndexMetadata indexMetadata = getIndexMetadata(entityKey.getKind(), indexName);
+			indexMetadata.validateIndexValue(indexValue);
+		}
+		
 		T indexValues = (T) get(entityKey, indexName);
 		indexValues.add(indexValue);
 		put(entityKey, indexName, indexValues);
@@ -48,6 +56,11 @@ public class IndexManagerImpl implements IndexManager {
 	
 	@Override
 	public <T extends Collection> T deleteIndexValue(Key entityKey, String indexName, Object indexValue) {
+		if (enforceSchemaConstraints) {
+			MultivaluedIndexMetadata indexMetadata = getIndexMetadata(entityKey.getKind(), indexName);
+			indexMetadata.validateIndexValue(indexValue);
+		}
+		
 		T indexValues = (T) get(entityKey, indexName);
 		indexValues.remove(indexValue);
 		put(entityKey, indexName, indexValues);
@@ -56,8 +69,13 @@ public class IndexManagerImpl implements IndexManager {
 
 	@Override
 	public void put(Key entityKey, String indexName, Collection indexValue) {
-		MultivaluedIndexMetadata relationIndex = getIndexMetadata(entityKey.getKind(), indexName);
-		Entity entity = new Entity(relationIndex.createIndexKey(entityKey));
+		MultivaluedIndexMetadata indexMetadata = getIndexMetadata(entityKey.getKind(), indexName);
+		if (enforceSchemaConstraints && !indexValue.isEmpty()) {
+			// validate only the first index value (suppose generics guarantee that all items share the same class)
+			indexMetadata.validateIndexValue(indexValue.iterator().next());
+		}
+		
+		Entity entity = new Entity(indexMetadata.createIndexKey(entityKey));
 		entity.setProperty("contents", indexValue);
 		datastoreService.put(entity);
 	}
@@ -108,5 +126,9 @@ public class IndexManagerImpl implements IndexManager {
 
 	public void setRepository(PersistenceMetadataRepository repository) {
 		this.repository = repository;
+	}
+
+	public void setEnforceSchemaConstraints(boolean validateSchemaConstraints) {
+		this.enforceSchemaConstraints = validateSchemaConstraints;
 	}
 }

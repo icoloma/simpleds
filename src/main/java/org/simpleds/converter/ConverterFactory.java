@@ -86,8 +86,8 @@ public class ConverterFactory {
 		return converter;
 	}
 	
-	public static CollectionConverter getCollectionConverter(Class collectionType, Class nodeType) {
-		if (nodeType == null) {
+	public static CollectionConverter getCollectionConverter(Class collectionType, Class itemType) {
+		if (itemType == null) {
 			throw new IllegalArgumentException("Cannot create collection converter for unspecified node type");
 		}
 		AbstractCollectionConverter c;
@@ -100,7 +100,8 @@ public class ConverterFactory {
 		} else {
 			throw new IllegalArgumentException("Unrecognized collection class: " + collectionType.getName());
 		}
-		c.setItemConverter(getConverter(nodeType));
+		c.setItemConverter(getConverter(itemType));
+		c.setItemType(itemType);
 		return c;
 	}	
 	

@@ -13,6 +13,9 @@ public abstract class AbstractCollectionConverter<C extends Collection> implemen
 	/** converter used for each item */
 	private Converter itemConverter;
 	
+	/** the expected type of the collection items */
+	private Class<?> itemType;
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public C datastoreToJava(C dsValue) {
@@ -41,6 +44,11 @@ public abstract class AbstractCollectionConverter<C extends Collection> implemen
 		}
 		return collection;
 	}
+
+	@Override
+	public Class<?> getItemType() {
+		return itemType;
+	}
 	
 	public Converter getItemConverter() {
 		return itemConverter;
@@ -48,6 +56,10 @@ public abstract class AbstractCollectionConverter<C extends Collection> implemen
 
 	public void setItemConverter(Converter itemConverter) {
 		this.itemConverter = itemConverter;
+	}
+
+	public void setItemType(Class<?> itemType) {
+		this.itemType = itemType;
 	}
 
 }
