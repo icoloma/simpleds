@@ -109,7 +109,7 @@ public class EntityManagerImpl implements EntityManager {
 		PropertyMetadata keyProperty = metadata.getKeyProperty();
 		Key providedKey = (Key) keyProperty.getValue(javaObject);
 		if (providedKey == null && !metadata.isGenerateKeyValue()) {
-			throw new IllegalArgumentException("No key value provided for " + javaObject.getClass().getSimpleName() + " instance, but key generation is not enabled for that class (missing @GeneratedValue?)");
+			throw new IllegalArgumentException("No key value provided for " + javaObject.getClass().getSimpleName() + " instance, but key generation is not enabled for this class (missing @GeneratedValue?)");
 		}
 		
 		// transform to entity instance
