@@ -34,8 +34,8 @@ public class IndexManagerImpl implements IndexManager {
 		MultivaluedIndexMetadata indexMetadata = getIndexMetadata(entityKey.getKind(), indexName);
 		try {
 			Entity entity = datastoreService.get(indexMetadata.createIndexKey(entityKey));
-			T result = (T) entity.getProperty("contents");
-			return result == null? (T) indexMetadata.createEmptyIndex() : result;
+			Object result = entity.getProperty("contents");
+			return (T) (result == null? indexMetadata.createEmptyIndex() : indexMetadata.getConverter().datastoreToJava(result));
 		} catch (EntityNotFoundException e) {
 			return (T) indexMetadata.createEmptyIndex();
 		}

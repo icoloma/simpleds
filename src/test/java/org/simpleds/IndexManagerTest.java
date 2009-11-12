@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +49,8 @@ public class IndexManagerTest extends AbstractDatastoreTest {
 		friend1 = createDummy();
 		entityManager.put(friend1);
 		indexManager.put(dummy.getKey(), "friends", Sets.newHashSet(friend1.getKey()));
-		assertTrue(indexManager.get(dummy.getKey(), "friends").contains(friend1.getKey()));
+		Set retrievedSet = indexManager.get(dummy.getKey(), "friends");
+		assertTrue(retrievedSet.contains(friend1.getKey()));
 	}
 	
 	@Test
