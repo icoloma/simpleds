@@ -17,6 +17,7 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.common.collect.Lists;
 
+@SuppressWarnings("unchecked")
 public class IndexManagerImpl implements IndexManager {
 
 	@Autowired 
@@ -48,7 +49,7 @@ public class IndexManagerImpl implements IndexManager {
 			indexMetadata.validateIndexValue(indexValue);
 		}
 		
-		T indexValues = get(entityKey, indexName);
+		T indexValues = (T) get(entityKey, indexName);
 		indexValues.add(indexValue);
 		put(entityKey, indexName, indexValues);
 		return indexValues;
@@ -61,7 +62,7 @@ public class IndexManagerImpl implements IndexManager {
 			indexMetadata.validateIndexValue(indexValue);
 		}
 		
-		T indexValues = get(entityKey, indexName);
+		T indexValues = (T) get(entityKey, indexName);
 		indexValues.remove(indexValue);
 		put(entityKey, indexName, indexValues);
 		return indexValues;
