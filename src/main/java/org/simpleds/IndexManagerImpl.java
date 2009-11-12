@@ -48,7 +48,7 @@ public class IndexManagerImpl implements IndexManager {
 			indexMetadata.validateIndexValue(indexValue);
 		}
 		
-		T indexValues = (T) get(entityKey, indexName);
+		T indexValues = get(entityKey, indexName);
 		indexValues.add(indexValue);
 		put(entityKey, indexName, indexValues);
 		return indexValues;
@@ -61,7 +61,7 @@ public class IndexManagerImpl implements IndexManager {
 			indexMetadata.validateIndexValue(indexValue);
 		}
 		
-		T indexValues = (T) get(entityKey, indexName);
+		T indexValues = get(entityKey, indexName);
 		indexValues.remove(indexValue);
 		put(entityKey, indexName, indexValues);
 		return indexValues;
