@@ -53,6 +53,7 @@ public class EntityManagerImpl implements EntityManager {
 		ClassMetadata metadata = repository.get(query.getKind());
 		if (enforceSchemaConstraints) {
 			metadata.validateConstraints(query);
+			metadata.validateParentKey(query.getAncestor());
 		}
 		
 		PreparedQuery preparedQuery = datastoreService.prepare(query);
@@ -86,8 +87,9 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public int count(SimpleQuery q) {
-		if (!q.isKeysOnly())
+		if (!q.isKeysOnly()) {
 			q = q.clone().keysOnly();
+		}
 		return datastoreService.prepare(q.getQuery()).countEntities();
 	}
 	
@@ -104,6 +106,10 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	public Key put(Key parentKey, Object javaObject) {
 		ClassMetadata metadata = repository.get(javaObject.getClass());
+		
+		if (enforceSchemaConstraints) {
+			metadata.validateParentKey(parentKey);
+		}
 		
 		// generate primary key if missing
 		PropertyMetadata keyProperty = metadata.getKeyProperty();
@@ -152,6 +158,9 @@ public class EntityManagerImpl implements EntityManager {
 		for (Class clazz : transientInstances.keySet()) {
 			List<Object> instances = transientInstances.get(clazz);
 			ClassMetadata metadata = repository.get(clazz);
+			if (enforceSchemaConstraints) {
+				metadata.validateParentKey(parentKey);
+			}
 			Iterator<Key> allocatedKeys = datastoreService.allocateIds(parentKey, metadata.getKind(), instances.size()).iterator();
 			for (Object javaObject : instances) {
 				metadata.getKeyProperty().setValue(javaObject, allocatedKeys.next());

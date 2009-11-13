@@ -1,5 +1,6 @@
 package org.simpleds;
 
+import static java.lang.System.out;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -15,9 +16,11 @@ import org.simpleds.exception.RequiredFieldException;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
 import org.simpleds.test.AbstractDatastoreTest;
+import org.simpleds.testdb.Child;
 import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
 import org.simpleds.testdb.Dummy3;
+import org.simpleds.testdb.Root;
 
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Key;
@@ -125,6 +128,59 @@ public class EntityManagerTest extends AbstractDatastoreTest {
 	@Test(expected=IllegalArgumentException.class)
 	public void testFindByUnmappedProperty() throws Exception {
 		entityManager.find(new SimpleQuery(Dummy1.class).equal("xxx", "foo"));
+	}
+	
+	@Test
+	public void testValidateParentPass() throws Exception {
+		Root  root = new Root();
+		entityManager.put(root);
+		entityManager.put(Arrays.asList(new Root(), new Root()));
+		Child child = new Child();
+		entityManager.put(root.getKey(), child);
+		entityManager.put(root.getKey(), Arrays.asList(new Child(), new Child()));
+		entityManager.findChildren(root.getKey(), Child.class);
+		entityManager.find(new SimpleQuery(Root.class));
+	}
+	
+	@Test
+	public void testValidateParentFail() throws Exception {
+		// root entity with a parent
+		putShouldFail(Dummy1.createDummyKey(), new Root());
+		
+		// child entity with wrong parent
+		putShouldFail(Dummy1.createDummyKey(), new Child());
+		
+		// child entity without parent
+		putShouldFail(null, new Child());
+		
+		// same for searches
+		findShouldFail(Dummy1.createDummyKey(), Root.class);
+		findShouldFail(Dummy1.createDummyKey(), Child.class);
+		findShouldFail(null, Child.class);
+	}
+	
+	private void putShouldFail(Key parentKey, Object instance) {
+		try {
+			entityManager.put(parentKey, instance);
+			fail("Put operation should fail");
+		} catch (IllegalArgumentException e) {
+			out.println(e);
+		}
+		try {
+			entityManager.put(parentKey, Arrays.asList(instance));
+			fail("Put operation should fail");
+		} catch (IllegalArgumentException e) {
+			out.println(e);
+		}
+	}
+	
+	private void findShouldFail(Key parentKey, Class clazz) {
+		try {
+			entityManager.find(new SimpleQuery(parentKey, clazz));
+			fail("find operation should fail");
+		} catch (IllegalArgumentException e) {
+			out.println(e);
+		}
 	}
 	
 	private Dummy1 createDummy() {

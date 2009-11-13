@@ -19,6 +19,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortPredicate;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -30,11 +32,14 @@ public class ClassMetadata {
 	/** datastore kind */
 	private String kind;
 	
-	/** primary key property accessor */
+	/** primary key property */
 	private PropertyMetadata keyProperty;
 	
 	/** not null if the key value should be generated automatically, null otherwise */
 	private boolean generateKeyValue;
+	
+	/** the expected parent kind names, empty if this class is a root class (default empty) */
+	private Set<String> parents = ImmutableSet.of();
 	
 	/** persistent properties */
 	private Map<String, PropertyMetadata> properties = Maps.newHashMap();
@@ -44,6 +49,9 @@ public class ClassMetadata {
 	
 	/** relation indexes */
 	private Map<String, MultivaluedIndexMetadata> multivaluedIndexes = Maps.newHashMap();
+	
+	/** true to validate parent key kind when inserting */
+	private boolean validateParentKey;
 	
 	/**
 	 * Convert a value from Google representation to a Java value
@@ -201,6 +209,27 @@ public class ClassMetadata {
 		}
 		return index;
 	}
+
+	/**
+	 * Validates the parent key when inserting
+	 */
+	public void validateParentKey(Key parentKey) {
+		if (validateParentKey) {
+			if (parents.isEmpty()) {
+				if (parentKey != null) {
+					throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.kind + " is configured as a root class (missing @Entity(parent)?)");
+				}
+			} else {
+				if (parentKey == null) {
+					throw new IllegalArgumentException("Missing parent key for entity " + this.kind + ". Expected: " + Joiner.on(", ").join(parents));
+				}
+				if (!parents.contains(parentKey.getKind())) {
+					throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.kind + " expects parents with type " + Joiner.on(", ").join(parents));
+				}
+			}
+			
+		}
+	}
 	
 	public void add(MultivaluedIndexMetadata metadata) {
 		multivaluedIndexes.put(metadata.getName(), metadata);
@@ -236,5 +265,13 @@ public class ClassMetadata {
 		this.kind = kind;
 	}
 
+	public boolean isValidateParentKey() {
+		return validateParentKey;
+	}
+
+	public void setParents(Set<String> parents) {
+		this.parents = parents;
+		this.validateParentKey = true;
+	}
 
 }

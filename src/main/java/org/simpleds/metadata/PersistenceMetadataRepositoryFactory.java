@@ -1,6 +1,7 @@
 package org.simpleds.metadata;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.persistence.Entity;
 
@@ -12,6 +13,8 @@ import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
+
+import com.google.common.collect.Sets;
 
 public class PersistenceMetadataRepositoryFactory {
 
@@ -35,7 +38,8 @@ public class PersistenceMetadataRepositoryFactory {
 					if (resource.isReadable()) {
 						MetadataReader metadataReader = readerFactory.getMetadataReader(resource);
 						AnnotationMetadata am = metadataReader.getAnnotationMetadata();
-						if (am.hasAnnotation(Entity.class.getName())) {
+						if (am.hasAnnotation(Entity.class.getName()) || 
+								am.hasAnnotation(org.simpleds.annotations.Entity.class.getName())) {
 							Class clazz = ClassUtils.forName(am.getClassName());
 							ClassMetadata metadata = classMetadataFactory.createMetadata(clazz);
 							repository.add(metadata);
@@ -43,6 +47,19 @@ public class PersistenceMetadataRepositoryFactory {
 					}
 				}
 			}
+			
+			// assign expected parent kinds
+			for (ClassMetadata metadata: repository.getAll()) {
+				org.simpleds.annotations.Entity entity = (org.simpleds.annotations.Entity) metadata.getPersistentClass().getAnnotation(org.simpleds.annotations.Entity.class);
+				if (entity != null) {
+					Set<String> parents = Sets.newTreeSet();
+					for (Class<?> clazz : entity.parent()) {
+						parents.add(repository.get(clazz).getKind());
+					}
+					metadata.setParents(parents);
+				}
+			}
+			
 			return repository;
 		} catch (IOException e) {
 			throw new RuntimeException(e);

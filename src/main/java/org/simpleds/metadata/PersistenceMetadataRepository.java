@@ -1,5 +1,6 @@
 package org.simpleds.metadata;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -49,6 +50,13 @@ public class PersistenceMetadataRepository {
 			throw new IllegalArgumentException("No persistent class " + simpleName + " could be found");
 		}
 		return result;
+	}
+	
+	/**
+	 * @return the list of all configured {@link ClassMetadata} instances
+	 */
+	public Collection<ClassMetadata> getAll() {
+		return metadataByClass.values();
 	}
 	
 }
