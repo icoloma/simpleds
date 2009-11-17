@@ -28,16 +28,15 @@ configurations {
 
 repositories {
     mavenCentral()
-    flatDir name: 'lib', dirs: [ this.appengineHome + '/lib/impl', this.appengineHome + '/lib/user' ]
+    flatDir name: 'appenginehome-libs', dirs: [ this.appengineHome + '/lib/impl', this.appengineHome + '/lib/user' ]
 }
 
-task 'gen-lib'(description: 'Copies the 3rd party libraries from maven to src/gen-lib') << {
+task 'genlib'(description: 'Copies the 3rd party libraries from maven to src/gen-lib') << {
 
 	copy {
 		into "src/gen-lib"
 		from configurations.testRuntime.files
 		from configurations.sources.files
-		//from this.appengineHome + "/lib/impl"
 	}
 }
 
