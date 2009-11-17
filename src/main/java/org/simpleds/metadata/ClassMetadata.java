@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import org.simpleds.converter.CollectionConverter;
 import org.simpleds.converter.Converter;
 import org.simpleds.exception.RequiredFieldException;
+import org.springframework.util.ClassUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -107,7 +108,7 @@ public class ClassMetadata {
 				expectedClass = Key.class;
 			}
 			Object value = predicate.getValue();
-			if (value != null && !expectedClass.isAssignableFrom(value.getClass())) {
+			if (value != null && !ClassUtils.isAssignable(expectedClass, value.getClass())) {
 				throw new IllegalArgumentException("Value of " + propertyName + " has wrong type. Expected " + expectedClass.getSimpleName() + 
 						" but the query provided " + value.getClass().getSimpleName() + " (" + value + ")");
 			}

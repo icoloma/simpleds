@@ -22,6 +22,10 @@ public class PropertyMetadataFactory {
 			metadata.setSetter(setter);
 			metadata.setField(field);
 			
+			// calculate the property type
+			Class<?> propertyType = getter == null? field.getType() : getter.getReturnType();		
+			metadata.setPropertyType(propertyType);
+			
 			// no setter specified, we will set the field directly 
 			if (setter == null) {
 				field.setAccessible(true);
@@ -31,7 +35,21 @@ public class PropertyMetadataFactory {
 			throw new RuntimeException("Cannot process property '" + name + "': " + e.getMessage(), e);
 		}
 	}
-	
 
+	private static void initPropertyType(SinglePropertyMetadata metadata) {
+	}
+	
+	
+/*
+     * @see     java.lang.Boolean#TYPE
+     * @see     java.lang.Character#TYPE
+     * @see     java.lang.Byte#TYPE
+     * @see     java.lang.Short#TYPE
+     * @see     java.lang.Integer#TYPE
+     * @see     java.lang.Long#TYPE
+     * @see     java.lang.Float#TYPE
+     * @see     java.lang.Double#TYPE
+     * @see     java.lang.Void#TYPE
+ */
 	
 }

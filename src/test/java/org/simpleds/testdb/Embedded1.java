@@ -4,16 +4,16 @@ import javax.persistence.Embedded;
 
 public class Embedded1 {
 
-	private Integer int1;
+	private int int1;
 	
 	@Embedded
 	private Embedded2 embedded2;
 
-	public Integer getInt1() {
+	public int getInt1() {
 		return int1;
 	}
 
-	public void setInt1(Integer int1) {
+	public void setInt1(int int1) {
 		this.int1 = int1;
 	}
 

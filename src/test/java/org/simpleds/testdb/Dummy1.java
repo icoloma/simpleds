@@ -31,7 +31,7 @@ public class Dummy1 {
 	
 	@Column(nullable=false)
 	private Date date;
-
+	
 	@SuppressWarnings("unused")
 	private EnumValues evalue;
 	

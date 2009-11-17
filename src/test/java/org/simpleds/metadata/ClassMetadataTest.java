@@ -67,8 +67,8 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 		assertEquals(key, dummy.getKey());
 		assertEquals("foo", dummy.getName());
 		assertSame(d, dummy.getDate());
-		assertEquals(Integer.valueOf(1), dummy.getEmbedded().getInt1());
-		assertEquals(2, dummy.getEmbedded().getEmbedded2().int2);
+		assertEquals(1, dummy.getEmbedded().getInt1());
+		assertEquals(Integer.valueOf(2), dummy.getEmbedded().getEmbedded2().int2);
 	}
 	
 	@Test
@@ -88,6 +88,8 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 		SimpleQuery query = new SimpleQuery(Dummy1.class);
 		query.equal("date", new Date());
 		query.equal("name", null);
+		query.equal("int1", 2);
+		query.equal("int2", 2);
 		query.equal("__key__", KeyFactory.createKey(Dummy1.class.getSimpleName(), 1));
 		query.orderAsc("name");
 		metadata.validateConstraints(query.getQuery());

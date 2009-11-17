@@ -48,6 +48,15 @@ public class ClassMetadataFactoryTest {
 		metadata.getProperty("xxx");
 	}
 	
+	/*
+	@Test
+	public void testPrimitive() throws Exception {
+		ClassMetadata metadata = factory.createMetadata(MyClass.class);
+		PropertyMetadata property = metadata.getProperty("intProperty");
+		assertEquals(Integer.class, property.getPropertyType());
+	}
+	*/
+	
 	@Test(expected=ConfigException.class)
 	public void testDoublePrimaryKey() throws Exception {
 		ClassMetadata metadata = factory.createMetadata(Error1.class);
@@ -70,6 +79,8 @@ public class ClassMetadataFactoryTest {
 		
 		@Transient
 		private String xxx;
+		
+		private int intProperty;
 
 		public Key getBar() {
 			return null;

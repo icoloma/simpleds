@@ -28,6 +28,9 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 	/** the converter used to convert values between java and the Google datastore */
 	private Converter converter;
 	
+	/** the type  of this property object */
+	private Class<?> propertyType;
+	
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + " { name=" + name + 
@@ -113,8 +116,12 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 		this.converter = converter;
 	}
 
-	public Class getPropertyType() {
-		return getter == null? field.getType() : getter.getReturnType();
+	public Class<?> getPropertyType() {
+		return propertyType;
+	}
+
+	public void setPropertyType(Class<?> propertyType) {
+		this.propertyType = propertyType;
 	}
 	
 }
