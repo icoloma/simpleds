@@ -53,7 +53,9 @@ public class EntityManagerImpl implements EntityManager {
 		ClassMetadata metadata = repository.get(query.getKind());
 		if (enforceSchemaConstraints) {
 			metadata.validateConstraints(query);
-			metadata.validateParentKey(query.getAncestor());
+			if (query.getAncestor() != null) { 
+				metadata.validateParentKey(query.getAncestor());
+			}
 		}
 		
 		PreparedQuery preparedQuery = datastoreService.prepare(query);
@@ -107,15 +109,15 @@ public class EntityManagerImpl implements EntityManager {
 	public Key put(Key parentKey, Object javaObject) {
 		ClassMetadata metadata = repository.get(javaObject.getClass());
 		
-		if (enforceSchemaConstraints) {
-			metadata.validateParentKey(parentKey);
-		}
-		
 		// generate primary key if missing
 		PropertyMetadata keyProperty = metadata.getKeyProperty();
 		Key providedKey = (Key) keyProperty.getValue(javaObject);
 		if (providedKey == null && !metadata.isGenerateKeyValue()) {
 			throw new IllegalArgumentException("No key value provided for " + javaObject.getClass().getSimpleName() + " instance, but key generation is not enabled for this class (missing @GeneratedValue?)");
+		}
+		
+		if (enforceSchemaConstraints) {
+			metadata.validateParentKey(providedKey == null? parentKey : providedKey.getParent());
 		}
 		
 		// transform to entity instance

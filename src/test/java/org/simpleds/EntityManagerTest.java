@@ -133,13 +133,26 @@ public class EntityManagerTest extends AbstractDatastoreTest {
 	@Test
 	public void testValidateParentPass() throws Exception {
 		Root  root = new Root();
-		entityManager.put(root);
-		entityManager.put(Arrays.asList(new Root(), new Root()));
 		Child child = new Child();
+		List<Child> childList = Arrays.asList(new Child(), new Child());
+		List<Root> rootList = Arrays.asList(new Root(), new Root());
+		
+		// generate root keys
+		entityManager.put(root);
+		entityManager.put(rootList);
+		
+		// generate children keys
 		entityManager.put(root.getKey(), child);
-		entityManager.put(root.getKey(), Arrays.asList(new Child(), new Child()));
+		entityManager.put(root.getKey(), childList);
+		
+		// pre-assigned children keys
+		entityManager.put(child);
+		entityManager.put(childList);
+		
+		// search
 		entityManager.findChildren(root.getKey(), Child.class);
 		entityManager.find(new SimpleQuery(Root.class));
+		entityManager.find(new SimpleQuery(Child.class));
 	}
 	
 	@Test
@@ -156,7 +169,6 @@ public class EntityManagerTest extends AbstractDatastoreTest {
 		// same for searches
 		findShouldFail(Dummy1.createDummyKey(), Root.class);
 		findShouldFail(Dummy1.createDummyKey(), Child.class);
-		findShouldFail(null, Child.class);
 	}
 	
 	private void putShouldFail(Key parentKey, Object instance) {
