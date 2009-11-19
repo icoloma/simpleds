@@ -18,7 +18,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 @MultivaluedIndex(name="friends", itemClass=Key.class)
 public class Dummy1 {
 
-	enum EnumValues {
+	public enum EnumValues {
 		FOO, BAR
 	}
 	

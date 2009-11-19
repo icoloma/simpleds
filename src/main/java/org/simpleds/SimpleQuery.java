@@ -2,6 +2,9 @@ package org.simpleds;
 
 import java.util.List;
 
+import org.simpleds.converter.Converter;
+import org.simpleds.converter.ConverterFactory;
+
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
@@ -43,13 +46,6 @@ public class SimpleQuery implements Cloneable {
 		query = new Query(clazz.getSimpleName(), ancestor);
 	}
 	
-	public SimpleQuery equal(String propertyName, Object value) {
-		if (value != null) {
-			query.addFilter(propertyName, FilterOperator.EQUAL, value);
-		}
-		return this;
-	}
-	
 	@Override
 	public SimpleQuery clone() {
 		SimpleQuery copy = new SimpleQuery(query.getAncestor(), query.getKind());
@@ -60,23 +56,32 @@ public class SimpleQuery implements Cloneable {
 			copy.order(spredicate.getPropertyName(), spredicate.getDirection());
 		}
 		if (fetchOptions != null) {
-			if (fetchOptions.getChunkSize() != null)
+			if (fetchOptions.getChunkSize() != null) {
 				copy.withChunkSize(fetchOptions.getChunkSize());
-			if (fetchOptions.getLimit() != null)
+			}
+			if (fetchOptions.getLimit() != null) {
 				copy.withLimit(fetchOptions.getLimit());
-			if (fetchOptions.getOffset() != null)
+			}
+			if (fetchOptions.getOffset() != null) {
 				copy.withOffset(fetchOptions.getOffset());
-			if (fetchOptions.getPrefetchSize() != null)
+			}
+			if (fetchOptions.getPrefetchSize() != null) {
 				copy.withPrefetchSize(fetchOptions.getPrefetchSize());
+			}
 		}
 		return copy;
 	}
 	
 	public SimpleQuery addFilter(String propertyName, FilterOperator operator, Object value) {
 		if (value != null) {
-			query.addFilter(propertyName, operator, value);
+			Converter converter = ConverterFactory.getConverter(value.getClass());
+			query.addFilter(propertyName, operator, converter.javaToDatastore(value));
 		}
 		return this;
+	}
+	
+	public SimpleQuery equal(String propertyName, Object value) {
+		return addFilter(propertyName, FilterOperator.EQUAL, value);
 	}
 	
 	public SimpleQuery isNull(String propertyName) {
@@ -90,31 +95,19 @@ public class SimpleQuery implements Cloneable {
 	}
 	
 	public SimpleQuery greaterThan(String propertyName, Object value) {
-		if (value != null) {
-			query.addFilter(propertyName, FilterOperator.GREATER_THAN, value);
-		}
-		return this;
+		return addFilter(propertyName, FilterOperator.GREATER_THAN, value);
 	}
 	
 	public SimpleQuery greaterThanOrEqual(String propertyName, Object value) {
-		if (value != null) {
-			query.addFilter(propertyName, FilterOperator.GREATER_THAN_OR_EQUAL, value);
-		}
-		return this;
+		return addFilter(propertyName, FilterOperator.GREATER_THAN_OR_EQUAL, value);
 	}
 	
 	public SimpleQuery lessThan(String propertyName, Object value) {
-		if (value != null) {
-			query.addFilter(propertyName, FilterOperator.LESS_THAN, value);
-		}
-		return this;
+		return addFilter(propertyName, FilterOperator.LESS_THAN, value);
 	}
 	
 	public SimpleQuery lessThanOrEqual(String propertyName, Object value) {
-		if (value != null) {
-			query.addFilter(propertyName, FilterOperator.LESS_THAN_OR_EQUAL, value);
-		}
-		return this;
+		return addFilter(propertyName, FilterOperator.LESS_THAN_OR_EQUAL, value);
 	}
 	
 	/**
