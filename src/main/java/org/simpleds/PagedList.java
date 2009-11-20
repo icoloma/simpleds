@@ -2,6 +2,8 @@ package org.simpleds;
 
 import java.util.List;
 
+import com.google.appengine.api.datastore.Query.SortPredicate;
+
 /**
  * The result of executing a paged query
  * @author icoloma
@@ -46,6 +48,13 @@ public class PagedList<T> {
 		return data.isEmpty();
 	}
 	
+	/**
+	 * @return the zero-based index of the first record that is returned. Internally, it multiplies the page index and the page size.
+	 */
+	public int getFirstRecordIndex() {
+		return query.getFirstRecordIndex();
+	}
+
 	public List<T> getData() {
 		return data;
 	}
@@ -61,5 +70,17 @@ public class PagedList<T> {
 	
 	public int getTotalPages() {
 		return totalPages;
+	}
+
+	public int getPageIndex() {
+		return query.getPageIndex();
+	}
+
+	public int getPageSize() {
+		return query.getPageSize();
+	}
+
+	public List<SortPredicate> getSortPredicates() {
+		return query.getSortPredicates();
 	}	
 }
