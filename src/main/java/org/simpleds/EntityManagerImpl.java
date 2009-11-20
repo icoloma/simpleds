@@ -35,6 +35,60 @@ public class EntityManagerImpl implements EntityManager {
 	private boolean enforceSchemaConstraints = true;
 	
 	@Override
+	public SimpleQuery createQuery(String kind) {
+		return createQueryImpl(null, repository.get(kind));
+	}
+	
+	@Override
+	public SimpleQuery createQuery(Class<?> clazz) {
+		return createQueryImpl(null, repository.get(clazz));
+	}
+	
+	@Override
+	public SimpleQuery createQuery(Key ancestor, String kind) {
+		return createQueryImpl(ancestor, repository.get(kind));
+	}
+	
+	@Override
+	public SimpleQuery createQuery(Key ancestor, Class<?> clazz) {
+		return createQueryImpl(ancestor, repository.get(clazz));
+	}
+	
+	@Override
+	public PagedQuery createPagedQuery(String kind) {
+		return createPagedQueryImpl(null, repository.get(kind));
+	}
+	
+	@Override
+	public PagedQuery createPagedQuery(Class<?> clazz) {
+		return createPagedQueryImpl(null, repository.get(clazz));
+	}
+	
+	@Override
+	public PagedQuery createPagedQuery(Key ancestor, String kind) {
+		return createPagedQueryImpl(ancestor, repository.get(kind));
+	}
+	
+	@Override
+	public PagedQuery createPagedQuery(Key ancestor, Class<?> clazz) {
+		return createPagedQueryImpl(ancestor, repository.get(clazz));
+	}
+	
+	private PagedQuery createPagedQueryImpl(Key ancestor, ClassMetadata metadata) {
+		if (enforceSchemaConstraints && ancestor != null) { 
+			metadata.validateParentKey(ancestor);
+		}
+		return new PagedQuery(ancestor, metadata);
+	}
+	
+	private SimpleQuery createQueryImpl(Key ancestor, ClassMetadata metadata) {
+		if (enforceSchemaConstraints && ancestor != null) { 
+			metadata.validateParentKey(ancestor);
+		}
+		return new SimpleQuery(ancestor, metadata);
+	}
+	
+	@Override
 	public Transaction beginTransaction() {
 		return datastoreService.beginTransaction();
 	}
@@ -46,20 +100,14 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> List<T> find(SimpleQuery factory) {
-		Query query = factory.getQuery();
+	public <T> List<T> find(SimpleQuery simpleQuery) {
+		Query query = simpleQuery.getQuery();
 		
 		// check that all constraints and sort properties belong to this schema
-		ClassMetadata metadata = repository.get(query.getKind());
-		if (enforceSchemaConstraints) {
-			metadata.validateConstraints(query);
-			if (query.getAncestor() != null) { 
-				metadata.validateParentKey(query.getAncestor());
-			}
-		}
+		ClassMetadata metadata = simpleQuery.getClassMetadata();
 		
 		PreparedQuery preparedQuery = datastoreService.prepare(query);
-		FetchOptions fetchOptions = factory.getFetchOptions();
+		FetchOptions fetchOptions = simpleQuery.getFetchOptions();
 		Iterable<Entity> entities = fetchOptions == null? preparedQuery.asIterable() : preparedQuery.asIterable(fetchOptions);
 		List result = Lists.newArrayList();
 		for (Entity entity : entities) {
@@ -70,12 +118,12 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public <T> List<T> findChildren(Key parentKey, Class<T> childrenClass) {
-		return find(new SimpleQuery(parentKey, childrenClass));
+		return find(createQuery(parentKey, childrenClass));
 	}
 	
 	@Override
 	public List<Key> findChildrenKeys(Key parentKey, Class childrenClass) {
-		return find(new SimpleQuery(parentKey, childrenClass).keysOnly());
+		return find(createQuery(parentKey, childrenClass).keysOnly());
 	}
 	
 	@Override

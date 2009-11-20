@@ -8,6 +8,7 @@ import java.util.Collection;
  * @author icoloma
  * @param <C>
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractCollectionConverter<C extends Collection> implements CollectionConverter<C> {
 
 	/** converter used for each item */
@@ -17,7 +18,6 @@ public abstract class AbstractCollectionConverter<C extends Collection> implemen
 	private Class<?> itemType;
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public C datastoreToJava(C dsValue) {
 		if (dsValue == null) { // null values are translated to empty collection
 			return createCollection(0);
@@ -30,7 +30,6 @@ public abstract class AbstractCollectionConverter<C extends Collection> implemen
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public C javaToDatastore(C javaValue) {
 		if (javaValue == null || javaValue.isEmpty()) { //  null or empty values are not stored
 			return null;
@@ -43,6 +42,16 @@ public abstract class AbstractCollectionConverter<C extends Collection> implemen
 			collection.add(itemConverter.javaToDatastore(o));
 		}
 		return collection;
+	}
+	
+	@Override
+	public Object itemDatastoreToJava(Object value) {
+		return itemConverter.datastoreToJava(value);
+	}
+	
+	@Override
+	public Object itemJavaToDatastore(Object value) {
+		return itemConverter.javaToDatastore(value);
 	}
 
 	@Override

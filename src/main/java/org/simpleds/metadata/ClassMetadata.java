@@ -10,16 +10,10 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import org.simpleds.converter.CollectionConverter;
-import org.simpleds.converter.Converter;
 import org.simpleds.exception.RequiredFieldException;
-import org.springframework.util.ClassUtils;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterPredicate;
-import com.google.appengine.api.datastore.Query.SortPredicate;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -88,39 +82,6 @@ public class ClassMetadata {
 		}
 	}
 
-	/**
-	 * Validate the schema constraints on the provided Query instance
-	 * @param query the query to validate
-	 */
-	public void validateConstraints(Query query) {
-		if (!kind.equals(query.getKind())) {
-			throw new IllegalArgumentException("The provided query kind '" + query.getKind() + "' does not match the expected kind '" + kind + "'");
-		}
-		
-		for (FilterPredicate predicate : query.getFilterPredicates()) {
-			String propertyName = predicate.getPropertyName();
-			Class<?> expectedClass;
-			if (!"__key__".equals(propertyName)) {
-				PropertyMetadata propertyMetadata = getProperty(propertyName);
-				Converter<?, ?> converter = propertyMetadata.getConverter();
-				expectedClass = converter instanceof CollectionConverter? ((CollectionConverter)converter).getItemType() : propertyMetadata.getPropertyType();
-			} else {
-				expectedClass = Key.class;
-			}
-			Object value = predicate.getValue();
-			if (value != null && !ClassUtils.isAssignable(expectedClass, value.getClass())) {
-				throw new IllegalArgumentException("Value of " + propertyName + " has wrong type. Expected " + expectedClass.getSimpleName() + 
-						" but the query provided " + value.getClass().getSimpleName() + " (" + value + ")");
-			}
-		}
-		for (SortPredicate predicate : query.getSortPredicates()) {
-			String propertyName = predicate.getPropertyName();
-			if (!"__key__".equals(propertyName) && !properties.containsKey(propertyName)) {
-				throwPropertyNotFoundException(propertyName);
-			}
-		}
-
-	}
 	/**
 	 * Convert a value from Java representation to a Datastore {@link Entity}
 	 * @param javaObject the Java property value

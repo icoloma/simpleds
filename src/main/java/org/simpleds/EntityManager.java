@@ -126,11 +126,62 @@ public interface EntityManager {
 	void put(Key parentKey, Collection javaObjects);
 
 	/**
-	 * Return a PagedList result after computing a PagedQuery
+	 * Return a {@link PagedList} result after computing a PagedQuery
 	 * @param query the query to execute
 	 * @return the result of the query
 	 */
 	<T> PagedList<T> findPaged(PagedQuery query);
 
+	/**
+	 * Create a new {@link SimpleQuery} instance
+	 * @param kind the unqualified class name for this query
+	 */
+	public SimpleQuery createQuery(String kind);
+	
+	/**
+	 * Create a new {@link SimpleQuery} instance
+	 * @param clazz the class for this query
+	 */
+	public SimpleQuery createQuery(Class<?> clazz);
+	
+	/**
+	 * Create a new {@link SimpleQuery} instance
+	 * @param ancestor the parent key to use for this query. Can be null.
+	 * @param kind the unqualified class name for this query
+	 */
+	public SimpleQuery createQuery(Key ancestor, String kind);
+	
+	/**
+	 * Create a new {@link SimpleQuery} instance
+	 * @param ancestor the parent key to use for this query. Can be null.
+	 * @param clazz the class for this query
+	 */
+	public SimpleQuery createQuery(Key ancestor, Class<?> clazz);
+	
+	/**
+	 * Create a new {@link PagedQuery} instance
+	 * @param kind the unqualified class name for this query
+	 */
+	public PagedQuery createPagedQuery(String kind);
+	
+	/**
+	 * Create a new {@link PagedQuery} instance
+	 * @param clazz the class for this query
+	 */
+	public PagedQuery createPagedQuery(Class<?> clazz);
+	
+	/**
+	 * Create a new {@link PagedQuery} instance
+	 * @param ancestor the parent key to use for this query. Can be null.
+	 * @param kind the unqualified class name for this query
+	 */
+	public PagedQuery createPagedQuery(Key ancestor, String kind);
+	
+	/**
+	 * Create a new {@link PagedQuery} instance
+	 * @param ancestor the parent key to use for this query. Can be null.
+	 * @param clazz the class for this query
+	 */
+	public PagedQuery createPagedQuery(Key ancestor, Class<?> clazz);
 
 }

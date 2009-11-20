@@ -1,6 +1,8 @@
 package org.simpleds;
 
 
+import org.simpleds.metadata.ClassMetadata;
+
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -34,26 +36,10 @@ public class PagedQuery extends SimpleQuery {
 	/** true to calculate the total size of the response, defaults to true */
 	private boolean calculateTotalResults = true;
 	
-	public PagedQuery(Class clazz) {
-		super(clazz);
+	PagedQuery(Key ancestor, ClassMetadata metadata) {
+		super(ancestor, metadata);
 	}
-
-	public PagedQuery(Key ancestor, Class clazz) {
-		super(ancestor, clazz);
-	}
-
-	public PagedQuery(Key ancestor, String kind) {
-		super(ancestor, kind);
-	}
-
-	public PagedQuery(Key ancestor) {
-		super(ancestor);
-	}
-
-	public PagedQuery(String kind) {
-		super(kind);
-	}
-
+	
 	@Override
 	public FetchOptions getFetchOptions() {
 		FetchOptions fo = super.getFetchOptions();
@@ -124,8 +110,8 @@ public class PagedQuery extends SimpleQuery {
 	}
 	
 	@Override
-	public PagedQuery order(String propertyName, SortDirection direction) {
-		return (PagedQuery) super.order(propertyName, direction);
+	public PagedQuery sort(String propertyName, SortDirection direction) {
+		return (PagedQuery) super.sort(propertyName, direction);
 	}
 	
 	@Override

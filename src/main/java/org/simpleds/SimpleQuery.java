@@ -2,8 +2,11 @@ package org.simpleds;
 
 import java.util.List;
 
+import org.simpleds.converter.CollectionConverter;
 import org.simpleds.converter.Converter;
-import org.simpleds.converter.ConverterFactory;
+import org.simpleds.metadata.ClassMetadata;
+import org.simpleds.metadata.PropertyMetadata;
+import org.springframework.util.ClassUtils;
 
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
@@ -20,40 +23,28 @@ import com.google.appengine.api.datastore.Query.SortPredicate;
  */
 public class SimpleQuery implements Cloneable {
 
+	/** the {@link ClassMetadata} that corresponds to this query */
+	private ClassMetadata classMetadata;
+	
 	/** the constructed query */
 	private Query query;
 
 	/** the fetch options */
 	private FetchOptions fetchOptions;
 	
-	public SimpleQuery(Key ancestor) {
-		query = new Query(ancestor);
-	}
-	
-	public SimpleQuery(String kind) {
-		query = new Query(kind);
-	}
-	
-	public SimpleQuery(Class clazz) {
-		query = new Query(clazz.getSimpleName());
-	}
-	
-	public SimpleQuery(Key ancestor, String kind) {
-		query = new Query(kind, ancestor);
-	}
-	
-	public SimpleQuery(Key ancestor, Class clazz) {
-		query = new Query(clazz.getSimpleName(), ancestor);
+	SimpleQuery(Key ancestor, ClassMetadata metadata) {
+		this.classMetadata = metadata;
+		this.query = new Query(metadata.getKind(), ancestor);
 	}
 	
 	@Override
 	public SimpleQuery clone() {
-		SimpleQuery copy = new SimpleQuery(query.getAncestor(), query.getKind());
+		SimpleQuery copy = new SimpleQuery(query.getAncestor(), classMetadata);
 		for (FilterPredicate fpredicate : query.getFilterPredicates()) {
-			copy.addFilter(fpredicate.getPropertyName(), fpredicate.getOperator(), fpredicate.getValue());
+			copy.query.addFilter(fpredicate.getPropertyName(), fpredicate.getOperator(), fpredicate.getValue());
 		}
 		for (SortPredicate spredicate : query.getSortPredicates()) {
-			copy.order(spredicate.getPropertyName(), spredicate.getDirection());
+			copy.query.addSort(spredicate.getPropertyName(), spredicate.getDirection());
 		}
 		if (fetchOptions != null) {
 			if (fetchOptions.getChunkSize() != null) {
@@ -72,10 +63,35 @@ public class SimpleQuery implements Cloneable {
 		return copy;
 	}
 	
+	public String getKind() {
+		return classMetadata.getKind();
+	}
+	
 	public SimpleQuery addFilter(String propertyName, FilterOperator operator, Object value) {
 		if (value != null) {
-			Converter converter = ConverterFactory.getConverter(value.getClass());
-			query.addFilter(propertyName, operator, converter.javaToDatastore(value));
+			
+			// convert from java to google datastore
+			Object convertedValue;
+			Class expectedClass;
+			if ("__key__".equals(propertyName)) {
+				convertedValue = value;
+				expectedClass = Key.class;
+			} else {
+				PropertyMetadata propertyMetadata = classMetadata.getProperty(propertyName);
+				Converter converter = propertyMetadata.getConverter();
+				if (converter instanceof CollectionConverter) {
+					convertedValue = ((CollectionConverter)converter).itemJavaToDatastore(value);
+					expectedClass = ((CollectionConverter)converter).getItemType();
+				} else {
+					convertedValue = converter.javaToDatastore(value);
+					expectedClass = propertyMetadata.getPropertyType();
+				}
+			}
+			if (!ClassUtils.isAssignable(expectedClass, value.getClass())) {
+				throw new IllegalArgumentException("Value of " + propertyName + " has wrong type. Expected " + expectedClass.getSimpleName() + ", but the query provided " + value.getClass().getSimpleName());
+			}
+			
+			query.addFilter(propertyName, operator, convertedValue);
 		}
 		return this;
 	}
@@ -85,11 +101,15 @@ public class SimpleQuery implements Cloneable {
 	}
 	
 	public SimpleQuery isNull(String propertyName) {
+		// check that the property exists
+		classMetadata.getProperty(propertyName);
 		query.addFilter(propertyName, FilterOperator.EQUAL, null);
 		return this;
 	}
 	
 	public SimpleQuery isNotNull(String propertyName) {
+		// check that the property exists
+		classMetadata.getProperty(propertyName);
 		query.addFilter(propertyName, FilterOperator.GREATER_THAN, null);
 		return this;
 	}
@@ -125,19 +145,38 @@ public class SimpleQuery implements Cloneable {
 		return this;
 	}
 	
-	public SimpleQuery orderAsc(String propertyName) {
-		query.addSort(propertyName, SortDirection.ASCENDING);
-		return this;
+	public SimpleQuery sortAsc(String propertyName) {
+		return sort(propertyName, SortDirection.ASCENDING);
 	}
 	
-	public SimpleQuery order(String propertyName, SortDirection direction) {
+	/**
+	 * @deprecated use sortAsc instead
+	 */
+	@Deprecated
+	public SimpleQuery orderAsc(String propertyName) {
+		return sortAsc(propertyName);
+	}
+	
+	public SimpleQuery sort(String propertyName, SortDirection direction) {
+		if (!"__key__".equals(propertyName)) {
+			// check that the sort property exists
+			classMetadata.getProperty(propertyName);
+		}
+		
 		query.addSort(propertyName, direction);
 		return this;
 	}
 	
+	/**
+	 * @deprecated use sortDesc instead
+	 */
+	@Deprecated
 	public SimpleQuery orderDesc(String propertyName) {
-		query.addSort(propertyName, SortDirection.DESCENDING);
-		return this;
+		return sortDesc(propertyName);
+	}
+	
+	public SimpleQuery sortDesc(String propertyName) {
+		return sort(propertyName, SortDirection.DESCENDING);
 	}
 	
 	public SimpleQuery keysOnly() {
@@ -183,6 +222,10 @@ public class SimpleQuery implements Cloneable {
 
 	public FetchOptions getFetchOptions() {
 		return fetchOptions;
+	}
+
+	public ClassMetadata getClassMetadata() {
+		return classMetadata;
 	}
 
 }

@@ -29,7 +29,7 @@ public class PagedQueryTest extends AbstractDatastoreTest {
 		entityManager = EntityManagerFactory.getEntityManager();
 		
 		// clear the database
-		List<Key> keys = entityManager.find(new SimpleQuery(Dummy1.class).keysOnly());
+		List<Key> keys = entityManager.find(entityManager.createQuery(Dummy1.class).keysOnly());
 		entityManager.delete(keys);
 		
 		// persist instances
@@ -42,7 +42,7 @@ public class PagedQueryTest extends AbstractDatastoreTest {
 	
 	@Test
 	public void testPaginate() throws Exception {
-		PagedQuery query = new PagedQuery(Dummy1.class).setPageSize(PAGE_SIZE);
+		PagedQuery query = entityManager.createPagedQuery(Dummy1.class).setPageSize(PAGE_SIZE);
 		
 		// count 
 		assertEquals(29, entityManager.count(query));
@@ -66,7 +66,7 @@ public class PagedQueryTest extends AbstractDatastoreTest {
 	
 	@Test
 	public void testPagedList() throws Exception {
-		PagedQuery query = new PagedQuery(Dummy1.class).setPageSize(PAGE_SIZE);
+		PagedQuery query = entityManager.createPagedQuery(Dummy1.class).setPageSize(PAGE_SIZE);
 		query.setPageIndex(2);
 		PagedList list = entityManager.findPaged(query);
 		assertEquals(29, list.getTotalResults());

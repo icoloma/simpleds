@@ -6,14 +6,10 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
-
-import javax.persistence.Id;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.SimpleQuery;
 import org.simpleds.converter.IntegerConverter;
 import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
@@ -82,63 +78,6 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 		assertNull(entity.getProperty("id"));
 		assertEquals("foo", entity.getProperty("name"));
 	}
-	
-	@Test
-	public void testValidateSimpleQueryOK() throws Exception {
-		SimpleQuery query = new SimpleQuery(Dummy1.class);
-		query.equal("date", new Date());
-		query.equal("name", null);
-		query.equal("int1", 2);
-		query.equal("int2", 2);
-		query.equal("__key__", KeyFactory.createKey(Dummy1.class.getSimpleName(), 1));
-		query.orderAsc("name");
-		metadata.validateConstraints(query.getQuery());
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testValidateSimpleQueryWrongSortName() throws Exception {
-		SimpleQuery query = new SimpleQuery(Dummy1.class);
-		query.orderAsc("xxx");
-		metadata.validateConstraints(query.getQuery());
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testValidateSimpleQueryWrongPropertyClass() throws Exception {
-		SimpleQuery query = new SimpleQuery(Dummy1.class);
-		query.equal("date", 1);
-		metadata.validateConstraints(query.getQuery());
-	}
-	
-	@Test
-	public void testValidateSimpleQueryCollectionOK() throws Exception {
-		metadata = addMetadata(CollectionDummy.class);
-		SimpleQuery query = new SimpleQuery(CollectionDummy.class);
-		query.equal("intList", 1);
-		metadata.validateConstraints(query.getQuery());
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
-	public void testValidateSimpleQueryCollectionWrongItemClass() throws Exception {
-		metadata = addMetadata(CollectionDummy.class);
-		SimpleQuery query = new SimpleQuery(CollectionDummy.class);
-		query.equal("intList", "foo");
-		metadata.validateConstraints(query.getQuery());
-	}
-	
-	private ClassMetadata addMetadata(Class<CollectionDummy> clazz) {
-		ClassMetadataFactory factory = new ClassMetadataFactory();
-		ClassMetadata cm = factory.createMetadata(clazz);
-		repository.add(cm);
-		return cm;
-	}
 
-	@javax.persistence.Entity
-	@SuppressWarnings("unused")
-	public static class CollectionDummy {
-		@Id 
-		private Key key;
-		
-		private List<Integer> intList;
-	}
 	
 }

@@ -67,7 +67,7 @@ public class IndexManagerTest extends AbstractDatastoreTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testFindByUnmappedProperty() throws Exception {
-		entityManager.find(new SimpleQuery(Dummy1.class).equal("xxx", "foo"));
+		entityManager.find(entityManager.createQuery(Dummy1.class).equal("xxx", "foo"));
 	}
 	
 	private Dummy1 createDummy() {

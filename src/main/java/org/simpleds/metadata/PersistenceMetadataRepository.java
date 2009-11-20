@@ -41,13 +41,13 @@ public class PersistenceMetadataRepository {
 	}
 	
 	/**
-	 * @param simpleName the simple (unqualified) class name
+	 * @param kind the simple (unqualified) class name
 	 * @return the ClassMetadata regsitered for the provided simple class name
 	 */
-	public ClassMetadata get(String simpleName) {
-		ClassMetadata result = metadataBySimpleClassName.get(simpleName);
+	public ClassMetadata get(String kind) {
+		ClassMetadata result = metadataBySimpleClassName.get(kind);
 		if (result == null) {
-			throw new IllegalArgumentException("No persistent class " + simpleName + " could be found");
+			throw new IllegalArgumentException("No persistent class " + kind + " could be found");
 		}
 		return result;
 	}

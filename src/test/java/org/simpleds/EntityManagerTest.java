@@ -10,38 +10,19 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.exception.RequiredFieldException;
-import org.simpleds.metadata.PersistenceMetadataRepository;
-import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
-import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Child;
 import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
 import org.simpleds.testdb.Dummy3;
 import org.simpleds.testdb.Root;
 
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
-public class EntityManagerTest extends AbstractDatastoreTest {
+public class EntityManagerTest extends AbstractEntityManagerTest {
 
-	private PersistenceMetadataRepository repository;
-	
-	private EntityManagerImpl entityManager;
-	
-	@Before
-	public void setup() {
-		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
-		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		repository = factory.createRepository();
-		entityManager = new EntityManagerImpl();
-		entityManager.setRepository(repository);
-		entityManager.setDatastoreService(DatastoreServiceFactory.getDatastoreService());
-	}
-	
 	@Test
 	public void testSinglePutSuccess() {
 		// root entity
@@ -119,7 +100,7 @@ public class EntityManagerTest extends AbstractDatastoreTest {
 	public void testFind() {
 		Dummy1  dummy = createDummy();
 		entityManager.put(dummy);
-		SimpleQuery query = new SimpleQuery(Dummy1.class).equal("name", "foo");
+		SimpleQuery query = entityManager.createQuery(Dummy1.class).equal("name", "foo");
 		List<Dummy1> result = entityManager.find(query);
 		assertTrue(result.size() >= 1);
 		assertEquals("foo", result.get(0).getName());
@@ -127,7 +108,7 @@ public class EntityManagerTest extends AbstractDatastoreTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testFindByUnmappedProperty() throws Exception {
-		entityManager.find(new SimpleQuery(Dummy1.class).equal("xxx", "foo"));
+		entityManager.find(entityManager.createQuery(Dummy1.class).equal("xxx", "foo"));
 	}
 	
 	@Test
@@ -151,8 +132,8 @@ public class EntityManagerTest extends AbstractDatastoreTest {
 		
 		// search
 		entityManager.findChildren(root.getKey(), Child.class);
-		entityManager.find(new SimpleQuery(Root.class));
-		entityManager.find(new SimpleQuery(Child.class));
+		entityManager.find(entityManager.createQuery(Root.class));
+		entityManager.find(entityManager.createQuery(Child.class));
 	}
 	
 	@Test
@@ -188,7 +169,7 @@ public class EntityManagerTest extends AbstractDatastoreTest {
 	
 	private void findShouldFail(Key parentKey, Class clazz) {
 		try {
-			entityManager.find(new SimpleQuery(parentKey, clazz));
+			entityManager.find(entityManager.createQuery(parentKey, clazz));
 			fail("find operation should fail");
 		} catch (IllegalArgumentException e) {
 			out.println(e);
