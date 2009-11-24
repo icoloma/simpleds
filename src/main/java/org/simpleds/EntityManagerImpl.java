@@ -35,6 +35,11 @@ public class EntityManagerImpl implements EntityManager {
 	private boolean enforceSchemaConstraints = true;
 	
 	@Override
+	public ClassMetadata getClassMetadata(Class<?> clazz) {
+		return repository.get(clazz);
+	}
+	
+	@Override
 	public SimpleQuery createQuery(String kind) {
 		return createQueryImpl(null, repository.get(kind));
 	}
