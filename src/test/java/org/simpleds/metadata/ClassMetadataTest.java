@@ -59,6 +59,7 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 		entity.setProperty("date", d);
 		entity.setProperty("int1", Long.valueOf(1));
 		entity.setProperty("int2", Long.valueOf(2));
+		entity.setProperty("xxx", "foobar"); // ignored property that is not mapped
 		Dummy1 dummy = metadata.datastoreToJava(entity);
 		assertEquals(key, dummy.getKey());
 		assertEquals("foo", dummy.getName());
