@@ -4,7 +4,9 @@ usePlugin 'java'
 usePlugin 'maven'
 
 project.group='com.google.code'
-project.version='0.8'
+project.version='0.8.1'
+
+defaultTasks 'buildAll'
 
 try {
 	this["appengineHome"]
@@ -69,4 +71,12 @@ uploadArchives {
             authentication(userName: "me", password: "myPassword")
         }
     }
+}
+
+task 'buildAll' (dependsOn: [build, javadoc]) << {
+	ant.zip(
+		destfile: "build/docs/simpleds-${project.version}-javadoc.zip", 
+		basedir: 'build/docs', 
+		includes: 'javadoc/**'
+	)
 }
