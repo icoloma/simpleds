@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.simpleds.exception.RequiredFieldException;
 
 import com.google.appengine.api.datastore.Entity;
@@ -48,6 +50,8 @@ public class ClassMetadata {
 	/** true to validate parent key kind when inserting */
 	private boolean validateParentKey;
 	
+	private static final Log log = LogFactory.getLog(ClassMetadata.class);
+	
 	/**
 	 * Convert a value from Google representation to a Java value
 	 * @param entity the persistent {@link Entity} from the google datastore
@@ -58,8 +62,14 @@ public class ClassMetadata {
 			T result = (T) persistentClass.newInstance();
 			for (Entry<String, Object> property : entity.getProperties().entrySet()) {
 				PropertyMetadata metadata = properties.get(property.getKey());
-				Object value = metadata.getConverter().datastoreToJava(property.getValue());
-				metadata.setValue(result, value);
+				if (metadata != null) {
+					Object value = metadata.getConverter().datastoreToJava(property.getValue());
+					metadata.setValue(result, value);
+				} else {
+					if (log.isDebugEnabled()) {
+						log.debug("Unmapped attribute found in DataStore entry. Ignoring: " + entity.getKind() + "." + property.getKey());
+					} 
+				}
 			}
 			keyProperty.setValue(result, entity.getKey());
 			return result;

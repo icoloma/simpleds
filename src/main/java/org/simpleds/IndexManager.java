@@ -61,10 +61,10 @@ public interface IndexManager {
 
 	/**
 	 * Return a list of persistent instances that satisfy the provided {@link IndexQuery}
-	 * @param <T>
-	 * @param factory
-	 * @return
+	 * @param <T> the type of the persistent entity
+	 * @param query the query to execute over the index
+	 * @return the list of persistent instances that satisfy the query
 	 */
-	<T> List<T> find(IndexQuery factory);
+	<T> List<T> find(IndexQuery query);
 	
 }

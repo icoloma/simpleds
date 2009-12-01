@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.simpleds.exception.EntityNotFoundException;
+import org.simpleds.metadata.ClassMetadata;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -183,5 +184,11 @@ public interface EntityManager {
 	 * @param clazz the class for this query
 	 */
 	public PagedQuery createPagedQuery(Key ancestor, Class<?> clazz);
+
+	/**
+	 * @return the configured {@link ClassMetadata} for the provided persistent class
+	 * @throws IllegalArgumentException if the provided class is not registered as a persistent class
+	 */
+	ClassMetadata getClassMetadata(Class<?> clazz);
 
 }

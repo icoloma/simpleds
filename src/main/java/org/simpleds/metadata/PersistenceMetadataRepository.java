@@ -31,6 +31,7 @@ public class PersistenceMetadataRepository {
 	
 	/**
 	 * @return the ClassMetadata regsitered for the provided class 
+	 * @throws IllegalArgumentException if the provided class is not registered as a persistent class
 	 */
 	public ClassMetadata get(Class clazz) {
 		ClassMetadata result = metadataByClass.get(clazz);

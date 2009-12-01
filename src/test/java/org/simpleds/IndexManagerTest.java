@@ -34,7 +34,7 @@ public class IndexManagerTest extends AbstractDatastoreTest {
 	public void setup() {
 		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		repository = factory.createRepository();
+		repository = factory.initialize();
 		indexManager = new IndexManagerImpl();
 		indexManager.setRepository(repository);
 		indexManager.setDatastoreService(DatastoreServiceFactory.getDatastoreService());

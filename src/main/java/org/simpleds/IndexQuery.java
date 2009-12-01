@@ -7,7 +7,8 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 /**
- * Query for a multivalued index. This query will return instances of the entity containing the index, instead of the index itself
+ * Query for a multivalued index. This query will return the matching persistent instances 
+ * instead of the index value itself.
  * @author icoloma
  */
 public class IndexQuery {
@@ -18,7 +19,7 @@ public class IndexQuery {
 	/** the fetch options */
 	private FetchOptions fetchOptions;
 	
-	/** if true, return only the keys of the containing instances (default false) */
+	/** if true, return only the keys of the matching instances (default false) */
 	private boolean keysOnly;
 	
 	private MultivaluedIndexMetadata metadata;
@@ -65,7 +66,7 @@ public class IndexQuery {
 	}
 	
 	/**
-	 * If true, this return will only return the indexes of the containing instances of the provided index
+	 * If invoked, this query will return the keys of the instances that are a match 
 	 * @return
 	 */
 	public IndexQuery keysOnly() {
