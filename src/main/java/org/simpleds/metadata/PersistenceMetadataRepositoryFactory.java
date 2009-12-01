@@ -25,7 +25,9 @@ public class PersistenceMetadataRepositoryFactory {
 	/** the list of ant-style package locations, such as classpath*:com/acme/model/** */
 	private String[] locations;
 	
-	public PersistenceMetadataRepository createRepository() {
+	private static PersistenceMetadataRepository instance;
+	
+	public PersistenceMetadataRepository initialize() {
 		try {
 			if (locations == null) {
 				throw new IllegalArgumentException("locations has not been specified");
@@ -60,6 +62,7 @@ public class PersistenceMetadataRepositoryFactory {
 				}
 			}
 			
+			instance = repository;
 			return repository;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -67,17 +70,13 @@ public class PersistenceMetadataRepositoryFactory {
 			throw new RuntimeException(e);
 		}
 	}
-
-	public ResourcePatternResolver getResolver() {
-		return resolver;
+	
+	public static PersistenceMetadataRepository getPersistenceMetadataRepository() {
+		return instance;
 	}
 
 	public void setResolver(ResourcePatternResolver resolver) {
 		this.resolver = resolver;
-	}
-
-	public String[] getLocations() {
-		return locations;
 	}
 
 	public void setLocations(String[] locations) {

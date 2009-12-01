@@ -1,52 +1,46 @@
 package org.simpleds;
 
-import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
+import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.appengine.api.datastore.DatastoreService;
 
 /**
- * Creates a {@link IndexManager} instance
+ * Wrapper to make injection of {@link IndexManager} attributes easier using Spring.
  * @author icoloma
  */
-public class SpringIndexManagerFactory implements FactoryBean, InitializingBean {
+public class SpringIndexManagerFactory implements FactoryBean {
 
 	private IndexManagerFactory factory = new IndexManagerFactory();
-	
+
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		factory.initialize();
+	public Object getObject() throws Exception {
+		return factory.initialize();
 	}
-	
-	@Override
-	public IndexManager getObject() {
-		return IndexManagerFactory.getIndexManager();
-	}
-	
+
 	@Override
 	public Class getObjectType() {
 		return IndexManager.class;
 	}
-	
+
 	@Override
 	public boolean isSingleton() {
 		return true;
 	}
-	
+
 	@Autowired(required=false)
 	public void setDatastoreService(DatastoreService datastoreService) {
-		factory.setDatastoreService(datastoreService);
+		this.factory.setDatastoreService(datastoreService);
 	}
 
-	public void setEnforceSchemaConstraints(boolean checkSchemaConstraints) {
-		factory.setEnforceSchemaConstraints(checkSchemaConstraints);
+	public void setEnforceSchemaConstraints(boolean enforceSchemaConstraints) {
+		this.factory.setEnforceSchemaConstraints(enforceSchemaConstraints);
 	}
 
-	@Autowired(required=false)
-	public void setRepositoryFactory( PersistenceMetadataRepositoryFactory repositoryFactory) {
-		factory.setRepositoryFactory(repositoryFactory);
+	@Autowired
+	public void setPersistenceMetadataRepository(PersistenceMetadataRepository persistenceMetadataRepository) {
+		this.factory.setPersistenceMetadataRepository(persistenceMetadataRepository);
 	}
-	
+
 }

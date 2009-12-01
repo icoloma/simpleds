@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
 import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
 
@@ -24,9 +25,10 @@ public class PagedQueryTest extends AbstractDatastoreTest {
 	@Before
 	public void setup() {
 		EntityManagerFactory factory = new EntityManagerFactory();
-		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		factory.initializeEntityManager();
-		entityManager = EntityManagerFactory.getEntityManager();
+		PersistenceMetadataRepositoryFactory pmrFactory = new PersistenceMetadataRepositoryFactory();
+		pmrFactory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
+		factory.setPersistenceMetadataRepository(pmrFactory.initialize());
+		entityManager = factory.initialize();
 		
 		// clear the database
 		List<Key> keys = entityManager.find(entityManager.createQuery(Dummy1.class).keysOnly());

@@ -14,7 +14,7 @@ public class PersistenceMetadataFactoryTest {
 	public void testRetrieveClasses() throws Exception {
 		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		PersistenceMetadataRepository repository = factory.createRepository();
+		PersistenceMetadataRepository repository = factory.initialize();
 		assertNotNull(repository.get(Dummy1.class));
 		assertNotNull(repository.get(Dummy2.class));
 		try {

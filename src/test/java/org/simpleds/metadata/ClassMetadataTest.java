@@ -28,7 +28,7 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 	public void setup() {
 		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		repository = factory.createRepository();
+		repository = factory.initialize();
 		metadata = repository.get(Dummy1.class);
 	}
 	

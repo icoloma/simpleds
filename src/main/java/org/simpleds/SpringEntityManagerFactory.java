@@ -1,30 +1,20 @@
 package org.simpleds;
 
-import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
+import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.appengine.api.datastore.DatastoreService;
 
 /**
- * Factory class for easier Spring configuration
- * @author Nacho
- *
+ * Wrapper to make injection of {@link EntityManager} attributes easier using Spring. 
+ * @author icoloma
  */
-public class SpringEntityManagerFactory implements FactoryBean, InitializingBean {
+public class SpringEntityManagerFactory implements FactoryBean {
 
-	/** delegate factory class */
-	private EntityManagerFactory factory = new EntityManagerFactory();
-	
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		factory.initializeEntityManager();
-	}
-	
-	@Override
-	public EntityManager getObject() throws Exception {
-		return factory.getEntityManager();
+	public Object getObject() throws Exception {
+		return factory.initialize();
 	}
 
 	@Override
@@ -36,22 +26,21 @@ public class SpringEntityManagerFactory implements FactoryBean, InitializingBean
 	public boolean isSingleton() {
 		return true;
 	}
+
+	private EntityManagerFactory factory = new EntityManagerFactory();
 	
 	@Autowired(required=false)
 	public void setDatastoreService(DatastoreService datastoreService) {
-		factory.setDatastoreService(datastoreService);
+		this.factory.setDatastoreService(datastoreService);
 	}
 
-	public void setEnforceSchemaConstraints(boolean checkSchemaConstraints) {
-		factory.setEnforceSchemaConstraints(checkSchemaConstraints);
+	public void setEnforceSchemaConstraints(boolean enforceSchemaConstraints) {
+		this.factory.setEnforceSchemaConstraints(enforceSchemaConstraints);
 	}
 
-	public void setLocations(String[] locations) {
-		factory.setLocations(locations);
+	@Autowired
+	public void setPersistenceMetadataRepository(PersistenceMetadataRepository persistenceMetadataRepository) {
+		this.factory.setPersistenceMetadataRepository(persistenceMetadataRepository);
 	}
 
-	@Autowired(required=false)
-	public void setRepositoryFactory( PersistenceMetadataRepositoryFactory repositoryFactory) {
-		factory.setRepositoryFactory(repositoryFactory);
-	}
 }

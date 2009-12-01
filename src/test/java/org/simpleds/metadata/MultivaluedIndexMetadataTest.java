@@ -17,10 +17,10 @@ public class MultivaluedIndexMetadataTest extends AbstractDatastoreTest {
 	public void setup() {
 		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		repository = factory.createRepository();
+		repository = factory.initialize();
 		IndexManagerFactory indexManagerFactory = new IndexManagerFactory();
 		indexManagerFactory.setDatastoreService(datastoreService);
-		indexManagerFactory.setRepositoryFactory(factory);
+		indexManagerFactory.setPersistenceMetadataRepository(factory.initialize());
 		indexManagerFactory.initialize();
 		IndexManagerImpl indexManager = (IndexManagerImpl) indexManagerFactory.getIndexManager();
 		metadata = indexManager.getIndexMetadata(Dummy1.class, "friends");
