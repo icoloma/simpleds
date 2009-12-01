@@ -67,7 +67,6 @@ public class IndexQuery {
 	
 	/**
 	 * If invoked, this query will return the keys of the instances that are a match 
-	 * @return
 	 */
 	public IndexQuery keysOnly() {
 		this.keysOnly = true;
