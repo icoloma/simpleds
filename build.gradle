@@ -1,5 +1,7 @@
-// required gradle version: 0.8
-
+/**
+ * To install in the local repository: gradle -s uploadArchives
+ * required gradle version: 0.8
+ */
 usePlugin 'java'
 usePlugin 'maven'
 
@@ -62,7 +64,7 @@ dependencies {
 	sources "org.apache.geronimo.specs:geronimo-jpa_3.0_spec:1.1.1:sources"
 	sources "junit:junit:4.4:sources"
 }
-
+/*
 uploadArchives {
     repositories.mavenDeployer {
         name = 'sshDeployer' // optional
@@ -71,7 +73,7 @@ uploadArchives {
             authentication(userName: "me", password: "myPassword")
         }
     }
-}
+}*/
 
 task 'buildAll' (dependsOn: [build, javadoc]) << {
 	ant.zip(
