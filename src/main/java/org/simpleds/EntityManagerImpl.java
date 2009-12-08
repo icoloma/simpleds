@@ -287,8 +287,9 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T get(Key key) {
-		return get(null, key);
+		return (T) get(null, key);
 	}
 	
 	@Override

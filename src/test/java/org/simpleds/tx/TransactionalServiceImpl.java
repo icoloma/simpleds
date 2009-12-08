@@ -1,6 +1,7 @@
 package org.simpleds.tx;
 
 import org.simpleds.EntityManager;
+import org.simpleds.annotations.Transactional;
 import org.simpleds.testdb.Dummy1;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

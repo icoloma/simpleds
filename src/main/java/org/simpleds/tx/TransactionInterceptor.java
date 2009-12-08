@@ -5,6 +5,7 @@ import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.simpleds.EntityManager;
 import org.simpleds.EntityManagerFactory;
+import org.simpleds.annotations.Transactional;
 
 
 /**

@@ -1,4 +1,4 @@
-package org.simpleds.tx;
+package org.simpleds.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
