@@ -52,17 +52,24 @@ dependencies {
 	compile ":appengine-api-stubs"
 	compile ":appengine-api-1.0-sdk:latest.integration"
 	
+	compile "org.aspectj:aspectjrt:1.6.6"
+	compile "org.aspectj:aspectjweaver:1.6.6"
 	compile "com.google.collections:google-collections:1.0-rc3"
 	compile "org.springframework:spring:2.5.6"
 	compile "commons-logging:commons-logging:1.1.1"
 	compile "org.apache.geronimo.specs:geronimo-jpa_3.0_spec:1.1.1"
 	compile "junit:junit:4.4"
 	
+	sources "org.aspectj:aspectjrt:1.6.6:sources"
+	sources "org.aspectj:aspectjweaver:1.6.6:sources"
 	sources "com.google.collections:google-collections:1.0-rc3:sources"
 	sources "org.springframework:spring:2.5.6:sources"
 	sources "commons-logging:commons-logging:1.1.1:sources"
 	sources "org.apache.geronimo.specs:geronimo-jpa_3.0_spec:1.1.1:sources"
 	sources "junit:junit:4.4:sources"
+	
+	testCompile "org.springframework:spring-test:2.5.6"
+	
 }
 /*
 uploadArchives {

@@ -9,7 +9,10 @@
 	<classpathentry kind="lib" path="src/gen-lib/spring-2.5.6.jar"/>
 	<classpathentry kind="lib" path="src/gen-lib/appengine-local-runtime.jar"/>
 	<classpathentry kind="lib" path="src/gen-lib/appengine-api-stubs.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="src/gen-lib/spring-test-2.5.6.jar"/>
+	<classpathentry kind="lib" path="src/gen-lib/junit-4.4.jar"/>
+	<classpathentry kind="lib" path="src/gen-lib/aspectjrt-1.6.6.jar" sourcepath="src/gen-lib/aspectjrt-1.6.6-sources.jar"/>
+	<classpathentry kind="lib" path="src/gen-lib/aspectjweaver-1.6.6.jar" sourcepath="src/gen-lib/aspectjweaver-1.6.6-sources.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

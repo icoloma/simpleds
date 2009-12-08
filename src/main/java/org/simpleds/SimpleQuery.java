@@ -11,6 +11,7 @@ import org.springframework.util.ClassUtils;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
@@ -31,6 +32,9 @@ public class SimpleQuery implements Cloneable {
 
 	/** the fetch options */
 	private FetchOptions fetchOptions;
+	
+	/** the transaction to use, null if none */
+	private Transaction transaction;
 	
 	SimpleQuery(Key ancestor, ClassMetadata metadata) {
 		this.classMetadata = metadata;
@@ -203,6 +207,15 @@ public class SimpleQuery implements Cloneable {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withOffset(offset) : fetchOptions.offset(offset);
 		return this;
 	}
+	
+	/**
+	 * Specify the transaction to use when executing this query
+	 * @param transaction the transaction to use (can be null)
+	 */
+	public SimpleQuery withTransaction(Transaction transaction) {
+		this.transaction = transaction;
+		return this;
+	}
 
 	public List<FilterPredicate> getFilterPredicates() {
 		return query.getFilterPredicates();
@@ -226,6 +239,10 @@ public class SimpleQuery implements Cloneable {
 
 	public ClassMetadata getClassMetadata() {
 		return classMetadata;
+	}
+
+	public Transaction getTransaction() {
+		return transaction;
 	}
 
 }

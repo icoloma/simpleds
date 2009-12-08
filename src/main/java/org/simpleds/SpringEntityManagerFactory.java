@@ -1,6 +1,7 @@
 package org.simpleds;
 
 import org.simpleds.metadata.PersistenceMetadataRepository;
+import org.simpleds.tx.TransactionManager;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,6 +42,11 @@ public class SpringEntityManagerFactory implements FactoryBean {
 	@Autowired
 	public void setPersistenceMetadataRepository(PersistenceMetadataRepository persistenceMetadataRepository) {
 		this.factory.setPersistenceMetadataRepository(persistenceMetadataRepository);
+	}
+	
+	@Autowired(required=false)
+	public void setTransactionManager(TransactionManager transactionManager) {
+		this.factory.setTransactionManager(transactionManager);
 	}
 
 }

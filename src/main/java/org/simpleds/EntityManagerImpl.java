@@ -9,7 +9,7 @@ import java.util.Map;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PropertyMetadata;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.simpleds.tx.TransactionManager;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -25,11 +25,11 @@ import com.google.common.collect.Lists;
 
 public class EntityManagerImpl implements EntityManager {
 
-	@Autowired 
 	private DatastoreService datastoreService;
 	
-	@Autowired 
 	private PersistenceMetadataRepository repository; 
+	
+	private TransactionManager transactionManager;
 	
 	/** true to check the schema constraints before persisting changes to the database, default true */
 	private boolean enforceSchemaConstraints = true;
@@ -95,12 +95,17 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public Transaction beginTransaction() {
-		return datastoreService.beginTransaction();
+		return transactionManager.beginTransaction();
 	}
 	
 	@Override
-	public Transaction getCurrentTransaction() {
-		return datastoreService.getCurrentTransaction();
+	public void commit() {
+		transactionManager.commit();
+	}
+	
+	@Override
+	public void rollback() {
+		transactionManager.rollback();
 	}
 	
 	@Override
@@ -111,7 +116,7 @@ public class EntityManagerImpl implements EntityManager {
 		// check that all constraints and sort properties belong to this schema
 		ClassMetadata metadata = simpleQuery.getClassMetadata();
 		
-		PreparedQuery preparedQuery = datastoreService.prepare(query);
+		PreparedQuery preparedQuery = datastoreService.prepare(simpleQuery.getTransaction(), query);
 		FetchOptions fetchOptions = simpleQuery.getFetchOptions();
 		Iterable<Entity> entities = fetchOptions == null? preparedQuery.asIterable() : preparedQuery.asIterable(fetchOptions);
 		List result = Lists.newArrayList();
@@ -150,16 +155,21 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public Key put(Object javaObject) {
-		return put(null, javaObject);
+		return put(null, null, javaObject);
 	}
 	
 	@Override
-	public void put(Collection javaObjects) {
-		put(null, javaObjects);
+	public Key put(Transaction transaction, Object javaObject) {
+		return put(transaction, null, javaObject);
 	}
 	
 	@Override
 	public Key put(Key parentKey, Object javaObject) {
+		return this.put(null, parentKey, javaObject);
+	}
+	
+	@Override
+	public Key put(Transaction transaction, Key parentKey, Object javaObject) {
 		ClassMetadata metadata = repository.get(javaObject.getClass());
 		
 		// generate primary key if missing
@@ -182,7 +192,7 @@ public class EntityManagerImpl implements EntityManager {
 		}
 		
 		// persist and set the returned primary key value
-		Key newKey = datastoreService.put(entity);
+		Key newKey = datastoreService.put(transaction, entity);
 		if (providedKey == null) {
 			keyProperty.setValue(javaObject, newKey);
 		}
@@ -190,7 +200,22 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
+	public void put(Collection javaObjects) {
+		put(null, null, javaObjects);
+	}
+	
+	@Override
+	public void put(Transaction transaction, Collection javaObjects) {
+		put(transaction, null, javaObjects);
+	}
+	
+	@Override
 	public void put(Key parentKey, Collection javaObjects) {
+		put(null, parentKey, javaObjects);
+	}
+	
+	@Override
+	public void put(Transaction transaction, Key parentKey, Collection javaObjects) {
 		
 		Iterator it = javaObjects.iterator();
 		if (!it.hasNext()) {
@@ -238,24 +263,39 @@ public class EntityManagerImpl implements EntityManager {
 		
 		
 		// persist 
-		datastoreService.put(entities);
+		datastoreService.put(transaction, entities);
 	}
 	
 	@Override
 	public void delete(Key... keys) {
-		datastoreService.delete(keys);
+		delete(null, keys);
+	}
+	
+	@Override
+	public void delete(Transaction transaction, Key... keys) {
+		datastoreService.delete(transaction, keys);
 	}
 	
 	@Override
 	public void delete(Iterable<Key> keys) {
-		datastoreService.delete(keys);
+		delete(null, keys);
+	}
+	
+	@Override
+	public void delete(Transaction transaction, Iterable<Key> keys) {
+		datastoreService.delete(transaction, keys);
+	}
+	
+	@Override
+	public <T> T get(Key key) {
+		return get(null, key);
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T get(Key key) {
+	public <T> T get(Transaction transaction, Key key) {
 		try {
-			Entity entity = datastoreService.get(key);
+			Entity entity = datastoreService.get(transaction, key);
 			return (T) repository.get(key.getKind()).datastoreToJava(entity);
 		} catch (EntityNotFoundException e) {
 			throw new org.simpleds.exception.EntityNotFoundException(e);
@@ -264,7 +304,12 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public <T> List<T> get(Iterable<Key> keys) {
-		Map<Key, Entity> entities = datastoreService.get(keys);
+		return get(null, keys);
+	}
+	
+	@Override
+	public <T> List<T> get(Transaction transaction, Iterable<Key> keys) {
+		Map<Key, Entity> entities = datastoreService.get(transaction, keys);
 		List<T> result = Lists.newArrayList();
 		for (Map.Entry<Key, Entity> entry : entities.entrySet()) {
 			ClassMetadata metadata = repository.get(entry.getKey().getKind());
@@ -307,6 +352,10 @@ public class EntityManagerImpl implements EntityManager {
 	
 	public void setEnforceSchemaConstraints(boolean enforceSchemaConstraints) {
 		this.enforceSchemaConstraints = enforceSchemaConstraints;
+	}
+
+	public void setTransactionManager(TransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
 	}
 		
 }

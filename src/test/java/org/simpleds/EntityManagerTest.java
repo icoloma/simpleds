@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.Test;
@@ -26,7 +25,7 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	@Test
 	public void testSinglePutSuccess() {
 		// root entity
-		Dummy1 dummy = createDummy();
+		Dummy1 dummy = Dummy1.create();
 		entityManager.put(dummy);
 		assertNotNull(dummy.getKey());
 		
@@ -38,7 +37,7 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	
 	@Test
 	public void testSingleGet() {
-		Dummy1 dummy = createDummy();
+		Dummy1 dummy = Dummy1.create();
 		entityManager.put(dummy);
 		Dummy1 retrieved = entityManager.get(dummy.getKey());
 		assertNotNull(retrieved);
@@ -50,7 +49,7 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	public void testMultiplePutWithKeysSuccess() {
 		// root entities
 		Key key = KeyFactory.createKey(Dummy1.class.getSimpleName(), 1);
-		Dummy1 dummy1 = createDummy();
+		Dummy1 dummy1 = Dummy1.create();
 		dummy1.setKey(key);
 		Dummy2 dummy2 = createDummy2();
 		dummy2.setKey(KeyFactory.createKey(Dummy2.class.getSimpleName(), 1));
@@ -67,7 +66,7 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	@SuppressWarnings("cast")
 	public void testMultiplePutWithoutKeysSuccess() {
 		// root entities
-		Dummy1 dummy1 = createDummy();
+		Dummy1 dummy1 = Dummy1.create();
 		Dummy2 dummy2 = createDummy2();
 		Dummy3 dummy3 = createDummy3();
 		dummy3.setKey(KeyFactory.createKey(Dummy3.class.getSimpleName(), 1));
@@ -98,7 +97,7 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	
 	@Test
 	public void testFind() {
-		Dummy1  dummy = createDummy();
+		Dummy1  dummy = Dummy1.create();
 		entityManager.put(dummy);
 		SimpleQuery query = entityManager.createQuery(Dummy1.class).equal("name", "foo");
 		List<Dummy1> result = entityManager.find(query);
@@ -174,13 +173,6 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		} catch (IllegalArgumentException e) {
 			out.println(e);
 		}
-	}
-	
-	private Dummy1 createDummy() {
-		Dummy1 dummy = new Dummy1();
-		dummy.setName("foo");
-		dummy.setDate(new Date());
-		return dummy;
 	}
 	
 	private Dummy2 createDummy2() {

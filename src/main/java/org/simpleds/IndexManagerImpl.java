@@ -30,7 +30,6 @@ public class IndexManagerImpl implements IndexManager {
 	private boolean enforceSchemaConstraints = true;
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T extends Collection> T get(Key entityKey, String indexName) {
 		MultivaluedIndexMetadata indexMetadata = getIndexMetadata(entityKey.getKind(), indexName);
 		try {
@@ -98,7 +97,6 @@ public class IndexManagerImpl implements IndexManager {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> List<T> find(IndexQuery factory) {
 		Key parentKey = null;
 		try {

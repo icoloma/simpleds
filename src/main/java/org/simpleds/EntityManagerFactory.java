@@ -2,6 +2,8 @@ package org.simpleds;
 
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
+import org.simpleds.tx.TransactionManager;
+import org.simpleds.tx.TransactionManagerImpl;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -15,6 +17,8 @@ public class EntityManagerFactory {
 	private DatastoreService datastoreService;
 
 	private PersistenceMetadataRepository persistenceMetadataRepository;
+	
+	private TransactionManager transactionManager;
 	
 	/** true to check the schema constraints before persisting changes to the database, default true */
 	private boolean enforceSchemaConstraints = true;
@@ -31,10 +35,15 @@ public class EntityManagerFactory {
 		if (datastoreService == null) {
 			datastoreService = DatastoreServiceFactory.getDatastoreService();
 		}
+		if (transactionManager == null) {
+			transactionManager = new TransactionManagerImpl();
+			((TransactionManagerImpl)transactionManager).setDatastoreService(datastoreService);
+		}
 		EntityManagerImpl emi = new EntityManagerImpl();
 		emi.setDatastoreService(datastoreService);
 		emi.setRepository(persistenceMetadataRepository);
 		emi.setEnforceSchemaConstraints(enforceSchemaConstraints);
+		emi.setTransactionManager(transactionManager);
 		instance = emi;
 		return instance;
 	}
@@ -53,6 +62,10 @@ public class EntityManagerFactory {
 
 	public void setPersistenceMetadataRepository(PersistenceMetadataRepository persistenceMetadataRepository) {
 		this.persistenceMetadataRepository = persistenceMetadataRepository;
+	}
+
+	public void setTransactionManager(TransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
 	}
 
 }

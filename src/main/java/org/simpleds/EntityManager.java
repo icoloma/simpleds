@@ -6,6 +6,7 @@ import java.util.List;
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
 
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
@@ -39,23 +40,50 @@ public interface EntityManager {
 	 * @return the allocated/existing key
 	 */
 	Key put(Object javaObject);
+	
+	/**
+	 * Persists a java object to the datastore. This method is equivalent to invoking merge(null, javaObject)
+	 * @param transaction the transaction instance to use.  May be null.
+	 * @param javaObject the instance to persist.
+	 * @return the allocated/existing key
+	 */
+	Key put(Transaction transaction, Object javaObject);
 
 	/**
 	 * Persists a java object to the datastore. 
 	 * If the primary key has not yet been assigned, a new one will be generated and assigned.
 	 * The entity will also be checked for missing required fields 
-	 * @param parentKey the parent entity key. Will be used to generate the persisted entity key.
+	 * @param parentKey the parent entity key that will be used to generate the persisted entity key. May be null.
 	 * @param javaObject the instance to persist.
 	 * @return the allocated/existing key
 	 */
 	Key put(Key parentKey, Object javaObject);
 
 	/**
+	 * Persists a java object to the datastore. 
+	 * If the primary key has not yet been assigned, a new one will be generated and assigned.
+	 * The entity will also be checked for missing required fields 
+	 * @param parentKey the parent entity key that will be used to generate the persisted entity key. May be null.
+	 * @param transaction the transaction instance to use.  May be null.
+	 * @param javaObject the instance to persist.
+	 * @return the allocated/existing key
+	 */
+	Key put(Transaction transaction, Key parentKey, Object javaObject);
+	
+	/**
 	 * Return a persistent java instance by key
 	 * @param key the key of the persistent entity to retrieve
 	 * @return the persistent java instance
 	 */
 	<T> T get(Key key);
+	
+	/**
+	 * Return a persistent java instance by key
+	 * @param key the key of the persistent entity to retrieve
+	 * @param transaction the transaction instance to use.  May be null.
+	 * @return the persistent java instance
+	 */
+	<T> T get(Transaction transaction, Key key);
 
 	/**
 	 * Return a set of persistent entities, by key
@@ -65,14 +93,35 @@ public interface EntityManager {
 	<T> List<T> get(Iterable<Key> keys);
 	
 	/**
-	 * Wrapper method around DatastoreService.beginTransaction()
+	 * Return a set of persistent entities, by key
+	 * @param keys the keys of the persistent entities to retrieve
+	 * @param transaction the transaction instance to use.  May be null.
+	 * @return a Map of the retrieved entities, by Key
+	 */
+	<T> List<T> get(Transaction transaction, Iterable<Key> keys);
+	
+	/**
+	 * Creates a new managed {@link Transaction}. Transactions created using this 
+	 * method will be registered with the current thread until either commit() or rollback() 
+	 * is invoked.
 	 */
 	Transaction beginTransaction();
 	
 	/**
-	 * Wrapper method around DatastoreService.getCurrentTransaction()
+	 * Commits all transactions created using beginTransaction. Only active 
+	 * transactions will be processed, any transaction that has been 
+	 * manually commited or rolled back will be skipped.
+	 * @throws DatastoreFailureException - If a datastore error occurs.
 	 */
-	Transaction getCurrentTransaction();
+	public void commit();
+	
+	/**
+	 * Rollbacks all transactions created using beginTransaction. Only active 
+	 * transactions will be processed, any transaction that has been 
+	 * manually commited or rolled back will be skipped.
+	 * @throws DatastoreFailureException - If a datastore error occurs.
+	 */
+	public void rollback();
 
 	/**
 	 * Wrapper method around DatastoreService.delete()
@@ -81,8 +130,20 @@ public interface EntityManager {
 	
 	/**
 	 * Wrapper method around DatastoreService.delete()
+	 * @param transaction the transaction instance to use.  May be null.
+	 */
+	void delete(Transaction transaction, Key... keys);
+	
+	/**
+	 * Wrapper method around DatastoreService.delete()
 	 */
 	void delete(Iterable<Key> keys);
+	
+	/**
+	 * Wrapper method around DatastoreService.delete()
+	 * @param transaction the transaction instance to use.  May be null.
+	 */
+	void delete(Transaction transaction, Iterable<Key> keys);
 
 	/**
 	 * Execute a query and return a single result
@@ -117,14 +178,30 @@ public interface EntityManager {
 	 * @param javaObjects the list of java objects to store
 	 */
 	void put(Collection javaObjects);
+	
+	/**
+	 * Store a set of persistent objects in the datastore
+	 * @param javaObjects the list of java objects to store
+	 * @param transaction the transaction instance to use.  May be null.
+	 */
+	void put(Transaction transaction, Collection javaObjects);
 
 	/**
 	 * Store a set of persistent objects in the datastore. 
-	 * @param parentKey the key of the parent objects. If not null, all the provided objects 
+	 * @param parentKey the key of the parent instance. If not null, all the provided objects 
 	 * will get a primary key automatically generated
 	 * @param javaObjects the list of java objects to store
 	 */
 	void put(Key parentKey, Collection javaObjects);
+	
+	/**
+	 * Store a set of persistent objects in the datastore. 
+	 * @param parentKey the key of the parent instance. If not null, all the provided objects 
+	 * will get a primary key automatically generated
+	 * @param transaction the transaction instance to use.  May be null.
+	 * @param javaObjects the list of java objects to store
+	 */
+	void put(Transaction transaction, Key parentKey, Collection javaObjects);
 
 	/**
 	 * Return a {@link PagedList} result after computing a PagedQuery
@@ -190,5 +267,7 @@ public interface EntityManager {
 	 * @throws IllegalArgumentException if the provided class is not registered as a persistent class
 	 */
 	ClassMetadata getClassMetadata(Class<?> clazz);
+
+	
 
 }

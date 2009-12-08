@@ -45,6 +45,13 @@ public class Dummy1 {
 		return KeyFactory.createKey(Dummy1.class.getSimpleName(), 1);
 	}
 	
+	public static Dummy1 create() {
+		Dummy1 dummy = new Dummy1();
+		dummy.setName("foo");
+		dummy.setDate(new Date());
+		return dummy;
+	}
+	
 	public String getName() {
 		return name;
 	}

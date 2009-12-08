@@ -6,8 +6,7 @@ import org.simpleds.metadata.ClassMetadataFactory;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
 import org.simpleds.test.AbstractDatastoreTest;
-
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import org.simpleds.tx.TransactionManagerImpl;
 
 public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 	
@@ -20,9 +19,13 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
 		repository = factory.initialize();
+		TransactionManagerImpl transactionManager = new TransactionManagerImpl();
+		transactionManager.setDatastoreService(datastoreService);
+		
 		entityManager = new EntityManagerImpl();
 		entityManager.setRepository(repository);
-		entityManager.setDatastoreService(DatastoreServiceFactory.getDatastoreService());
+		entityManager.setDatastoreService(datastoreService);
+		entityManager.setTransactionManager(transactionManager);
 	}
 	
 	/**
