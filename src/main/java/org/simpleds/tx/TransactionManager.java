@@ -41,6 +41,11 @@ public interface TransactionManager {
 	 */
 	List<Transaction> getActiveTransactions();
 
+	/**
+	 * Invoked to prepare the TransactionManager. This method must be invoked 
+	 * at least once per thread, and must be matched by a commit() or rollback()
+	 * invocation. Notice that failing to do so could result in memory leaks.
+	 */
 	void pushContext();
 
 }
