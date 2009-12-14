@@ -37,8 +37,8 @@ public interface TransactionManager {
 	public void commit();
 
 	/**
-	 * @return the list of transactions open by this {@link TransactionManager}
+	 * @return the list of active transactions managed by this {@link TransactionManager}
 	 */
-	List<Transaction> getOpenTransactions();
+	List<Transaction> getActiveTransactions();
 	
 }
