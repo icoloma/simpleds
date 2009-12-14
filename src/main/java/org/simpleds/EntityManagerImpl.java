@@ -99,16 +99,6 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	public void commit() {
-		transactionManager.commit();
-	}
-	
-	@Override
-	public void rollback() {
-		transactionManager.rollback();
-	}
-	
-	@Override
 	@SuppressWarnings("unchecked")
 	public <T> List<T> find(SimpleQuery simpleQuery) {
 		Query query = simpleQuery.getQuery();

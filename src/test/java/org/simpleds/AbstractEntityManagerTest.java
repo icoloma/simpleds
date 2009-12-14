@@ -14,12 +14,14 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 	
 	protected EntityManagerImpl entityManager;
 	
+	protected TransactionManagerImpl transactionManager;
+	
 	@Before
 	public void setup() {
 		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
 		repository = factory.initialize();
-		TransactionManagerImpl transactionManager = new TransactionManagerImpl();
+		transactionManager = new TransactionManagerImpl();
 		transactionManager.setDatastoreService(datastoreService);
 		
 		entityManager = new EntityManagerImpl();

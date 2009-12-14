@@ -3,6 +3,7 @@ package org.simpleds.tx;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.simpleds.EntityManager;
 import org.simpleds.EntityManagerFactory;
 import org.simpleds.annotations.Transactional;
@@ -17,22 +18,28 @@ import org.simpleds.annotations.Transactional;
 @Aspect
 public class TransactionInterceptor {
 
+	@Before(
+			"execution(* *(..)) and @annotation(transactional) "
+	)
+	public void beforeExecute(Transactional transactional) {
+		TransactionManager transactionManager = EntityManagerFactory.getEntityManager().getTransactionManager();
+		transactionManager.pushContext();
+	}
+	
 	@AfterReturning(
-			"execution(* *(..)) " +
-			"and @annotation(transactional) "
-			//"and args(transactional)"
+			"execution(* *(..)) and @annotation(transactional) "
 			)
 	public void doCommit(Transactional transactional) {
-		EntityManagerFactory.getEntityManager().commit();
+		TransactionManager transactionManager = EntityManagerFactory.getEntityManager().getTransactionManager();
+		transactionManager.commit();
 	}
 	
 	@AfterThrowing(throwing="exception", pointcut=
-			"execution(* *(..)) " +
-			"and @annotation(transactional) " 
-			//"and args(transactional, exception)"
+			"execution(* *(..)) and @annotation(transactional) " 
 	)
 	public void doRollback(Transactional transactional, Exception exception) {
 		EntityManager entityManager = EntityManagerFactory.getEntityManager();
+		TransactionManager transactionManager = entityManager.getTransactionManager();
 		boolean rollback = transactional.rollbackFor().length == 0;
 		for (Class<? extends Throwable> exceptionClass : transactional.noRollbackFor()) {
 			if (exceptionClass.isAssignableFrom(exception.getClass())) {
@@ -47,9 +54,9 @@ public class TransactionInterceptor {
 			}
 		}
 		if (rollback) {
-			entityManager.rollback();
+			transactionManager.rollback();
 		} else {
-			entityManager.commit();
+			transactionManager.commit();
 		}
 	}
 	

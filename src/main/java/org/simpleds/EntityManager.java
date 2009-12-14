@@ -7,7 +7,6 @@ import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.tx.TransactionManager;
 
-import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
@@ -108,22 +107,6 @@ public interface EntityManager {
 	 */
 	Transaction beginTransaction();
 	
-	/**
-	 * Commits all transactions created using beginTransaction. Only active 
-	 * transactions will be processed, any transaction that has been 
-	 * manually commited or rolled back will be skipped.
-	 * @throws DatastoreFailureException - If a datastore error occurs.
-	 */
-	public void commit();
-	
-	/**
-	 * Rollbacks all transactions created using beginTransaction. Only active 
-	 * transactions will be processed, any transaction that has been 
-	 * manually commited or rolled back will be skipped.
-	 * @throws DatastoreFailureException - If a datastore error occurs.
-	 */
-	public void rollback();
-
 	/**
 	 * Wrapper method around DatastoreService.delete()
 	 */

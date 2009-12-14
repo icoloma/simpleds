@@ -40,5 +40,7 @@ public interface TransactionManager {
 	 * @return the list of active transactions managed by this {@link TransactionManager}
 	 */
 	List<Transaction> getActiveTransactions();
-	
+
+	void pushContext();
+
 }
