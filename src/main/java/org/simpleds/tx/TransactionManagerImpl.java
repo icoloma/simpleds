@@ -36,7 +36,7 @@ public class TransactionManagerImpl implements TransactionManager {
 			log.debug("Creating new transaction for thread " + Thread.currentThread().getName());
 		}
 		Transaction transaction = datastoreService.beginTransaction();
-		transactionsMap.get().add(transaction);
+		getOpenTransactions().add(transaction);
 		return transaction;
 	}
 
@@ -44,7 +44,7 @@ public class TransactionManagerImpl implements TransactionManager {
 	public void commit() {
 		try {
 			RuntimeException exception = null;
-			for (Transaction transaction : transactionsMap.get()) {
+			for (Transaction transaction : getOpenTransactions()) {
 				if (transaction.isActive()) {
 					try {
 						transaction.commit();
@@ -66,10 +66,15 @@ public class TransactionManagerImpl implements TransactionManager {
 	}
 
 	@Override
+	public List<Transaction> getOpenTransactions() {
+		return transactionsMap.get();
+	}
+
+	@Override
 	public void rollback() {
 		try {
 			RuntimeException exception = null;
-			for (Transaction transaction : transactionsMap.get()) {
+			for (Transaction transaction : getOpenTransactions()) {
 				if (transaction.isActive()) {
 					try {
 						transaction.rollback();
@@ -93,8 +98,5 @@ public class TransactionManagerImpl implements TransactionManager {
 	public void setDatastoreService(DatastoreService datastoreService) {
 		this.datastoreService = datastoreService;
 	}
-
-
-	
 
 }

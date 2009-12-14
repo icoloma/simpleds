@@ -1,5 +1,7 @@
 package org.simpleds.tx;
 
+import java.util.List;
+
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Transaction;
 
@@ -33,5 +35,10 @@ public interface TransactionManager {
 	 * @throws DatastoreFailureException - If a datastore error occurs.
 	 */
 	public void commit();
+
+	/**
+	 * @return the list of transactions open by this {@link TransactionManager}
+	 */
+	List<Transaction> getOpenTransactions();
 	
 }

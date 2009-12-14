@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
+import org.simpleds.tx.TransactionManager;
 
 import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
@@ -268,6 +269,9 @@ public interface EntityManager {
 	 */
 	ClassMetadata getClassMetadata(Class<?> clazz);
 
-	
+	/**
+	 * @return the currently configured {@link TransactionManager} instance
+	 */
+	public TransactionManager getTransactionManager();
 
 }

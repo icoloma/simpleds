@@ -358,5 +358,9 @@ public class EntityManagerImpl implements EntityManager {
 	public void setTransactionManager(TransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
 	}
+
+	public TransactionManager getTransactionManager() {
+		return transactionManager;
+	}
 		
 }
