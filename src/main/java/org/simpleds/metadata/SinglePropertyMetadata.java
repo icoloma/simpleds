@@ -123,5 +123,6 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 	public void setPropertyType(Class<?> propertyType) {
 		this.propertyType = propertyType;
 	}
+
 	
 }

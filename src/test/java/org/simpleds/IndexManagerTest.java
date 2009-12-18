@@ -73,7 +73,7 @@ public class IndexManagerTest extends AbstractDatastoreTest {
 	private Dummy1 createDummy() {
 		Dummy1 dummy = new Dummy1();
 		dummy.setName("foo");
-		dummy.setDate(new Date());
+		dummy.setOverridenNameDate(new Date());
 		return dummy;
 	}
 	

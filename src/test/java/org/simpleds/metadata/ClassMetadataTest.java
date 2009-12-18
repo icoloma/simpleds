@@ -63,7 +63,7 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 		Dummy1 dummy = metadata.datastoreToJava(entity);
 		assertEquals(key, dummy.getKey());
 		assertEquals("foo", dummy.getName());
-		assertSame(d, dummy.getDate());
+		assertSame(d, dummy.getOverridenNameDate());
 		assertEquals(1, dummy.getEmbedded().getInt1());
 		assertEquals(Integer.valueOf(2), dummy.getEmbedded().getEmbedded2().int2);
 	}

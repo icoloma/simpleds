@@ -29,8 +29,8 @@ public class Dummy1 {
 	@Basic(optional=false)
 	private String name;
 	
-	@Column(nullable=false)
-	private Date date;
+	@Column(nullable=false, name="date")
+	private Date overridenNameDate;
 	
 	@SuppressWarnings("unused")
 	private EnumValues evalue;
@@ -48,7 +48,7 @@ public class Dummy1 {
 	public static Dummy1 create() {
 		Dummy1 dummy = new Dummy1();
 		dummy.setName("foo");
-		dummy.setDate(new Date());
+		dummy.setOverridenNameDate(new Date());
 		return dummy;
 	}
 	
@@ -60,12 +60,12 @@ public class Dummy1 {
 		this.name = name;
 	}
 
-	public Date getDate() {
-		return date;
+	public Date getOverridenNameDate() {
+		return overridenNameDate;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setOverridenNameDate(Date date) {
+		this.overridenNameDate = date;
 	}
 
 	public Key getKey() {

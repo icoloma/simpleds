@@ -62,7 +62,7 @@ public class EmbeddedPropertyMetadata implements PropertyMetadata {
 	public String getName() {
 		return getLastNode().getName();
 	}
-
+	
 	@Override
 	public Object getValue(Object container) {
 		for (Iterator<SinglePropertyMetadata> i = nodes.iterator(); i.hasNext(); ) {

@@ -23,10 +23,10 @@ public interface PropertyMetadata {
 	public void setValue(Object container, Object value);
 
 	/**
-	 * @return the persistent name of this property
+	 * @return the name of this property
 	 */
 	public String getName();
-
+	
 	/**
 	 * @return the Converter to use for this property
 	 */

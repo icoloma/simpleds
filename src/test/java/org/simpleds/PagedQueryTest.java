@@ -78,7 +78,7 @@ public class PagedQueryTest extends AbstractDatastoreTest {
 	private Dummy1 createDummy(int index) {
 		Dummy1 dummy = new Dummy1();
 		dummy.setName("foo" + index);
-		dummy.setDate(new Date());
+		dummy.setOverridenNameDate(new Date());
 		return dummy;
 	}
 	

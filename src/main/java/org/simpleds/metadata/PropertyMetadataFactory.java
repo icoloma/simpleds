@@ -3,6 +3,8 @@ package org.simpleds.metadata;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import javax.persistence.Column;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,10 +19,17 @@ public class PropertyMetadataFactory {
 				throw new IllegalArgumentException("Either supply field or getter");
 			}
 			SinglePropertyMetadata metadata = new SinglePropertyMetadata();
-			metadata.setName(name);
 			metadata.setGetter(getter);
 			metadata.setSetter(setter);
 			metadata.setField(field);
+			
+			// maybe override the column name using a Column annotation
+			Column column = metadata.getAnnotation(Column.class);
+			if (column != null && column.name() != null) {
+				name = column.name();
+			}
+
+			metadata.setName(name);
 			
 			// calculate the property type
 			Class<?> propertyType = getter == null? field.getType() : getter.getReturnType();
