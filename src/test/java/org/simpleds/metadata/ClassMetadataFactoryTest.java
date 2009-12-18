@@ -1,10 +1,12 @@
 package org.simpleds.metadata;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
@@ -67,6 +69,16 @@ public class ClassMetadataFactoryTest {
 		ClassMetadata metadata = factory.createMetadata(Error2.class);
 	}
 	
+	@Test
+	public void testPrivateAttribute() throws Exception {
+		ClassMetadata metadata = factory.createMetadata(MyClass.class);
+		PropertyMetadata property = metadata.getProperty("intProperty");
+		assertNotNull(property);
+		MyClass instance = new MyClass();
+		property.setValue(instance, 5);
+		assertEquals(5, property.getValue(instance));
+	}
+	
 	public static class Parent {
 		private Integer foo;
 	}
@@ -80,6 +92,8 @@ public class ClassMetadataFactoryTest {
 		@Transient
 		private String xxx;
 		
+		// left empty on purpose
+		@Column
 		private int intProperty;
 
 		public Key getBar() {

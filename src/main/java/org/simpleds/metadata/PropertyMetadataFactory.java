@@ -25,7 +25,7 @@ public class PropertyMetadataFactory {
 			
 			// maybe override the column name using a Column annotation
 			Column column = metadata.getAnnotation(Column.class);
-			if (column != null && column.name() != null) {
+			if (column != null && column.name().length() > 0) {
 				name = column.name();
 			}
 
