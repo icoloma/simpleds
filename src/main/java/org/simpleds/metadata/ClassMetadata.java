@@ -246,4 +246,8 @@ public class ClassMetadata {
 		this.validateParentKey = true;
 	}
 
+	public Set<String> getParents() {
+		return parents;
+	}
+
 }

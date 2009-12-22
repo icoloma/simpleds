@@ -253,8 +253,15 @@ public interface EntityManager {
 	ClassMetadata getClassMetadata(Class<?> clazz);
 
 	/**
+	 * @return the configured {@link ClassMetadata} for the provided kind
+	 * @throws IllegalArgumentException if the provided kind is not registered as a persistent class
+	 */
+	ClassMetadata getClassMetadata(String kind);
+	
+	/**
 	 * @return the currently configured {@link TransactionManager} instance
 	 */
 	public TransactionManager getTransactionManager();
+
 
 }

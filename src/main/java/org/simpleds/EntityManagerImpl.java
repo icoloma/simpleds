@@ -40,6 +40,11 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
+	public ClassMetadata getClassMetadata(String kind) {
+		return repository.get(kind);
+	}
+	
+	@Override
 	public SimpleQuery createQuery(String kind) {
 		return createQueryImpl(null, repository.get(kind));
 	}
