@@ -106,7 +106,12 @@ public class PagedQuery extends SimpleQuery {
 	
 	@Override
 	public PagedQuery orderAsc(String propertyName) {
-		return (PagedQuery) super.orderAsc(propertyName);
+		return (PagedQuery) super.sortAsc(propertyName);
+	}
+	
+	@Override
+	public PagedQuery sortAsc(String propertyName) {
+		return (PagedQuery) super.sortAsc(propertyName);
 	}
 	
 	@Override
@@ -115,8 +120,13 @@ public class PagedQuery extends SimpleQuery {
 	}
 	
 	@Override
+	public PagedQuery sortDesc(String propertyName) {
+		return (PagedQuery) super.sortDesc(propertyName);
+	}
+	
+	@Override
 	public PagedQuery orderDesc(String propertyName) {
-		return (PagedQuery) super.orderDesc(propertyName);
+		return (PagedQuery) super.sortDesc(propertyName);
 	}
 	
 	@Override
