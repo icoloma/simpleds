@@ -1,6 +1,7 @@
 package org.simpleds;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
 public class PagedQueryTest extends AbstractDatastoreTest {
@@ -70,9 +72,12 @@ public class PagedQueryTest extends AbstractDatastoreTest {
 	public void testPagedList() throws Exception {
 		PagedQuery query = entityManager.createPagedQuery(Dummy1.class).setPageSize(PAGE_SIZE);
 		query.setPageIndex(2);
-		PagedList list = entityManager.findPaged(query);
+		PagedList<Dummy1> list = entityManager.findPaged(query);
 		assertEquals(29, list.getTotalResults());
 		assertEquals(10, list.getTotalPages());
+		
+		PagedList<String> names = list.transform(new GetDummy1Name());
+		assertTrue(names.getData().get(0) instanceof String);
 	}
 	
 	private Dummy1 createDummy(int index) {
@@ -80,6 +85,15 @@ public class PagedQueryTest extends AbstractDatastoreTest {
 		dummy.setName("foo" + index);
 		dummy.setOverridenNameDate(new Date());
 		return dummy;
+	}
+	
+	private class GetDummy1Name implements Function<Dummy1, String> {
+
+		@Override
+		public String apply(Dummy1 from) {
+			return from.getName();
+		}
+		
 	}
 	
 }

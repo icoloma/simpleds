@@ -3,6 +3,8 @@ package org.simpleds;
 import java.util.List;
 
 import com.google.appengine.api.datastore.Query.SortPredicate;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * The result of executing a paged query
@@ -32,6 +34,19 @@ public class PagedList<T> {
 		this.totalPages = (int) Math.ceil((double)totalResults / query.getPageSize());
 		return this;
 	}
+	
+	/**
+	 * Transform this PagedList instance by applying the transformation function to each data list item
+	 * @param <O> the type of the resulting PagedList, after applying the transformation
+	 * @param function the function to apply to each data item
+	 * @return a new PagedList instance. The original instance is not modified.
+	 */
+	public <O> PagedList<O> transform(Function<? super T, ? extends O> function) {
+		PagedList<O> copy = new PagedList<O>(query, Lists.transform(this.data, function));
+		copy.setTotalResults(totalResults);
+		return copy;
+	}
+
 	
 	/**
 	 * @return the zero-based index of the first record on the next page. 
