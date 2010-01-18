@@ -5,7 +5,7 @@
  *    nexusLocation=http://lechuck:8558/nexus/content/groups/public
  *
  * To install to the local repository: gradle install
- * To upload to the maven repository: gradle uploadArchives
+ * To upload to the maven repository: gradle upload
  *
  * required gradle version: 0.8
  */
@@ -28,16 +28,16 @@ if (!this.appengineHome) {
 	export APPENGINE_HOME=/usr/local/java/appengine-java-sdk-1.2.5/
 	"""
 }
-
+	
 configurations {
-	// deploy artifacts using SSH
     deployerJars
     
     // exclude source files for certain libraries
-    sources
+    sources { description = 'Source files for the libraries' }
     sources.exclude group: 'com.google.appengine'
     sources.exclude module: 'appengine-local-runtime'
     
+    // pending http://jira.codehaus.org/browse/GRADLE-471
     providedCompile
 }
 
@@ -48,17 +48,6 @@ repositories {
 
     mavenCentral()
     flatDir name: 'appenginehome-libs', dirs: [ this.appengineHome + '/lib/impl'/*, this.appengineHome + '/lib/user'*/ ]
-}
-
-sourceSets {
-	main {
-		compileClasspath = compileClasspath + configurations.providedCompile
-		runtimeClasspath = runtimeClasspath + configurations.providedCompile
-	}
-	test {
-		compileClasspath = compileClasspath + configurations.providedCompile
-		runtimeClasspath = runtimeClasspath + configurations.providedCompile
-	}
 }
 	
 dependencies {
@@ -86,10 +75,28 @@ dependencies {
 					"org.springframework:spring-expression:3.0.0.RELEASE",
 					"org.springframework:spring-test:3.0.0.RELEASE",
 					"log4j:log4j:1.2.14"
-	    
+					
+	configurations.compile.dependencies.each { d ->
+		sources "${d.group}:${d.name}:${d.version}:sources@jar"
+	}
+	
+	configurations.providedCompile.dependencies.each { d ->
+		sources "${d.group}:${d.name}:${d.version}:sources@jar"
+	}  
+	
 }
 
-// --- start of copy from Loom master ---
+sourceSets {
+	main {
+		compileClasspath = compileClasspath + configurations.providedCompile
+		runtimeClasspath = runtimeClasspath + configurations.providedCompile
+	}
+	test {
+		compileClasspath = compileClasspath + configurations.providedCompile
+		runtimeClasspath = runtimeClasspath + configurations.providedCompile
+	}
+}
+
 task 'cleanGenlib' << { 
 	ant.delete(dir: "${projectDir}/src/main/genlib")
 	ant.delete(dir: "${projectDir}/src/test/genlib")
@@ -98,36 +105,19 @@ clean.dependsOn cleanGenlib
 
 task 'genlib'(description: 'Copies the 3rd party libraries to genlib folder') << {
 	
-	// Hack to copy the source files 
-	def calculateSourceFiles = { fileset ->
-		def conf = fileset.copyRecursive { it instanceof ExternalModuleDependency }
-		conf.extendsFrom(configurations.sources)
-		conf.dependencies.each { dep ->
-			dep.artifact {
-				group = dep.group
-				name = dep.name
-				version = dep.version
-				classifier = 'sources'
-				type = 'jar'
-			}
-		}
-		return conf;
-	} 
-	
 	project.copy {
 		from configurations.compile.files
-        from calculateSourceFiles(configurations.compile)
+        from configurations.sources.files
         into 'src/main/genlib'
     }
     
 	project.copy {
 		from configurations.testCompile.files
 		from configurations.providedCompile.files
-        from calculateSourceFiles(configurations.testRuntime)
         into 'src/test/genlib'
     }
+        
 }
-// --- end of copy from Loom master ---
 
 uploadArchives {
     repositories.mavenDeployer {
@@ -137,6 +127,22 @@ uploadArchives {
     }
 }
 
+/* uncomment after gradle 0.9 to generate sources and javadoc jar files
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    fileSet(dir: javadoc.destinationDir)
+    classifier = 'javadoc'
+}
+
+task sourcesJar(type: Jar, dependsOn: compileJava) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+} 
+*/
 task 'buildAll' (dependsOn: [build, javadoc]) << {
 	ant.zip(
 		destfile: "build/docs/simpleds-${project.version}-javadoc.zip", 
