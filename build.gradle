@@ -5,6 +5,7 @@
  *    nexusLocation=http://lechuck:8558/nexus/content/groups/public
  *
  * To install to the local repository: gradle install
+ * To upload to the maven repository: gradle uploadArchives
  *
  * required gradle version: 0.8
  */
@@ -13,7 +14,7 @@ usePlugin 'java'
 usePlugin 'maven'
 
 project.group='org.extrema-sistemas'
-project.version='0.8.2-SNAPSHOT'
+project.version='0.9-SNAPSHOT'
 
 defaultTasks 'buildAll'
 
@@ -128,17 +129,13 @@ task 'genlib'(description: 'Copies the 3rd party libraries to genlib folder') <<
 }
 // --- end of copy from Loom master ---
 
-
-/*
 uploadArchives {
     repositories.mavenDeployer {
-        name = 'sshDeployer' // optional
         configuration = configurations.deployerJars
-        repository(url: "scp://repos.mycompany.com/releases") {
-            authentication(userName: "me", password: "myPassword")
-        }
+        repository(url: "scp://web.sourceforge.net:/home/groups/l/lo/loom/htdocs/repository")
+        snapshotRepository(url: "scp://web.sourceforge.net:/home/groups/l/lo/loom/htdocs/snapshots")
     }
-}*/
+}
 
 task 'buildAll' (dependsOn: [build, javadoc]) << {
 	ant.zip(
