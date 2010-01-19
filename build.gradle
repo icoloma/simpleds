@@ -16,7 +16,7 @@ usePlugin 'maven'
 project.group='org.extrema-sistemas'
 project.version='0.9-SNAPSHOT'
 
-defaultTasks 'buildAll'
+defaultTasks 'build'
 
 this.appengineHome = System.getenv('APPENGINE_HOME') 
 if (!this.appengineHome) {
@@ -54,12 +54,12 @@ dependencies {
 
     deployerJars	"org.apache.maven.wagon:wagon-ssh:1.0-beta-2"
 	
-	providedCompile	":appengine-local-runtime"
-	
-	compile			"com.google.appengine:appengine-api-1.0-labs:1.3.0",
+	providedCompile	":appengine-local-runtime",
+					"com.google.appengine:appengine-api-1.0-labs:1.3.0",
 					"com.google.appengine:appengine-api-1.0-stubs:1.3.0",
-					"com.google.appengine:appengine-api-1.0-sdk:1.3.0",
-					"com.google.collections:google-collections:1.0",
+					"com.google.appengine:appengine-api-1.0-sdk:1.3.0"
+	
+	compile			"com.google.collections:google-collections:1.0",
 					"commons-logging:commons-logging:1.1.1",
 					"aopalliance:aopalliance:1.0",
 					"org.aspectj:aspectjrt:1.6.6",
@@ -76,14 +76,6 @@ dependencies {
 					"org.springframework:spring-test:3.0.0.RELEASE",
 					"log4j:log4j:1.2.14"
 					
-	configurations.compile.dependencies.each { d ->
-		sources "${d.group}:${d.name}:${d.version}:sources@jar"
-	}
-	
-	configurations.providedCompile.dependencies.each { d ->
-		sources "${d.group}:${d.name}:${d.version}:sources@jar"
-	}  
-	
 }
 
 sourceSets {
@@ -103,21 +95,33 @@ task 'cleanGenlib' << {
 }
 clean.dependsOn cleanGenlib
 
+afterEvaluate { project ->
+	def closure = { d ->
+		project.dependencies {
+			sources ((d.group?: '') + ':' + d.name + ':' + (d.version?: '') + ':sources@jar')
+		}
+	}
+	project.configurations.compile.dependencies.each closure
+	project.configurations.providedCompile.dependencies.each closure
+	project.configurations.testCompile.dependencies.each closure
+}
+
 task 'genlib'(description: 'Copies the 3rd party libraries to genlib folder') << {
 	
 	project.copy {
 		from configurations.compile.files
-        from configurations.sources.files
         into 'src/main/genlib'
     }
     
 	project.copy {
-		from configurations.testCompile.files
+		from configurations.testRuntime.files
 		from configurations.providedCompile.files
+        from configurations.sources.files
         into 'src/test/genlib'
     }
         
 }
+compileJava.dependsOn  'genlib'
 
 uploadArchives {
     repositories.mavenDeployer {
@@ -127,9 +131,9 @@ uploadArchives {
     }
 }
 
-/* uncomment after gradle 0.9 to generate sources and javadoc jar files
+/* uncomment after gradle 0.9 to generate sources and javadoc jar files */
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    fileSet(dir: javadoc.destinationDir)
+	from javadoc.destinationDir
     classifier = 'javadoc'
 }
 
@@ -142,11 +146,16 @@ artifacts {
     archives javadocJar
     archives sourcesJar
 } 
-*/
-task 'buildAll' (dependsOn: [build, javadoc]) << {
-	ant.zip(
-		destfile: "build/docs/simpleds-${project.version}-javadoc.zip", 
-		basedir: 'build/docs', 
-		includes: 'javadoc/**'
-	)
+
+task 'zipDist'(type: Zip, dependsOn: javadoc) {
+	into("$archivesBaseName-${version}") {
+		from(libsDir)
+		from(projectDir) {
+			include 'README'
+			include 'LICENSE'
+		}
+		from(configurations.runtime.resolve()) {
+			into 'lib'
+		} 
+	}
 }

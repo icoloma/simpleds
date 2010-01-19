@@ -1,5 +1,17 @@
-Define the environment variable APPENGINE_HOME
-To download jars for eclipse: "gradle gen-lib"
-To generate simpleds.jar: "gradle jar"
+Welcome to SimpleDS
+===================
 
-Minimum gradle version: 0.8
+SimpleDS provides a simple Java-to-Entity framework that maps java classes
+to persistent entities, getting as little in the way as possible. What you 
+get is barely a wrapper around Datastore APIs, providing mapping between 
+Entity and Java classes. 
+
+Distribution
+============
+
+The distribution file includes the following:
+
+ * simpleds.jar 			The jar with java classes
+ * simpleds-javadoc.jar 	The javadoc jar file
+ * simpleds-sources 		The jar file with all sources
+ * lib/						The third-party libraries required to use simpleds
