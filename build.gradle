@@ -131,7 +131,6 @@ uploadArchives {
     }
 }
 
-/* uncomment after gradle 0.9 to generate sources and javadoc jar files */
 task javadocJar(type: Jar, dependsOn: javadoc) {
 	from javadoc.destinationDir
     classifier = 'javadoc'
@@ -142,6 +141,7 @@ task sourcesJar(type: Jar, dependsOn: compileJava) {
     classifier = 'sources'
 }
 
+/* uncomment with gradle 0.9 to generate sources and javadoc jar files */
 artifacts {
     archives javadocJar
     archives sourcesJar
