@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
-import org.simpleds.tx.TransactionManager;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -99,13 +98,6 @@ public interface EntityManager {
 	 * @return a Map of the retrieved entities, by Key
 	 */
 	<T> List<T> get(Transaction transaction, Iterable<Key> keys);
-	
-	/**
-	 * Creates a new managed {@link Transaction}. Transactions created using this 
-	 * method will be registered with the current thread until either commit() or rollback() 
-	 * is invoked.
-	 */
-	Transaction beginTransaction();
 	
 	/**
 	 * Wrapper method around DatastoreService.delete()
@@ -258,10 +250,4 @@ public interface EntityManager {
 	 */
 	ClassMetadata getClassMetadata(String kind);
 	
-	/**
-	 * @return the currently configured {@link TransactionManager} instance
-	 */
-	public TransactionManager getTransactionManager();
-
-
 }

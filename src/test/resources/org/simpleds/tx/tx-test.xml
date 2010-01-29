@@ -24,6 +24,8 @@
 		class="org.simpleds.SpringEntityManagerFactory" 
 		p:enforceSchemaConstraints="true" 
 	/>
+	
+	<bean class="org.simpleds.SpringTransactionManagerFactory" />
 	<bean class="org.simpleds.tx.TransactionInterceptor" />
 	
 	<context:component-scan base-package="org.simpleds.tx" />

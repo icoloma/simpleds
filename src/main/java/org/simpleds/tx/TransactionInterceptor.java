@@ -4,8 +4,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.simpleds.EntityManager;
-import org.simpleds.EntityManagerFactory;
+import org.simpleds.TransactionManagerFactory;
 import org.simpleds.annotations.Transactional;
 
 
@@ -22,7 +21,7 @@ public class TransactionInterceptor {
 			"execution(* *(..)) and @annotation(transactional) "
 	)
 	public void beforeExecute(Transactional transactional) {
-		TransactionManager transactionManager = EntityManagerFactory.getEntityManager().getTransactionManager();
+		TransactionManager transactionManager = TransactionManagerFactory.getTransactionManager();
 		transactionManager.pushContext();
 	}
 	
@@ -30,7 +29,7 @@ public class TransactionInterceptor {
 			"execution(* *(..)) and @annotation(transactional) "
 			)
 	public void doCommit(Transactional transactional) {
-		TransactionManager transactionManager = EntityManagerFactory.getEntityManager().getTransactionManager();
+		TransactionManager transactionManager = TransactionManagerFactory.getTransactionManager();
 		transactionManager.commit();
 	}
 	
@@ -38,8 +37,7 @@ public class TransactionInterceptor {
 			"execution(* *(..)) and @annotation(transactional) " 
 	)
 	public void doRollback(Transactional transactional, Exception exception) {
-		EntityManager entityManager = EntityManagerFactory.getEntityManager();
-		TransactionManager transactionManager = entityManager.getTransactionManager();
+		TransactionManager transactionManager = TransactionManagerFactory.getTransactionManager();
 		boolean rollback = transactional.rollbackFor().length == 0;
 		for (Class<? extends Throwable> exceptionClass : transactional.noRollbackFor()) {
 			if (exceptionClass.isAssignableFrom(exception.getClass())) {

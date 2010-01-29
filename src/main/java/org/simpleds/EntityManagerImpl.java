@@ -9,7 +9,6 @@ import java.util.Map;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PropertyMetadata;
-import org.simpleds.tx.TransactionManager;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -28,8 +27,6 @@ public class EntityManagerImpl implements EntityManager {
 	private DatastoreService datastoreService;
 	
 	private PersistenceMetadataRepository repository; 
-	
-	private TransactionManager transactionManager;
 	
 	/** true to check the schema constraints before persisting changes to the database, default true */
 	private boolean enforceSchemaConstraints = true;
@@ -96,11 +93,6 @@ public class EntityManagerImpl implements EntityManager {
 			metadata.validateParentKey(ancestor);
 		}
 		return new SimpleQuery(ancestor, metadata);
-	}
-	
-	@Override
-	public Transaction beginTransaction() {
-		return transactionManager.beginTransaction();
 	}
 	
 	@Override
@@ -348,14 +340,6 @@ public class EntityManagerImpl implements EntityManager {
 	
 	public void setEnforceSchemaConstraints(boolean enforceSchemaConstraints) {
 		this.enforceSchemaConstraints = enforceSchemaConstraints;
-	}
-
-	public void setTransactionManager(TransactionManager transactionManager) {
-		this.transactionManager = transactionManager;
-	}
-
-	public TransactionManager getTransactionManager() {
-		return transactionManager;
 	}
 		
 }

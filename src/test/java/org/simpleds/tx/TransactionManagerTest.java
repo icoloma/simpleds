@@ -18,9 +18,9 @@ public class TransactionManagerTest extends AbstractEntityManagerTest {
 	@Test
 	public void testPutCommit() {
 		transactionManager.pushContext();
-		Transaction tx1 = entityManager.beginTransaction();
+		Transaction tx1 = transactionManager.beginTransaction();
 		entityManager.put(tx1, Dummy1.create());
-		Transaction tx2 = entityManager.beginTransaction();
+		Transaction tx2 = transactionManager.beginTransaction();
 		entityManager.put(tx2, Dummy1.create());
 		transactionManager.commit();
 		assertEquals(2, entityManager.count(entityManager.createQuery(Dummy1.class)));
@@ -29,9 +29,9 @@ public class TransactionManagerTest extends AbstractEntityManagerTest {
 	@Test
 	public void testPutRollback() {
 		transactionManager.pushContext();
-		Transaction tx1 = entityManager.beginTransaction();
+		Transaction tx1 = transactionManager.beginTransaction();
 		entityManager.put(tx1, Dummy1.create());
-		Transaction tx2 = entityManager.beginTransaction();
+		Transaction tx2 = transactionManager.beginTransaction();
 		entityManager.put(tx2, Dummy1.create());
 		transactionManager.rollback();
 		assertEquals(0, entityManager.count(entityManager.createQuery(Dummy1.class)));
@@ -41,7 +41,7 @@ public class TransactionManagerTest extends AbstractEntityManagerTest {
 	public void testMultiplePush() {
 		transactionManager.pushContext();
 		transactionManager.pushContext();
-		Transaction tx1 = entityManager.beginTransaction();
+		Transaction tx1 = transactionManager.beginTransaction();
 		entityManager.put(tx1, Dummy1.create());
 		transactionManager.commit();
 		transactionManager.commit();
@@ -50,13 +50,13 @@ public class TransactionManagerTest extends AbstractEntityManagerTest {
 	
 	@Test(expected=IllegalStateException.class)
 	public void testPushContextNotInvoked() {
-		entityManager.beginTransaction();
+		transactionManager.beginTransaction();
 	}
 	
 	@Test
 	public void testUnevenCommit() {
 		transactionManager.pushContext();
-		entityManager.beginTransaction();
+		transactionManager.beginTransaction();
 		transactionManager.commit();
 		try {
 			transactionManager.commit();

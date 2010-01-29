@@ -1,7 +1,6 @@
 package org.simpleds;
 
 import org.simpleds.metadata.PersistenceMetadataRepository;
-import org.simpleds.tx.TransactionManager;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,15 +10,17 @@ import com.google.appengine.api.datastore.DatastoreService;
  * Wrapper to make injection of {@link EntityManager} attributes easier using Spring. 
  * @author icoloma
  */
-public class SpringEntityManagerFactory implements FactoryBean {
+public class SpringEntityManagerFactory implements FactoryBean<EntityManager> {
+	
+	private EntityManagerFactory factory = new EntityManagerFactory();
 
 	@Override
-	public Object getObject() throws Exception {
+	public EntityManager getObject() throws Exception {
 		return factory.initialize();
 	}
 
 	@Override
-	public Class getObjectType() {
+	public Class<EntityManager> getObjectType() {
 		return EntityManager.class;
 	}
 
@@ -27,8 +28,6 @@ public class SpringEntityManagerFactory implements FactoryBean {
 	public boolean isSingleton() {
 		return true;
 	}
-
-	private EntityManagerFactory factory = new EntityManagerFactory();
 	
 	@Autowired(required=false)
 	public void setDatastoreService(DatastoreService datastoreService) {
@@ -44,9 +43,4 @@ public class SpringEntityManagerFactory implements FactoryBean {
 		this.factory.setPersistenceMetadataRepository(persistenceMetadataRepository);
 	}
 	
-	@Autowired(required=false)
-	public void setTransactionManager(TransactionManager transactionManager) {
-		this.factory.setTransactionManager(transactionManager);
-	}
-
 }

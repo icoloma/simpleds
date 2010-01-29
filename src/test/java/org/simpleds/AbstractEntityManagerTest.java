@@ -1,5 +1,8 @@
 package org.simpleds;
 
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
 import org.junit.Before;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.ClassMetadataFactory;
@@ -16,6 +19,11 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 	
 	protected TransactionManagerImpl transactionManager;
 	
+	@After
+	public void assertAllClosed() {
+		assertTrue(transactionManager.getActiveTransactions().isEmpty());
+	}
+
 	@Before
 	public void setup() {
 		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
@@ -27,7 +35,6 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 		entityManager = new EntityManagerImpl();
 		entityManager.setRepository(repository);
 		entityManager.setDatastoreService(datastoreService);
-		entityManager.setTransactionManager(transactionManager);
 	}
 	
 	/**

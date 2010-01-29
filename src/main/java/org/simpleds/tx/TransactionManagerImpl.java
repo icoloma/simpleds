@@ -68,7 +68,7 @@ public class TransactionManagerImpl implements TransactionManager {
 			try {
 				RuntimeException exception = null;
 				List<Transaction> activeTransactions = getActiveTransactions();
-				log.debug((commit? "Commit " : "Rollback ") + activeTransactions.size() + " for thread " + Thread.currentThread().getName());
+				log.debug((commit? "Commit " : "Rollback ") + activeTransactions.size() + " transactions for thread " + Thread.currentThread().getName());
 				int count = 0;
 				for (Transaction transaction : activeTransactions) {
 					if (transaction.isActive()) {

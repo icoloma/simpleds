@@ -3,16 +3,11 @@ package org.simpleds;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-
 /**
  * Creates a {@link IndexManager} instance
  * @author icoloma
  */
-public class IndexManagerFactory {
-
-	private DatastoreService datastoreService;
+public class IndexManagerFactory extends DatastoreServiceAwareFactory {
 
 	private PersistenceMetadataRepository persistenceMetadataRepository;
 	
@@ -21,14 +16,12 @@ public class IndexManagerFactory {
 	private static IndexManager instance;
 	
 	public IndexManager initialize() {
+		super.initDatastoreService();
 		if (persistenceMetadataRepository == null) {
 			persistenceMetadataRepository = PersistenceMetadataRepositoryFactory.getPersistenceMetadataRepository();
 			if (persistenceMetadataRepository == null) {
 				throw new IllegalArgumentException("persistenceMetadataRepository cannot be null.");
 			}
-		}
-		if (datastoreService == null) {
-			datastoreService = DatastoreServiceFactory.getDatastoreService();
 		}
 		IndexManagerImpl imi = new IndexManagerImpl();
 		imi.setDatastoreService(datastoreService);
@@ -42,10 +35,6 @@ public class IndexManagerFactory {
 		return instance;
 	}
 	
-	public void setDatastoreService(DatastoreService datastoreService) {
-		this.datastoreService = datastoreService;
-	}
-
 	public void setEnforceSchemaConstraints(boolean enforceSchemaConstraints) {
 		this.enforceSchemaConstraints = enforceSchemaConstraints;
 	}

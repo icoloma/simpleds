@@ -49,7 +49,7 @@ public class IndexManagerTest extends AbstractDatastoreTest {
 		friend1 = createDummy();
 		entityManager.put(friend1);
 		indexManager.put(dummy.getKey(), "friends", Sets.newHashSet(friend1.getKey()));
-		Set retrievedSet = indexManager.get(dummy.getKey(), "friends");
+		Set<Key> retrievedSet = indexManager.get(dummy.getKey(), "friends");
 		assertTrue(retrievedSet.contains(friend1.getKey()));
 	}
 	

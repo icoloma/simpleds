@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.simpleds.EntityManager;
@@ -28,6 +29,14 @@ public class TransactionInterceptorTest extends AbstractDatastoreTest {
 	
 	@Autowired
 	private EntityManager entityManager;
+	
+	@Autowired
+	private TransactionManager transactionManager;
+	
+	@After
+	public void assertAllClosed() {
+		assertTrue(transactionManager.getActiveTransactions().isEmpty());
+	}
 	
 	@Test
 	public void testCommit() throws Exception {
