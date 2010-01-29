@@ -1,20 +1,20 @@
 /**
- * This is a standalone project that does not depend on any master configuration.
- * 
  * To use nexus, create a ~/.gradle/gradle.properties file with this contents
  *    nexusLocation=http://lechuck:8558/nexus/content/groups/public
  *
  * To install to the local repository: gradle install
  * To upload to the maven repository: gradle upload
  *
- * required gradle version: 0.8
+ * required gradle version: 0.9
  */
  
-usePlugin 'java'
-usePlugin 'maven'
+apply id: 'java'
+apply id: 'maven'
+apply url: 'https://loom.svn.sourceforge.net/svnroot/loom/shared/trunk/genlib.gradle'
+apply url: 'https://loom.svn.sourceforge.net/svnroot/loom/shared/trunk/sources.gradle'
+apply url: 'https://loom.svn.sourceforge.net/svnroot/loom/shared/trunk/providedCompile.gradle'
 
 project.group='org.extrema-sistemas'
-project.name='loom-addons'
 project.version='0.9-SNAPSHOT'
 
 defaultTasks 'build'
@@ -36,10 +36,6 @@ configurations {
     // exclude source files for certain libraries
     sources { description = 'Source files for the libraries' }
     sources.exclude group: 'com.google.appengine'
-    sources.exclude module: 'appengine-local-runtime'
-    
-    // pending http://jira.codehaus.org/browse/GRADLE-471
-    providedCompile
 }
 
 repositories {
@@ -48,7 +44,6 @@ repositories {
 	}
 
     mavenCentral()
-    flatDir name: 'appenginehome-libs', dirs: [ this.appengineHome + '/lib/impl'/*, this.appengineHome + '/lib/user'*/ ]
 }
 	
 dependencies {
@@ -79,51 +74,6 @@ dependencies {
 					
 }
 
-sourceSets {
-	main {
-		compileClasspath = compileClasspath + configurations.providedCompile
-		runtimeClasspath = runtimeClasspath + configurations.providedCompile
-	}
-	test {
-		compileClasspath = compileClasspath + configurations.providedCompile
-		runtimeClasspath = runtimeClasspath + configurations.providedCompile
-	}
-}
-
-task 'cleanGenlib' << { 
-	ant.delete(dir: "${projectDir}/src/main/genlib")
-	ant.delete(dir: "${projectDir}/src/test/genlib")
-}
-clean.dependsOn cleanGenlib
-
-afterEvaluate { project ->
-	def closure = { d ->
-		project.dependencies {
-			sources ((d.group?: '') + ':' + d.name + ':' + (d.version?: '') + ':sources@jar')
-		}
-	}
-	project.configurations.compile.dependencies.each closure
-	project.configurations.providedCompile.dependencies.each closure
-	project.configurations.testCompile.dependencies.each closure
-}
-
-task 'genlib'(description: 'Copies the 3rd party libraries to genlib folder') << {
-	
-	project.copy {
-		from configurations.compile.files
-        into 'src/main/genlib'
-    }
-    
-	project.copy {
-		from configurations.testRuntime.files
-		from configurations.providedCompile.files
-        from configurations.sources.files
-        into 'src/test/genlib'
-    }
-        
-}
-compileJava.dependsOn  'genlib'
-
 uploadArchives {
     repositories.mavenDeployer {
         configuration = configurations.deployerJars
@@ -142,7 +92,6 @@ task sourcesJar(type: Jar, dependsOn: compileJava) {
     classifier = 'sources'
 }
 
-/* uncomment with gradle 0.9 to generate sources and javadoc jar files */
 artifacts {
     archives javadocJar
     archives sourcesJar
