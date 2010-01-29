@@ -14,6 +14,7 @@ usePlugin 'java'
 usePlugin 'maven'
 
 project.group='org.extrema-sistemas'
+project.name='loom-addons'
 project.version='0.9-SNAPSHOT'
 
 defaultTasks 'build'
