@@ -5,25 +5,25 @@
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="src/main/genlib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="src/main/genlib/geronimo-jpa_3.0_spec-1.1.1.jar"/>
-	<classpathentry kind="lib" path="src/main/genlib/google-collections-1.0.jar"/>
-	<classpathentry kind="lib" path="src/main/genlib/spring-aop-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/junit-4.5.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-test-3.0.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="src/main/genlib/spring-core-3.0.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="src/main/genlib/spring-beans-3.0.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="src/main/genlib/aspectjrt-1.6.6.jar"/>
-	<classpathentry kind="lib" path="src/main/genlib/aspectjweaver-1.6.6.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-context-3.0.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="src/main/genlib/spring-asm-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-expression-3.0.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="src/main/genlib/aopalliance-1.0.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-labs-1.3.0.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-runtime-1.3.0.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-sdk-1.3.0.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-stubs-1.3.0.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/aopalliance-1.0.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/aspectjrt-1.6.6.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/aspectjweaver-1.6.6.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/geronimo-jpa_3.0_spec-1.1.1.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/google-collections-1.0.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/spring-aop-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/spring-asm-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/spring-beans-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/spring-core-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
