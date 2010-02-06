@@ -7,7 +7,7 @@ import org.simpleds.tx.TransactionManagerImpl;
  * Creates a {@link TransactionManager} instance. 
  * @author icoloma
  */
-public class TransactionManagerFactory extends DatastoreServiceAwareFactory {
+public class TransactionManagerFactory extends AbstractDatastoreServiceAwareFactory {
 
 	private static TransactionManager transactionManager;
 	

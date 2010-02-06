@@ -10,17 +10,17 @@ import com.google.appengine.api.datastore.DatastoreService;
  * Wrapper to make injection of {@link IndexManager} attributes easier using Spring.
  * @author icoloma
  */
-public class SpringIndexManagerFactory implements FactoryBean {
+public class SpringIndexManagerFactory implements FactoryBean<IndexManager> {
 
 	private IndexManagerFactory factory = new IndexManagerFactory();
 
 	@Override
-	public Object getObject() throws Exception {
+	public IndexManager getObject() throws Exception {
 		return factory.initialize();
 	}
 
 	@Override
-	public Class getObjectType() {
+	public Class<IndexManager> getObjectType() {
 		return IndexManager.class;
 	}
 

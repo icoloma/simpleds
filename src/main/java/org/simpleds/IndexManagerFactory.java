@@ -7,7 +7,7 @@ import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
  * Creates a {@link IndexManager} instance
  * @author icoloma
  */
-public class IndexManagerFactory extends DatastoreServiceAwareFactory {
+public class IndexManagerFactory extends AbstractDatastoreServiceAwareFactory {
 
 	private PersistenceMetadataRepository persistenceMetadataRepository;
 	

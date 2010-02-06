@@ -3,7 +3,7 @@ package org.simpleds;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
-public class DatastoreServiceAwareFactory {
+public abstract class AbstractDatastoreServiceAwareFactory {
 
 	protected DatastoreService datastoreService;
 

@@ -7,7 +7,7 @@ import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
  * Creates a {@link EntityManager} instance. 
  * @author icoloma
  */
-public class EntityManagerFactory extends DatastoreServiceAwareFactory {
+public class EntityManagerFactory extends AbstractDatastoreServiceAwareFactory {
 
 	private PersistenceMetadataRepository persistenceMetadataRepository;
 	
