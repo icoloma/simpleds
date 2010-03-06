@@ -252,7 +252,7 @@ public interface EntityManager {
 	
 	/**
 	 * Wrapper method for DatastoreService.beginTransaction
-	 * @return
+	 * @return the created {@link Transaction}
 	 */
 	public Transaction beginTransaction();
 	
