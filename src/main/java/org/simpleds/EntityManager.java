@@ -250,4 +250,10 @@ public interface EntityManager {
 	 */
 	ClassMetadata getClassMetadata(String kind);
 	
+	/**
+	 * Wrapper method for DatastoreService.beginTransaction
+	 * @return
+	 */
+	public Transaction beginTransaction();
+	
 }

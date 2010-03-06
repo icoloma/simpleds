@@ -30,12 +30,9 @@ public class TransactionInterceptorTest extends AbstractDatastoreTest {
 	@Autowired
 	private EntityManager entityManager;
 	
-	@Autowired
-	private TransactionManager transactionManager;
-	
 	@After
 	public void assertAllClosed() {
-		assertTrue(transactionManager.getActiveTransactions().isEmpty());
+		assertTrue(datastoreService.getActiveTransactions().isEmpty());
 	}
 	
 	@Test
@@ -59,7 +56,11 @@ public class TransactionInterceptorTest extends AbstractDatastoreTest {
 			getMethod(methodName).invoke(transactionalService, false);
 		} catch (InvocationTargetException e) {
 			// expected noRollback exception
-			assertTrue(e.getTargetException() instanceof UnsupportedOperationException);
+			Throwable exc = e.getTargetException();
+			if(!(exc instanceof UnsupportedOperationException)) {
+				exc.printStackTrace();
+				fail(exc.toString());
+			}
 		}
 		assertEquals(2, entityManager.count(entityManager.createQuery(Dummy1.class)));
 	}

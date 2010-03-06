@@ -12,9 +12,6 @@ public class TransactionalServiceImpl implements TransactionalService {
 	@Autowired
 	private EntityManager entityManager;
 	
-	@Autowired
-	private TransactionManager transactionManager;
-	
 	@Override
 	@Transactional
 	public void saveSuccess(boolean shouldRollback) {
@@ -51,8 +48,8 @@ public class TransactionalServiceImpl implements TransactionalService {
 	}
 	
 	private void saveWithTwoTx() {
-		entityManager.put(transactionManager.beginTransaction(), Dummy1.create());
-		entityManager.put(transactionManager.beginTransaction(), Dummy1.create());
+		entityManager.put(entityManager.beginTransaction(), Dummy1.create());
+		entityManager.put(entityManager.beginTransaction(), Dummy1.create());
 	}
 	
 }

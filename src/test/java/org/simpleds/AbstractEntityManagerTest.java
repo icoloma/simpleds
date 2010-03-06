@@ -21,7 +21,7 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 	
 	@After
 	public void assertAllClosed() {
-		assertTrue(transactionManager.getActiveTransactions().isEmpty());
+		assertTrue(datastoreService.getActiveTransactions().isEmpty());
 	}
 
 	@Before

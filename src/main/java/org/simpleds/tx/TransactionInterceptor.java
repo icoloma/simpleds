@@ -1,11 +1,13 @@
 package org.simpleds.tx;
 
+import javax.annotation.PostConstruct;
+
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.simpleds.TransactionManagerFactory;
 import org.simpleds.annotations.Transactional;
+
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 
 /**
@@ -17,19 +19,20 @@ import org.simpleds.annotations.Transactional;
 @Aspect
 public class TransactionInterceptor {
 
-	@Before(
-			"execution(* *(..)) and @annotation(transactional) "
-	)
-	public void beforeExecute(Transactional transactional) {
-		TransactionManager transactionManager = TransactionManagerFactory.getTransactionManager();
-		transactionManager.pushContext();
+	private TransactionManager transactionManager;
+	
+	@PostConstruct
+	public void initTransactionManager() {
+		if (transactionManager == null) {
+			transactionManager = new TransactionManagerImpl();
+			((TransactionManagerImpl)transactionManager).setDatastoreService(DatastoreServiceFactory.getDatastoreService());
+		}
 	}
 	
 	@AfterReturning(
 			"execution(* *(..)) and @annotation(transactional) "
 			)
 	public void doCommit(Transactional transactional) {
-		TransactionManager transactionManager = TransactionManagerFactory.getTransactionManager();
 		transactionManager.commit();
 	}
 	
@@ -37,7 +40,6 @@ public class TransactionInterceptor {
 			"execution(* *(..)) and @annotation(transactional) " 
 	)
 	public void doRollback(Transactional transactional, Exception exception) {
-		TransactionManager transactionManager = TransactionManagerFactory.getTransactionManager();
 		boolean rollback = transactional.rollbackFor().length == 0;
 		for (Class<? extends Throwable> exceptionClass : transactional.noRollbackFor()) {
 			if (exceptionClass.isAssignableFrom(exception.getClass())) {
@@ -56,6 +58,10 @@ public class TransactionInterceptor {
 		} else {
 			transactionManager.commit();
 		}
+	}
+
+	public void setTransactionManager(TransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
 	}
 	
 }

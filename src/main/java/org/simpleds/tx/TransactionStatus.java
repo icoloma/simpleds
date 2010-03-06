@@ -1,9 +1,6 @@
 package org.simpleds.tx;
 
-import java.util.List;
-
 import com.google.appengine.api.datastore.Transaction;
-import com.google.common.collect.Lists;
 
 /**
  * The status of transactions  associated to the current thread
@@ -11,9 +8,6 @@ import com.google.common.collect.Lists;
  *
  */
 class TransactionStatus {
-	
-	/** the list of active transactions */
-	private List<Transaction> activeTransactions = Lists.newArrayList();
 	
 	/** the nesting level of transactional calls */
 	private int currentNestingLevel;
@@ -34,15 +28,10 @@ class TransactionStatus {
 		return --currentNestingLevel;
 	}
 
-	public List<Transaction> getActiveTransactions() {
-		return activeTransactions;
-	}
-
 	public void add(Transaction transaction) {
 		if (currentNestingLevel <= 0) {
 			throw new IllegalStateException("TransactionManager.pushContext() has not yet been invoked. Is TransactionInterceptor properly configured?");
 		}
-		activeTransactions.add(transaction);
 	}
 	
 }

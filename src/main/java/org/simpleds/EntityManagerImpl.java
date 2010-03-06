@@ -32,6 +32,11 @@ public class EntityManagerImpl implements EntityManager {
 	private boolean enforceSchemaConstraints = true;
 	
 	@Override
+	public Transaction beginTransaction() {
+		return datastoreService.beginTransaction();
+	}
+	
+	@Override
 	public ClassMetadata getClassMetadata(Class<?> clazz) {
 		return repository.get(clazz);
 	}
