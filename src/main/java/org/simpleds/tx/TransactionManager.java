@@ -3,10 +3,8 @@ package org.simpleds.tx;
 import com.google.appengine.api.datastore.DatastoreFailureException;
 
 /**
- * Creates transactions bound to the current thread. When the commit() or rollback()
- * method is invoked, the call is propagated to all open transactions.
+ * Propagates the commit() or rollback() invocation to all active transactions.
  * @author Nacho
- *
  */
 public interface TransactionManager {
 	
