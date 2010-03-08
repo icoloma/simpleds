@@ -8,12 +8,6 @@ import org.apache.commons.logging.LogFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Transaction;
 
-/**
- * Manages {@link Transaction} instances associated to this thread.
- * This class should be handled as a singleton object.
- * @author icoloma
- *
- */
 public class TransactionManagerImpl implements TransactionManager {
 
 	private DatastoreService datastoreService;

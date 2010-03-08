@@ -11,8 +11,8 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 
 /**
- * Interceptor configured using spring to get automatic transaction management 
- * with spring services
+ * Interceptor configured using aspects to get automatic transaction management 
+ * for methods annotated as {@link Transactional}
  * @author Nacho
  *
  */
