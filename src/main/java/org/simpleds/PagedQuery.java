@@ -3,6 +3,7 @@ package org.simpleds;
 
 import org.simpleds.metadata.ClassMetadata;
 
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -72,6 +73,11 @@ public class PagedQuery extends SimpleQuery {
 	@Override
 	public PagedQuery like(String propertyName, String value) {
 		return (PagedQuery) super.like(propertyName, value);
+	}
+	
+	@Override
+	public PagedQuery notEqual(String propertyName, Object value) {
+		return (PagedQuery) super.notEqual(propertyName, value);
 	}
 	
 	@Override
@@ -147,6 +153,16 @@ public class PagedQuery extends SimpleQuery {
 	@Override
 	public PagedQuery withPrefetchSize(int size) {
 		return (PagedQuery) super.withPrefetchSize(size);
+	}
+	
+	@Override
+	public PagedQuery withCursor(Cursor cursor) {
+		return (PagedQuery) super.withCursor(cursor);
+	}
+	
+	@Override
+	public SimpleQuery withCursor(String cursor) {
+		return super.withCursor(cursor);
 	}
 	
 	public PagedQuery setPageSize(int pageSize) {

@@ -5,7 +5,7 @@
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="src/test/genlib/junit-4.5.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/junit-4.5.jar" sourcepath="src/test/genlib/junit-4.5-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-test-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-context-3.0.0.RELEASE.jar"/>

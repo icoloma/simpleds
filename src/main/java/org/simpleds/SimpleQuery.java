@@ -8,6 +8,7 @@ import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PropertyMetadata;
 import org.springframework.util.ClassUtils;
 
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
@@ -134,6 +135,10 @@ public class SimpleQuery implements Cloneable {
 		return addFilter(propertyName, FilterOperator.LESS_THAN_OR_EQUAL, value);
 	}
 	
+	public SimpleQuery notEqual(String propertyName, Object value) {
+		return addFilter(propertyName, FilterOperator.NOT_EQUAL, value);
+	}
+	
 	/**
 	 * Adds a LIKE clause. This like clause will only match strings that START
 	 * with the provided argument. In other words, this clause will match "foo%" 
@@ -206,6 +211,18 @@ public class SimpleQuery implements Cloneable {
 	public SimpleQuery withOffset(int offset) {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withOffset(offset) : fetchOptions.offset(offset);
 		return this;
+	}
+	
+	public SimpleQuery withCursor(Cursor cursor) {
+		fetchOptions = fetchOptions == null? FetchOptions.Builder.withCursor(cursor) : fetchOptions.cursor(cursor);
+		return this;
+	}
+	
+	/**
+	 * Convenience method that acts as withCursor(Cursor), but accepts a cursor serialized as String 
+	 */
+	public SimpleQuery withCursor(String cursor) {
+		return withCursor(Cursor.fromWebSafeString(cursor));
 	}
 	
 	/**
