@@ -28,10 +28,10 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	protected String id;
 	
 	/** queue name to execute the schema migration, defaults to "default" */
-	protected String queueName = "default";
+	protected String queueName;
 	
 	/** the number of entities to process by each invocation, default 150 */
-	protected int batchSize = 150;
+	protected Integer batchSize;
 
 	/** subtasks that will be executed in parallel after this instance */
 	protected List<DatastoreAction> actions = Lists.newArrayList();
@@ -50,6 +50,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 		this.id = id;
 	}
 
+	@Override
 	public DatastoreAction withQueue(String queueName) {
 		this.queueName = queueName;
 		return this;
@@ -73,7 +74,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	 * @return 
 	 */
 	protected FetchOptions createFetchOptions(Map<String, String> params) {
-		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(batchSize);
+		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(batchSize == null? ActionLauncher.DEFAULT_BATCH_SIZE : batchSize);
 		Cursor cursor = deserializeCursor(params);
 		if (cursor != null) {
 			fetchOptions = fetchOptions.cursor(cursor);
@@ -91,7 +92,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 		}
 		
 		// set all params
-		Queue queue = QueueFactory.getQueue(queueName);
+		Queue queue = queueName == null? QueueFactory.getDefaultQueue() : QueueFactory.getQueue(queueName);
 		TaskOptions url = TaskOptions.Builder.url(uri); 
 		url.param(ActionParamNames.ACTION, getPath());
 		for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -121,6 +122,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	 * @param params
 	 */
 	protected void doNestedActions(String uri, Map<String, String> params) {
+		log.info("Action " + getPath() + " completed.");
 		for (DatastoreAction action : actions) {
 			action.deferProceed(null, uri, params);
 		}
@@ -159,6 +161,16 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	@Override
 	public List<DatastoreAction> getActions() {
 		return actions;
+	}
+
+	@Override
+	public String getQueueName() {
+		return queueName;
+	}
+
+	@Override
+	public Integer getBatchSize() {
+		return batchSize;
 	}
 
 

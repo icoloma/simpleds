@@ -62,8 +62,25 @@ public interface DatastoreAction {
 	 * Add nested action/s to this instance. The added actions will be executed after 
 	 * this one has been completed, but only if no work has been deferred.
 	 * @param actions the list of actions to add.
-	 * @return this instance, for nested chaining.
+	 * @return this instance, for chaining.
 	 */
 	DatastoreAction add(DatastoreAction... actions);
+
+	/**
+	 * Set the queue name to use. If not specified, the default queue will be used.
+	 * @param queueName the name of the queue to use
+	 * @return this instance, for chaining
+	 */
+	DatastoreAction withQueue(String queueName);
+
+	/**
+	 * @return the Queue to be used by this action
+	 */
+	String getQueueName();
+
+	/**
+	 * @return the batch size to be used by this action
+	 */
+	Integer getBatchSize();
 	
 }

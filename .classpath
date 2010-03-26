@@ -20,9 +20,11 @@
 	<classpathentry kind="lib" path="src/test/genlib/spring-asm-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-beans-3.0.0.RELEASE.jar" sourcepath="src/test/genlib/spring-beans-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-core-3.0.0.RELEASE.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-stubs-1.3.1.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/appengine-testing-1.3.1.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-runtime-1.3.1.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-labs-1.3.2.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-runtime-1.3.2.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-sdk-1.3.2.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-stubs-1.3.2.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/appengine-testing-1.3.2.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

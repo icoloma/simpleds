@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.schema.ActionRepository;
+import org.simpleds.schema.ActionLauncher;
 import org.simpleds.schema.ActionParamNames;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -18,13 +18,13 @@ import com.google.appengine.api.datastore.Query;
 
 public class ActionRepositoryTest extends AbstractActionTest {
 
-	private ActionRepository repository;
+	private ActionLauncher repository;
 	
 	private MockHttpServletRequest request;
 	
 	@Before
 	public void initRepository() {
-		repository = new ActionRepository().add(
+		repository = new ActionLauncher().add(
 			new DeleteSessionsAction().withBatchSize(2).add(new ClearCacheAction())
 		);
 		long farFuture = System.currentTimeMillis() + 10 * 24L * 60 * 60 * 1000;

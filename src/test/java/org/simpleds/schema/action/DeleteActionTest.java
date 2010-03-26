@@ -13,7 +13,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.repackaged.com.google.common.collect.Maps;
 
-public class DeleteQueryActionTest extends AbstractActionTest {
+public class DeleteActionTest extends AbstractActionTest {
 
 	private DeleteAction action;
 	
@@ -26,7 +26,6 @@ public class DeleteQueryActionTest extends AbstractActionTest {
 				return new Query("foo");
 			}
 		};
-		action.withBatchSize(2);
 		
 		for (int i = 0; i < 4; i++) {
 			Entity entity = new Entity("foo");
@@ -36,6 +35,7 @@ public class DeleteQueryActionTest extends AbstractActionTest {
 	
 	@Test
 	public void testProceed() {
+		action.withBatchSize(2);
 		assertEntitiesCount(4);
 		Map<String, String> params = Maps.newHashMap();
 		assertEquals(2, action.proceed("/mock-uri", params));
@@ -54,6 +54,15 @@ public class DeleteQueryActionTest extends AbstractActionTest {
 		params = parseTaskBody();
 		assertEquals(0, action.proceed("/mock-uri", params));
         assertQueueEmpty();
+	}
+	
+	@Test
+	public void testBigBatch() {
+		assertEntitiesCount(4);
+		Map<String, String> params = Maps.newHashMap();
+		assertEquals(4, action.proceed("/mock-uri", params));
+		assertEntitiesCount(0);
+		assertQueueEmpty();
 	}
 
 	private void assertEntitiesCount(int count) {
