@@ -31,12 +31,4 @@ public class ClearCacheAction extends AbstractDatastoreAction {
 		return items;
 	}
 	
-	/**
-	 * Rollback does also clean the cache up, just in case.
-	 */
-	@Override
-	public long rollback(String uri, Map<String, String> params) {
-		return proceed(uri, params);
-	}
-	
 }

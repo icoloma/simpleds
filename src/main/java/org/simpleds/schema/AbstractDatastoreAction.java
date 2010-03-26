@@ -61,7 +61,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	 * @return the serialized cursor value, if any. 
 	 */
 	protected Cursor deserializeCursor(Map<String, String> params) {
-		String serializedCursor = params.get(DatastoreParamNames.CURSOR);
+		String serializedCursor = params.get(ActionParamNames.CURSOR);
 		return serializedCursor == null? null : Cursor.fromWebSafeString(serializedCursor);
 	}
 	
@@ -93,10 +93,10 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 		// set all params
 		Queue queue = QueueFactory.getQueue(queueName);
 		TaskOptions url = TaskOptions.Builder.url(uri); 
-		url.param(DatastoreParamNames.ACTION, getPath());
+		url.param(ActionParamNames.ACTION, getPath());
 		for (Map.Entry<String, String> entry : params.entrySet()) {
 			String key = entry.getKey();
-			if (!key.equals(DatastoreParamNames.ACTION) && !key.equals(DatastoreParamNames.CURSOR) && entry.getValue() != null) {
+			if (!key.equals(ActionParamNames.ACTION) && !key.equals(ActionParamNames.CURSOR) && entry.getValue() != null) {
 				url.param(key, entry.getValue());
 			}
 		}
@@ -104,7 +104,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 		// add the cursor
 		if (cursor != null) {
 			String sc = cursor.toWebSafeString();
-			url.param(DatastoreParamNames.CURSOR, sc);
+			url.param(ActionParamNames.CURSOR, sc);
 			log.info("Deferring " + getPath() + " with cursor " + sc);
 		} else {
 			log.info("Deferring " + getPath());
@@ -138,12 +138,6 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	public DatastoreAction withBatchSize(int batchSize) {
 		this.batchSize = batchSize;
 		return this;
-	}
-
-	@Override
-	public long rollback(String uri, Map<String, String> params) {
-		log.warn("Rollback for '" + id + "' is not supported");
-		return 0;
 	}
 
 	/**

@@ -2,7 +2,7 @@ package org.simpleds.schema.action;
 
 import java.util.Map;
 
-import org.simpleds.schema.DatastoreParamNames;
+import org.simpleds.schema.ActionParamNames;
 
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -31,11 +31,11 @@ public class DeleteSessionsAction extends DeleteAction {
 	@Override
 	protected Query createQuery(Map<String, String> params) {
 		// get the timestamp
-		String sTimestamp = params.get(DatastoreParamNames.DELETE_SESSIONS_TIMESTAMP);
+		String sTimestamp = params.get(ActionParamNames.DELETE_SESSIONS_TIMESTAMP);
 		long timestamp;
 		if (sTimestamp == null) {
 			timestamp = System.currentTimeMillis() + sessionDuration;
-			params.put(DatastoreParamNames.DELETE_SESSIONS_TIMESTAMP, String.valueOf(timestamp));
+			params.put(ActionParamNames.DELETE_SESSIONS_TIMESTAMP, String.valueOf(timestamp));
 		} else {
 			timestamp = Long.valueOf(sTimestamp);
 		}

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.schema.DatastoreParamNames;
+import org.simpleds.schema.ActionParamNames;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
@@ -43,8 +43,8 @@ public class DeleteQueryActionTest extends AbstractActionTest {
 		
 		// first execution, should delay work
 		params = parseTaskBody();
-		assertEquals("delete-test", params.get(DatastoreParamNames.ACTION));
-		assertNotNull(params.get(DatastoreParamNames.CURSOR));
+		assertEquals("delete-test", params.get(ActionParamNames.ACTION));
+		assertNotNull(params.get(ActionParamNames.CURSOR));
 
 		// second execution,  finish the work but maybe there is more
 		assertEquals(2, action.proceed("/mock-uri", params));

@@ -10,7 +10,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.schema.ActionRepository;
-import org.simpleds.schema.DatastoreParamNames;
+import org.simpleds.schema.ActionParamNames;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import com.google.appengine.api.datastore.Entity;
@@ -74,17 +74,17 @@ public class ActionRepositoryTest extends AbstractActionTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testIllegalActionName() throws Exception {
-		request.setParameter(DatastoreParamNames.ACTION, "xxx");
+		request.setParameter(ActionParamNames.ACTION, "xxx");
 		repository.proceed(request);
 	}
 
 	private void assertActionAndCursor(String action, boolean cursor) throws Exception {
 		Map<String, String> next = reset();
-		assertEquals(action, next.get(DatastoreParamNames.ACTION));
+		assertEquals(action, next.get(ActionParamNames.ACTION));
 		if (cursor) {
-			assertNotNull(next.get(DatastoreParamNames.CURSOR));
+			assertNotNull(next.get(ActionParamNames.CURSOR));
 		} else {
-			assertNull(next.get(DatastoreParamNames.CURSOR));
+			assertNull(next.get(ActionParamNames.CURSOR));
 		}
 	}
 	

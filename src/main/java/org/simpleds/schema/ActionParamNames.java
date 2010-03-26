@@ -1,6 +1,6 @@
 package org.simpleds.schema;
 
-public interface DatastoreParamNames {
+public interface ActionParamNames {
 
 	/** the id of the action to execute, leave empty for all */
 	public static final String ACTION = "action";

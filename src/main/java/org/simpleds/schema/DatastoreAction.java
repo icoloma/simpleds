@@ -13,17 +13,13 @@ import com.google.appengine.api.datastore.Cursor;
  * invoked, so it must be capable of resuming tasks. Specifically, a previous execution
  * may have failed at any point.
  * <li>
- * Immutability: When using an static schema action structure, be aware that several threads 
- * may be executing your migration actions at the same time. Just to be on the safe side of 
- * things, once initialized your action classes should not be modified by any servlet request. 
+ * Immutability: When using an static schema action structure, several threads may be 
+ * running actions at the same time. To be on the safe side of things, once configured 
+ * actions should not be modified by data in any servlet request. 
  * </li>
  * <li>
- * Break up into smaller tasks: An SchemaAction should not failed by timeout, but instead break
- * the task into smaller pieces which should then be executed. 
- * </li>
- * <li>
- * All SchemaAction subclasses must supply a rollback() method. For those actions where 
- * rollback is not supported, an error should be logged but no exception must be thrown.
+ * Break up into smaller parts: actions should try to complete in 30 seconds or less,
+ * which often means deferring work. 
  * </li>
  * </ul>
  * @author icoloma
@@ -45,14 +41,6 @@ public interface DatastoreAction {
 	 * @param params the request params to use for the next invocation
 	 */
 	public void deferProceed(Cursor cursor, String uri, Map<String, String> params);
-
-	/**
-	 * Rollback this schema migration action. If the rollback operation is not 
-	 * supported, an error must be logged.
-	 * @param uri The queue invocation uri 
-	 * @return the number of processed entities
-	 */
-	public long rollback(String uri, Map<String, String> params);
 	
 	/**
 	 * @return the list of slash-separated schema actions up to this instance. 

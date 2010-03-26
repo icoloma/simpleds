@@ -55,7 +55,7 @@ public class ActionRepository {
 		}
 		
 		// process it
-		String actionId = params.get(DatastoreParamNames.ACTION);
+		String actionId = params.get(ActionParamNames.ACTION);
 		if (actionId == null || actionId.length() == 0) {
 			for (DatastoreAction action : rootActions) {
 				action.deferProceed(null, queueUrl, params);
