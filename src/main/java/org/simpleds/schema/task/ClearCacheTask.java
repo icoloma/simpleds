@@ -1,8 +1,8 @@
-package org.simpleds.schema.action;
+package org.simpleds.schema.task;
 
 import java.util.Map;
 
-import org.simpleds.schema.AbstractDatastoreAction;
+import org.simpleds.schema.AbstractTask;
 
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
@@ -12,22 +12,22 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
  * @author icoloma
  *
  */
-public class ClearCacheAction extends AbstractDatastoreAction {
+public class ClearCacheTask extends AbstractTask {
 
-	public ClearCacheAction() {
+	public ClearCacheTask() {
 		super("clear-cache");
 	}
 	
-	private ClearCacheAction(String id) {
+	private ClearCacheTask(String id) {
 		super(id);
 	}
 
 	@Override
-	public long proceed(String uri, Map<String, String> params) {
+	public long doProceed(String uri, Map<String, String> params) {
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		long items = memcache.getStatistics().getItemCount();
 		memcache.clearAll();
-		doNestedActions(uri, params);
+		doNestedTasks(uri, params);
 		return items;
 	}
 	

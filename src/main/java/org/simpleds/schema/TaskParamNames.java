@@ -1,9 +1,9 @@
 package org.simpleds.schema;
 
-public interface ActionParamNames {
+public interface TaskParamNames {
 
-	/** the id of the action to execute, leave empty for all */
-	public static final String ACTION = "action";
+	/** the id of the task to execute, leave empty for all */
+	public static final String TASK = "task";
 	
 	/** the cursor value, if any */
 	public static final String CURSOR = "cursor";

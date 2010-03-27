@@ -1,8 +1,8 @@
-package org.simpleds.schema.action;
+package org.simpleds.schema.task;
 
 import java.util.Map;
 
-import org.simpleds.schema.ActionParamNames;
+import org.simpleds.schema.TaskParamNames;
 
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -15,27 +15,27 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
  * 
  * @author icoloma
  */
-public class DeleteSessionsAction extends DeleteAction {
+public class DeleteSessionsTask extends DeleteTask {
 
 	/** configured duration of the session in millis, default 24 hours */
 	private long sessionDuration = 24L * 60 * 60 * 1000;
 	
-	public DeleteSessionsAction() {
+	public DeleteSessionsTask() {
 		super("delete-sessions");
 	}
 
-	private DeleteSessionsAction(String id) {
+	private DeleteSessionsTask(String id) {
 		super(id);
 	}
 
 	@Override
 	protected Query createQuery(Map<String, String> params) {
 		// get the timestamp
-		String sTimestamp = params.get(ActionParamNames.DELETE_SESSIONS_TIMESTAMP);
+		String sTimestamp = params.get(TaskParamNames.DELETE_SESSIONS_TIMESTAMP);
 		long timestamp;
 		if (sTimestamp == null) {
 			timestamp = System.currentTimeMillis() + sessionDuration;
-			params.put(ActionParamNames.DELETE_SESSIONS_TIMESTAMP, String.valueOf(timestamp));
+			params.put(TaskParamNames.DELETE_SESSIONS_TIMESTAMP, String.valueOf(timestamp));
 		} else {
 			timestamp = Long.valueOf(sTimestamp);
 		}
@@ -44,7 +44,7 @@ public class DeleteSessionsAction extends DeleteAction {
 		return new Query("_ah_SESSION").addFilter("_expires", FilterOperator.LESS_THAN_OR_EQUAL, timestamp);
 	}
 	
-	public DeleteSessionsAction withSessionDuration(long sessionDuration) {
+	public DeleteSessionsTask withSessionDuration(long sessionDuration) {
 		this.sessionDuration = sessionDuration;
 		return this;
 	}

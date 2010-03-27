@@ -1,4 +1,4 @@
-package org.simpleds.schema.action;
+package org.simpleds.schema.task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,19 +7,20 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.schema.ActionParamNames;
+import org.simpleds.schema.TaskParamNames;
+import org.simpleds.schema.task.DeleteTask;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.repackaged.com.google.common.collect.Maps;
 
-public class DeleteActionTest extends AbstractActionTest {
+public class DeleteTaskTest extends AbstractTaskTest {
 
-	private DeleteAction action;
+	private DeleteTask action;
 	
 	@Before
 	public void prepareTest() {
-		action = new DeleteAction("delete-test") {
+		action = new DeleteTask("delete-test") {
 			
 			@Override
 			protected Query createQuery(Map<String, String> params) {
@@ -43,8 +44,8 @@ public class DeleteActionTest extends AbstractActionTest {
 		
 		// first execution, should delay work
 		params = parseTaskBody();
-		assertEquals("delete-test", params.get(ActionParamNames.ACTION));
-		assertNotNull(params.get(ActionParamNames.CURSOR));
+		assertEquals("delete-test", params.get(TaskParamNames.TASK));
+		assertNotNull(params.get(TaskParamNames.CURSOR));
 
 		// second execution,  finish the work but maybe there is more
 		assertEquals(2, action.proceed("/mock-uri", params));

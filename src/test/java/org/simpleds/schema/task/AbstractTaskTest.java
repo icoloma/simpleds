@@ -1,4 +1,4 @@
-package org.simpleds.schema.action;
+package org.simpleds.schema.task;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,7 +12,7 @@ import com.google.appengine.api.labs.taskqueue.dev.QueueStateInfo;
 import com.google.appengine.api.labs.taskqueue.dev.QueueStateInfo.TaskStateInfo;
 import com.google.appengine.repackaged.com.google.common.collect.Maps;
 
-public abstract class AbstractActionTest extends AbstractDatastoreTest {
+public abstract class AbstractTaskTest extends AbstractDatastoreTest {
 
 	public void assertQueueEmpty() {
 		QueueStateInfo qsi = queue.getQueueStateInfo().get("default");

@@ -16,15 +16,15 @@ import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.common.collect.Lists;
 
 /**
- * Common SchemaAction superclass
+ * Common superclass
  * @author icoloma
  *
  */
-public abstract class AbstractDatastoreAction implements DatastoreAction {
+public abstract class AbstractTask implements Task {
 
 	static final char PATH_SEPARATOR = '/'; 
 	
-	/** required informational field to log the action name */
+	/** the id of this task */
 	protected String id;
 	
 	/** queue name to execute the schema migration, defaults to "default" */
@@ -34,16 +34,16 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	protected Integer batchSize;
 
 	/** subtasks that will be executed in parallel after this instance */
-	protected List<DatastoreAction> actions = Lists.newArrayList();
+	protected List<Task> tasks = Lists.newArrayList();
 	
-	/** the action prior to this instance, null for none */
-	protected DatastoreAction parent;
+	/** the parent task, null if none */
+	protected Task parent;
 	
 	protected DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
 
 	protected Log log = LogFactory.getLog(getClass());
 	
-	protected AbstractDatastoreAction(String id) {
+	protected AbstractTask(String id) {
 		if (id.indexOf(PATH_SEPARATOR) != -1) {
 			throw new IllegalArgumentException("'/' is not allowed as part of id names");
 		}
@@ -51,7 +51,21 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	}
 
 	@Override
-	public DatastoreAction withQueue(String queueName) {
+	public final long proceed(String uri, Map<String, String> params) {
+		if (batchSize == null) {
+			batchSize = Task.DEFAULT_BATCH_SIZE;
+		}
+		String path = getPath();
+		TaskStats.start(this);
+		long numResults = doProceed(uri, params);
+		TaskStats.addResults(this, numResults);
+		return numResults;
+	}
+
+	protected abstract long doProceed(String uri, Map<String, String> params);
+	
+	@Override
+	public Task withQueue(String queueName) {
 		this.queueName = queueName;
 		return this;
 	}
@@ -62,7 +76,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	 * @return the serialized cursor value, if any. 
 	 */
 	protected Cursor deserializeCursor(Map<String, String> params) {
-		String serializedCursor = params.get(ActionParamNames.CURSOR);
+		String serializedCursor = params.get(TaskParamNames.CURSOR);
 		return serializedCursor == null? null : Cursor.fromWebSafeString(serializedCursor);
 	}
 	
@@ -74,7 +88,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	 * @return 
 	 */
 	protected FetchOptions createFetchOptions(Map<String, String> params) {
-		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(batchSize == null? ActionLauncher.DEFAULT_BATCH_SIZE : batchSize);
+		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(batchSize);
 		Cursor cursor = deserializeCursor(params);
 		if (cursor != null) {
 			fetchOptions = fetchOptions.cursor(cursor);
@@ -83,7 +97,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	}
 	
 	/**
-	 * Defer action execution to another subsequent request 
+	 * Defer task execution to another subsequent request 
 	 * @param cursor the cursor to continue at, null if none
 	 */
 	public void deferProceed(Cursor cursor, String uri, Map<String, String> params) {
@@ -94,10 +108,10 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 		// set all params
 		Queue queue = queueName == null? QueueFactory.getDefaultQueue() : QueueFactory.getQueue(queueName);
 		TaskOptions url = TaskOptions.Builder.url(uri); 
-		url.param(ActionParamNames.ACTION, getPath());
+		url.param(TaskParamNames.TASK, getPath());
 		for (Map.Entry<String, String> entry : params.entrySet()) {
 			String key = entry.getKey();
-			if (!key.equals(ActionParamNames.ACTION) && !key.equals(ActionParamNames.CURSOR) && entry.getValue() != null) {
+			if (!key.equals(TaskParamNames.TASK) && !key.equals(TaskParamNames.CURSOR) && entry.getValue() != null) {
 				url.param(key, entry.getValue());
 			}
 		}
@@ -105,7 +119,7 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 		// add the cursor
 		if (cursor != null) {
 			String sc = cursor.toWebSafeString();
-			url.param(ActionParamNames.CURSOR, sc);
+			url.param(TaskParamNames.CURSOR, sc);
 			log.info("Deferring " + getPath() + " with cursor " + sc);
 		} else {
 			log.info("Deferring " + getPath());
@@ -116,51 +130,49 @@ public abstract class AbstractDatastoreAction implements DatastoreAction {
 	}
 
 	/**
-	 * Process nested actions
-	 * Invoke this method after the action executed has been completed (no defer was necessary)
-	 * @param uri
-	 * @param params
+	 * Process nested tasks
+	 * This should be invoked after task completion
 	 */
-	protected void doNestedActions(String uri, Map<String, String> params) {
-		log.info("Action " + getPath() + " completed.");
-		for (DatastoreAction action : actions) {
-			action.deferProceed(null, uri, params);
+	protected void doNestedTasks(String uri, Map<String, String> params) {
+		TaskStats.end(this);
+		for (Task task : tasks) {
+			task.deferProceed(null, uri, params);
 		}
 	}
 
 	@Override
-	public DatastoreAction add(DatastoreAction... actions) {
-		for (DatastoreAction action : actions) {
-			this.actions.add(action);
-			((AbstractDatastoreAction)action).setParent(this);
+	public Task add(Task... tasks) {
+		for (Task task : tasks) {
+			this.tasks.add(task);
+			((AbstractTask)task).setParent(this);
 		}
 		return this;
 	}
 	
-	public DatastoreAction withBatchSize(int batchSize) {
+	public Task withBatchSize(int batchSize) {
 		this.batchSize = batchSize;
 		return this;
 	}
 
 	/**
-	 * @return the nested path of this action. This path can be used to execute strictly this action when deferring work. 
+	 * @return the nested path of this task. This path can be used to execute strictly this task when deferring work. 
 	 */
 	@Override
 	public String getPath() {
 		return parent == null? id : parent.getPath() + PATH_SEPARATOR + id;
 	}
 
-	public DatastoreAction getParent() {
+	public Task getParent() {
 		return parent;
 	}
 
-	public void setParent(DatastoreAction parentAction) {
-		this.parent = parentAction;
+	public void setParent(Task parent) {
+		this.parent = parent;
 	}
 
 	@Override
-	public List<DatastoreAction> getActions() {
-		return actions;
+	public List<Task> getTasks() {
+		return tasks;
 	}
 
 	@Override

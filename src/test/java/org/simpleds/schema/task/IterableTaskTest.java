@@ -1,4 +1,4 @@
-package org.simpleds.schema.action;
+package org.simpleds.schema.task;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,19 +6,20 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.simpleds.schema.task.IterableTask;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.repackaged.com.google.common.collect.Maps;
 
-public class IterableActionTest extends AbstractActionTest {
+public class IterableTaskTest extends AbstractTaskTest {
 
-	private IterableAction action;
+	private IterableTask action;
 	
 	@Before
 	public void prepareTest() {
-		action = new IterableAction("set-foo") {
+		action = new IterableTask("set-foo") {
 			
 			@Override
 			protected void update(Entity entity) {

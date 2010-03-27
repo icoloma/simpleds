@@ -1,8 +1,8 @@
-package org.simpleds.schema.action;
+package org.simpleds.schema.task;
 
 import java.util.Map;
 
-import org.simpleds.schema.AbstractDatastoreAction;
+import org.simpleds.schema.AbstractTask;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -14,14 +14,14 @@ import com.google.appengine.api.datastore.QueryResultIterator;
  * @author icoloma
  *
  */
-public abstract class IterableAction extends AbstractDatastoreAction {
+public abstract class IterableTask extends AbstractTask {
 
-	public IterableAction(String id) {
+	public IterableTask(String id) {
 		super(id);
 	}
 	
 	@Override
-	public long proceed(String uri, Map<String, String> params) {
+	public long doProceed(String uri, Map<String, String> params) {
 		// execute the query and locate the cursor, if any
 		Query query = createQuery(params);
 		query.setKeysOnly();
@@ -38,7 +38,7 @@ public abstract class IterableAction extends AbstractDatastoreAction {
 		if (count == batchSize) {
 			deferProceed(it.getCursor(), uri, params);
 		} else {
-			doNestedActions(uri, params);
+			doNestedTasks(uri, params);
 		}
 		return count;
 	}

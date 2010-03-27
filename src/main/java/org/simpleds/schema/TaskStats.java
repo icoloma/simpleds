@@ -1,11 +1,19 @@
 package org.simpleds.schema;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 
 /**
  * Stores and retrieves the results of ongoing tasks inside memcache 
@@ -17,60 +25,113 @@ public class TaskStats {
 	/** timestamp of start, in millis */
 	private static final String START = "start-";
 	
-	/** total number of entities processed */
-	private static final String ENTITIES = "entities-";
+	/** timestamp of task end, in millis */
+	private static final String END = "end-";
 	
 	/** total number of batches processed */
 	private static final String BATCHES = "batches-";
 	
-	/** timestamp of task end, in millis */
-	private static final String END = "end-";
+	/** total number of entities processed */
+	private static final String ENTITIES = "entities-";
+	
+	private static Log log = LogFactory.getLog(TaskStats.class);
 
-	/** the namespaced memcache instance to use */
-	private MemcacheService memcache;
+	/** task path */
+	private String path;
 	
-	private static TaskStats instance;
+	/** start timestamp */
+	private Date start;
 	
-	TaskStats() {
+	/** end timestamp (null if the task is still running) */
+	private Date end;
+	
+	/** number of executed batches */
+	private Long executionCount;
+	
+	/** number of processed entities */
+	private Long entityCount;
+	
+	TaskStats(String path) {
+		MemcacheService memcache = getMemcache();
+		this.path = path;
+		Long l = (Long) memcache.get(START + path);
+		if (l != null) {
+			this.start = new Date(l);
+		}
+		l = (Long) memcache.get(END + path);
+		if (l != null) {
+			this.end = new Date(l);
+		}
+		this.executionCount = (Long) memcache.get(BATCHES + path); 
+		this.entityCount = (Long) memcache.get(ENTITIES + path); 
+	}
+
+	private static MemcacheService getMemcache() {
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		memcache.setNamespace("_simpleds-stats");
+		return memcache;
 	}
 	
-	public static TaskStats getInstance() {
-		if (instance == null) {
-			instance = new TaskStats();
+	static Collection<TaskStats> getTaskStats(Iterable<String> paths) {
+		Set<TaskStats> result = Sets.newTreeSet(new TaskStatsComparator());
+		for (String path : paths) {
+			result.add(new TaskStats(path));
 		}
-		return instance;
+		return result;
 	}
 	
-	public Map<String, Something> getStats() {
-	}
-	
-	public void start(String path) {
-		memcache.put(START + path, System.currentTimeMillis());
+	public static void start(Task task) {
+		String path = task.getPath();
+		log.info("Entering task: " + path);
+		MemcacheService memcache = getMemcache();
+		memcache.put(START + path, System.currentTimeMillis(), null, SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 		List keys = ImmutableList.of(
 			ENTITIES + path, BATCHES + path, END + path
 		);
 		memcache.deleteAll(keys);
 	}
 	
-	public void end(String path) {
-		memcache.put(END + path, System.currentTimeMillis());
+	public static void end(Task task) {
+		String path = task.getPath();
+		log.info("Task " + path + " completed.");
+		getMemcache().put(END + path, System.currentTimeMillis());
 	}
 	
-	public void addResults(String path, long entitiesProcessed) {
+	public static void addResults(Task task, long entitiesProcessed) {
+		String path = task.getPath();
+		log.info(path + " processed " + entitiesProcessed + " entities");
+		MemcacheService memcache = getMemcache();
 		memcache.increment(END + path, entitiesProcessed, 0L);
 		memcache.increment(BATCHES + path, 1, 0L);
 	}
 	
-	/**
-	 * 
-	 * @param path
-	 * @param entitiesProcessed
-	 */
-	public static void notifyResults(String path, long entitiesProcessed) {
-		TaskStats status = new TaskStats();
-		status.put(path, entitiesProcessed);
+	public String getPath() {
+		return path;
+	}
+
+	public Date getStart() {
+		return start;
+	}
+
+	public Date getEnd() {
+		return end;
+	}
+
+	public Long getExecutionCount() {
+		return executionCount;
+	}
+
+	public Long getEntityCount() {
+		return entityCount;
+	}
+	
+	private static class TaskStatsComparator implements Comparator<TaskStats> {
+
+		@Override
+		public int compare(TaskStats t1, TaskStats t2) {
+			return t1.getPath().compareTo(t2.getPath());
+		}
+		
 	}
 
 }

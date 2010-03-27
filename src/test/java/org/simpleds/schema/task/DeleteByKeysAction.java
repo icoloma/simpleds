@@ -1,8 +1,8 @@
-package org.simpleds.schema.action;
+package org.simpleds.schema.task;
 
 import java.util.Map;
 
-import org.simpleds.schema.AbstractDatastoreAction;
+import org.simpleds.schema.AbstractTask;
 
 import com.google.appengine.api.datastore.Key;
 
@@ -12,7 +12,7 @@ import com.google.appengine.api.datastore.Key;
  * @author icoloma
  *
  */
-public class DeleteByKeysAction extends AbstractDatastoreAction {
+public class DeleteByKeysAction extends AbstractTask {
 
 	protected Key[] keys;
 	
@@ -22,9 +22,9 @@ public class DeleteByKeysAction extends AbstractDatastoreAction {
 	}
 	
 	@Override
-	public long proceed(String uri, Map<String, String> params) {
+	public long doProceed(String uri, Map<String, String> params) {
 		datastoreService.delete(keys);
-		doNestedActions(uri, params);
+		doNestedTasks(uri, params);
 		return keys.length;
 	}
 	

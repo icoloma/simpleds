@@ -1,4 +1,4 @@
-package org.simpleds.schema.action;
+package org.simpleds.schema.task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -9,23 +9,25 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.schema.ActionLauncher;
-import org.simpleds.schema.ActionParamNames;
+import org.simpleds.schema.TaskLauncher;
+import org.simpleds.schema.TaskParamNames;
+import org.simpleds.schema.task.ClearCacheTask;
+import org.simpleds.schema.task.DeleteSessionsTask;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 
-public class ActionRepositoryTest extends AbstractActionTest {
+public class TaskLauncherTest extends AbstractTaskTest {
 
-	private ActionLauncher repository;
+	private TaskLauncher repository;
 	
 	private MockHttpServletRequest request;
 	
 	@Before
 	public void initRepository() {
-		repository = new ActionLauncher().add(
-			new DeleteSessionsAction().withBatchSize(2).add(new ClearCacheAction())
+		repository = new TaskLauncher().add(
+			new DeleteSessionsTask().withBatchSize(2).add(new ClearCacheTask())
 		);
 		long farFuture = System.currentTimeMillis() + 10 * 24L * 60 * 60 * 1000;
 		// sessions that should not be removed
@@ -74,17 +76,17 @@ public class ActionRepositoryTest extends AbstractActionTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testIllegalActionName() throws Exception {
-		request.setParameter(ActionParamNames.ACTION, "xxx");
+		request.setParameter(TaskParamNames.TASK, "xxx");
 		repository.proceed(request);
 	}
 
 	private void assertActionAndCursor(String action, boolean cursor) throws Exception {
 		Map<String, String> next = reset();
-		assertEquals(action, next.get(ActionParamNames.ACTION));
+		assertEquals(action, next.get(TaskParamNames.TASK));
 		if (cursor) {
-			assertNotNull(next.get(ActionParamNames.CURSOR));
+			assertNotNull(next.get(TaskParamNames.CURSOR));
 		} else {
-			assertNull(next.get(ActionParamNames.CURSOR));
+			assertNull(next.get(TaskParamNames.CURSOR));
 		}
 	}
 	

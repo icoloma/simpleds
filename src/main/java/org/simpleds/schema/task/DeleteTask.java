@@ -1,9 +1,9 @@
-package org.simpleds.schema.action;
+package org.simpleds.schema.task;
 
 import java.util.List;
 import java.util.Map;
 
-import org.simpleds.schema.AbstractDatastoreAction;
+import org.simpleds.schema.AbstractTask;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -18,15 +18,15 @@ import com.google.common.collect.Lists;
  * @author icoloma
  *
  */
-public abstract class DeleteAction extends AbstractDatastoreAction {
+public abstract class DeleteTask extends AbstractTask {
 
-	public DeleteAction(String id) {
+	public DeleteTask(String id) {
 		super(id);
 		withBatchSize(500);
 	}
 	
 	@Override
-	public long proceed(String uri, Map<String, String> params) {
+	public long doProceed(String uri, Map<String, String> params) {
 		// execute the query and locate the cursor, if any
 		Query query = createQuery(params);
 		query.setKeysOnly();
@@ -44,7 +44,7 @@ public abstract class DeleteAction extends AbstractDatastoreAction {
 		if (keys.size() == batchSize) {
 			deferProceed(it.getCursor(), uri, params);
 		} else {
-			doNestedActions(uri, params);
+			doNestedTasks(uri, params);
 		}
 		return keys.size();
 	}
