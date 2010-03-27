@@ -29,7 +29,7 @@ public class TaskStats {
 	private static final String END = "end-";
 	
 	/** total number of batches processed */
-	private static final String BATCHES = "batches-";
+	private static final String EXECUTIONS = "executions-";
 	
 	/** total number of entities processed */
 	private static final String ENTITIES = "entities-";
@@ -62,7 +62,7 @@ public class TaskStats {
 		if (l != null) {
 			this.end = new Date(l);
 		}
-		this.executionCount = (Long) memcache.get(BATCHES + path); 
+		this.executionCount = (Long) memcache.get(EXECUTIONS + path); 
 		this.entityCount = (Long) memcache.get(ENTITIES + path); 
 	}
 
@@ -86,7 +86,7 @@ public class TaskStats {
 		MemcacheService memcache = getMemcache();
 		memcache.put(START + path, System.currentTimeMillis(), null, SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
 		List keys = ImmutableList.of(
-			ENTITIES + path, BATCHES + path, END + path
+			ENTITIES + path, EXECUTIONS + path, END + path
 		);
 		memcache.deleteAll(keys);
 	}
@@ -101,8 +101,8 @@ public class TaskStats {
 		String path = task.getPath();
 		log.info(path + " processed " + entitiesProcessed + " entities");
 		MemcacheService memcache = getMemcache();
-		memcache.increment(END + path, entitiesProcessed, 0L);
-		memcache.increment(BATCHES + path, 1, 0L);
+		memcache.increment(ENTITIES + path, entitiesProcessed, 0L);
+		memcache.increment(EXECUTIONS + path, 1, 0L);
 	}
 	
 	public String getPath() {
