@@ -30,6 +30,10 @@ public class TaskLauncher {
 	
 	private static Log log = LogFactory.getLog(TaskLauncher.class);
 	
+	public TaskLauncher(Task... tasks) {
+		this.add(tasks);
+	}
+	
 	public TaskLauncher add(Task... tasks) {
 		for (Task task : tasks) {
 			rootTasks.add(task);
