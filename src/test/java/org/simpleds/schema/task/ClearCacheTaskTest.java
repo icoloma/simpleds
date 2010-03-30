@@ -6,7 +6,6 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.schema.task.ClearCacheTask;
 
 public class ClearCacheTaskTest extends AbstractTaskTest {
 
@@ -26,7 +25,7 @@ public class ClearCacheTaskTest extends AbstractTaskTest {
 		action.proceed("/mock-uri", new HashMap<String, String>());
 		// the item in the cache is the result of cleaning the TaskStats data
 		assertEquals(1, action.proceed("/mock-uri", new HashMap<String, String>()));
-		assertEquals(2, memcache.getStatistics().getItemCount());
+		assertEquals(3, memcache.getStatistics().getItemCount());
 	}
 	
 }

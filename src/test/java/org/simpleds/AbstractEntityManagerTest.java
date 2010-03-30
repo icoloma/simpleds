@@ -32,9 +32,10 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 		transactionManager = new TransactionManagerImpl();
 		transactionManager.setDatastoreService(datastoreService);
 		
-		entityManager = new EntityManagerImpl();
-		entityManager.setRepository(repository);
-		entityManager.setDatastoreService(datastoreService);
+		EntityManagerFactory emFactory = new EntityManagerFactory();
+		emFactory.setPersistenceMetadataRepository(repository);
+		emFactory.setDatastoreService(datastoreService);
+		entityManager = (EntityManagerImpl) emFactory.initialize();
 	}
 	
 	/**
