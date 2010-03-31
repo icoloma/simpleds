@@ -2,6 +2,7 @@ package org.simpleds;
 
 import java.util.List;
 
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.SortPredicate;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -43,6 +44,19 @@ public class PagedList<T> {
 	 */
 	public <O> PagedList<O> transform(Function<? super T, ? extends O> function) {
 		PagedList<O> copy = new PagedList<O>(query, Lists.transform(this.data, function));
+		copy.setTotalResults(totalResults);
+		return copy;
+	}
+	
+	/**
+	 * Transform this PagedList of Keys to a similar PagedList of persistent entities, using a single batch call 
+	 * to retrieve the entities data. If this PagedList contains something different from Keys, undefined behavior may occur.
+	 * @param <O> the type of the resulting PagedList, after retrieving the persistent data
+	 * @return a new PagedList instance. The original instance is not modified.
+	 */
+	public <O> PagedList<O> transformToEntities() {
+		List<O> entities = EntityManagerFactory.getEntityManager().get((List<Key>)data);
+		PagedList<O> copy = new PagedList<O>(query, entities);
 		copy.setTotalResults(totalResults);
 		return copy;
 	}
