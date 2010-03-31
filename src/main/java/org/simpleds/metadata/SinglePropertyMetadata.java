@@ -31,12 +31,16 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 	/** the type  of this property object */
 	private Class<?> propertyType;
 	
+	/** true if this property is indexed, false otherwise */
+	private boolean indexed;
+	
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + " { name=" + name + 
 			", getter=" + (getter == null? null : getter.getName()) + 
 			", setter=" + (setter == null? null : setter.getName()) + 
 			", field=" + (field == null? null : field.getName()) + 
+			", indexed=" + indexed + 
 			", converter=" + converter + " }";
 	}
 	
@@ -122,6 +126,14 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 
 	public void setPropertyType(Class<?> propertyType) {
 		this.propertyType = propertyType;
+	}
+
+	public boolean isIndexed() {
+		return indexed;
+	}
+
+	public void setIndexed(boolean indexed) {
+		this.indexed = indexed;
 	}
 
 	

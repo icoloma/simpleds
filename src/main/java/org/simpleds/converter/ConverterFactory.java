@@ -34,7 +34,7 @@ public class ConverterFactory {
 		addConverter(Boolean.class, new NullConverter());
 		addConverter(Short.TYPE, new ShortConverter());
 		addConverter(Short.class, new ShortConverter());
-		addConverter(Integer.TYPE, new IntegerConverter());
+		addConverter(Integer.TYPE, new IntegerConverter().withNullValue(0));
 		addConverter(Integer.class, new IntegerConverter());
 		addConverter(Long.TYPE, new NullConverter());
 		addConverter(Long.class, new NullConverter());

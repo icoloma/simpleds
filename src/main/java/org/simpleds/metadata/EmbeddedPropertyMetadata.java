@@ -64,6 +64,11 @@ public class EmbeddedPropertyMetadata implements PropertyMetadata {
 	}
 	
 	@Override
+	public boolean isIndexed() {
+		return getLastNode().isIndexed();
+	}
+	
+	@Override
 	public Object getValue(Object container) {
 		for (Iterator<SinglePropertyMetadata> i = nodes.iterator(); i.hasNext(); ) {
 			SinglePropertyMetadata node = i.next();
@@ -72,7 +77,7 @@ public class EmbeddedPropertyMetadata implements PropertyMetadata {
 			}
 			container = node.getValue(container);
 			if (container == null) {
-				return null;
+				return getLastNode().getNullValue();
 			}
 		}
 		throw new RuntimeException("Internal error. This code should not be executed");

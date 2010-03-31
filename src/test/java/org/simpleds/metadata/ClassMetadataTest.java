@@ -1,6 +1,7 @@
 package org.simpleds.metadata;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -40,6 +41,14 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 	}
 	
 	@Test
+	public void testUnindexedProperties() throws Exception {
+		assertTrue(metadata.getProperty("name").isIndexed());
+		assertFalse(metadata.getProperty("bigString").isIndexed());
+		assertTrue(metadata.getProperty("int1").isIndexed());
+		assertFalse(metadata.getProperty("int2").isIndexed());
+	}
+	
+	@Test
 	public void testEmbeddedProperties() throws Exception {
 		metadata.getProperty("int2");
 		PropertyMetadata property = metadata.getProperty("int1");
@@ -48,6 +57,7 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 		assertNull(property.getValue(dummy));
 		property.setValue(dummy, Integer.valueOf(1));
 		assertEquals(1, property.getValue(dummy));
+		assertEquals(0, metadata.getProperty("embedded1.int1").getValue(dummy));
 	}
 	
 	@Test
@@ -59,6 +69,7 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 		entity.setProperty("date", d);
 		entity.setProperty("int1", Long.valueOf(1));
 		entity.setProperty("int2", Long.valueOf(2));
+		entity.setProperty("bigString", "foobar");
 		entity.setProperty("xxx", "foobar"); // ignored property that is not mapped
 		Dummy1 dummy = metadata.datastoreToJava(entity);
 		assertEquals(key, dummy.getKey());
@@ -66,6 +77,7 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 		assertSame(d, dummy.getOverridenNameDate());
 		assertEquals(1, dummy.getEmbedded().getInt1());
 		assertEquals(Integer.valueOf(2), dummy.getEmbedded().getEmbedded2().int2);
+		assertEquals("foobar", dummy.getBigString());
 	}
 	
 	@Test

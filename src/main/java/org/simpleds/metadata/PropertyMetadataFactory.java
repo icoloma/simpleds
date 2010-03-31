@@ -7,6 +7,7 @@ import javax.persistence.Column;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.simpleds.annotations.Unindexed;
 
 public class PropertyMetadataFactory {
 
@@ -22,6 +23,7 @@ public class PropertyMetadataFactory {
 			metadata.setGetter(getter);
 			metadata.setSetter(setter);
 			metadata.setField(field);
+			metadata.setIndexed(metadata.getAnnotation(Unindexed.class) == null);
 			
 			// maybe override the column name using a Column annotation
 			Column column = metadata.getAnnotation(Column.class);

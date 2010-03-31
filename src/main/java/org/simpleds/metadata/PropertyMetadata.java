@@ -42,5 +42,10 @@ public interface PropertyMetadata {
 	 * @return the type of the last node in the path
 	 */
 	public Class getPropertyType();
+	
+	/**
+	 * @return true if this property is indexed
+	 */
+	public boolean isIndexed();
 
 }

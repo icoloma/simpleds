@@ -83,6 +83,9 @@ public class SimpleQuery implements Cloneable {
 				expectedClass = Key.class;
 			} else {
 				PropertyMetadata propertyMetadata = classMetadata.getProperty(propertyName);
+				if (!propertyMetadata.isIndexed()) {
+					throw new IllegalArgumentException(propertyName + " is not indexed. Correct your query, or remove @Unindexed and update your existing entities accordingly.");
+				}
 				Converter converter = propertyMetadata.getConverter();
 				if (converter instanceof CollectionConverter) {
 					convertedValue = ((CollectionConverter)converter).itemJavaToDatastore(value);

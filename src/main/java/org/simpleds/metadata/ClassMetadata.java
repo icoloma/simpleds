@@ -106,8 +106,10 @@ public class ClassMetadata {
 			String name = property.getKey();
 			PropertyMetadata metadata = property.getValue();
 			Object value = metadata.getConverter().javaToDatastore(metadata.getValue(javaObject));
-			if (value != null) { // null values are omitted
+			if (metadata.isIndexed()) {
 				entity.setProperty(name, value);
+			} else {
+				entity.setUnindexedProperty(name, value);
 			}
 		}
 		return entity;

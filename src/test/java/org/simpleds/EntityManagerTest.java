@@ -42,6 +42,7 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		Dummy1 retrieved = entityManager.get(dummy.getKey());
 		assertNotNull(retrieved);
 		assertEquals(dummy.getKey(),  retrieved.getKey());
+		assertEquals("foobar", dummy.getBigString());
 	}
 	
 	@Test

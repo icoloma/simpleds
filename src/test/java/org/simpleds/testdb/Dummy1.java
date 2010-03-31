@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import org.simpleds.annotations.MultivaluedIndex;
+import org.simpleds.annotations.Unindexed;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -38,6 +39,9 @@ public class Dummy1 {
 	@Embedded
 	private Embedded1 embedded;
 	
+	@Unindexed
+	private String bigString;
+	
 	/**
 	 * Create a simple dummy key
 	 */
@@ -49,6 +53,7 @@ public class Dummy1 {
 		Dummy1 dummy = new Dummy1();
 		dummy.setName("foo");
 		dummy.setOverridenNameDate(new Date());
+		dummy.setBigString("foobar");
 		return dummy;
 	}
 	
@@ -78,6 +83,14 @@ public class Dummy1 {
 
 	public Embedded1 getEmbedded() {
 		return embedded;
+	}
+
+	public String getBigString() {
+		return bigString;
+	}
+
+	public void setBigString(String bigString) {
+		this.bigString = bigString;
 	}
 	
 	
