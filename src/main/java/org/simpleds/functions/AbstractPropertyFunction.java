@@ -4,7 +4,6 @@ import org.simpleds.EntityManagerFactory;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PropertyMetadata;
 
-import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Function;
 
 /**
@@ -12,18 +11,13 @@ import com.google.common.base.Function;
  * @author icoloma
  *
  */
-public class EntityParentFunction<T> implements Function<T, Key> {
+public abstract class AbstractPropertyFunction<T, P> implements Function<T, P> {
 	
-	private PropertyMetadata keyMetadata;
+	protected PropertyMetadata propertyMetadata;
 	
-	public EntityParentFunction(Class<T> clazz) {
+	public AbstractPropertyFunction(Class<T> clazz, String propertyName) {
 		ClassMetadata classMetadata = EntityManagerFactory.getEntityManager().getClassMetadata(clazz);
-		this.keyMetadata = classMetadata.getKeyProperty();
-	}
-	
-	@Override
-	public Key apply(T instance) {
-		return ((Key)keyMetadata.getValue(instance)).getParent();
+		this.propertyMetadata = propertyName == null? classMetadata.getKeyProperty() : classMetadata.getProperty(propertyName);
 	}
 	
 }
