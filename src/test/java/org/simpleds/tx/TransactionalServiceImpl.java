@@ -22,31 +22,9 @@ public class TransactionalServiceImpl implements TransactionalService {
 	@Transactional
 	public void saveFailure(boolean shouldRollback) {
 		saveWithTwoTx();
-		throwException(shouldRollback);
-	}
-	
-	@Override
-	@Transactional(noRollbackFor=UnsupportedOperationException.class)
-	public void saveWithException(boolean shouldRollback) {
-		saveWithTwoTx();
-		throwException(shouldRollback);
-	}
-	
-	@Override
-	@Transactional(rollbackFor=SecurityException.class)
-	public void saveWithException2(boolean shouldRollback) {
-		saveWithTwoTx();
-		throwException(shouldRollback);
+		throw new SecurityException();
 	}
 
-	private void throwException(boolean shouldRollback) {
-		if (shouldRollback) {
-			throw new SecurityException();
-		} else {
-			throw new UnsupportedOperationException();
-		}
-	}
-	
 	private void saveWithTwoTx() {
 		entityManager.put(entityManager.beginTransaction(), Dummy1.create());
 		entityManager.put(entityManager.beginTransaction(), Dummy1.create());

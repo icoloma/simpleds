@@ -39,15 +39,11 @@ public class TransactionInterceptorTest extends AbstractDatastoreTest {
 	public void testCommit() throws Exception {
 		assertTrue(transactionalService.getClass().getName().startsWith("$Proxy"));
 		assertCommit("saveSuccess");
-		assertCommit("saveWithException");
-		assertCommit("saveWithException2");
 	}
 	
 	@Test
 	public void testRollback() throws Exception {
 		assertRollback("saveFailure");
-		assertRollback("saveWithException");
-		assertRollback("saveWithException2");
 	}
 
 	private void assertCommit(String methodName) throws Exception {

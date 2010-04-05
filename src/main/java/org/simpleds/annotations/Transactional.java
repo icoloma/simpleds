@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 /**
  * Indicates that a method is considered transactional, that is, all managed 
  * transactions should be commited or rolled back after method exit. 
- * By default transactions will be rolled back on any exception, and commited otherwise
+ * 
  * @author Nacho
  *
  */
@@ -19,17 +19,5 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface Transactional {
-	
-	/**
-	 * Indicates which exception types must cause
-	 * a transaction rollback.
-	 */
-	Class<? extends Throwable>[] rollbackFor() default {};
-	
-	/**
-	 * Indicates which exception types must not cause
-	 * a transaction rollback.
-	 */
-	Class<? extends Throwable>[] noRollbackFor() default {};
 	
 }

@@ -40,24 +40,7 @@ public class TransactionInterceptor {
 			"execution(* *(..)) and @annotation(transactional) " 
 	)
 	public void doRollback(Transactional transactional, Exception exception) {
-		boolean rollback = transactional.rollbackFor().length == 0;
-		for (Class<? extends Throwable> exceptionClass : transactional.noRollbackFor()) {
-			if (exceptionClass.isAssignableFrom(exception.getClass())) {
-				rollback = false;
-				break;
-			}
-		}
-		for (Class<? extends Throwable> exceptionClass : transactional.rollbackFor()) {
-			if (exceptionClass.isAssignableFrom(exception.getClass())) {
-				rollback = true;
-				break;
-			}
-		}
-		if (rollback) {
-			transactionManager.rollback();
-		} else {
-			transactionManager.commit();
-		}
+		transactionManager.rollback();
 	}
 
 	public void setTransactionManager(TransactionManager transactionManager) {
