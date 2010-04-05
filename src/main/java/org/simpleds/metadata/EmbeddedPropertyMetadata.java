@@ -77,7 +77,7 @@ public class EmbeddedPropertyMetadata implements PropertyMetadata {
 			}
 			container = node.getValue(container);
 			if (container == null) {
-				return getLastNode().getNullValue();
+				return getLastNode().getConverter().getNullValue();
 			}
 		}
 		throw new RuntimeException("Internal error. This code should not be executed");

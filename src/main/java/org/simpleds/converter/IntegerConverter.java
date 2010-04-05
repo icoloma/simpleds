@@ -1,12 +1,10 @@
 package org.simpleds.converter;
 
-public class IntegerConverter implements Converter<Integer, Long> {
+public class IntegerConverter extends AbstractConverter<Integer, Long> {
 
-	private Integer nullValue;
-	
 	@Override
 	public Integer datastoreToJava(Long persistentValue) {
-		return persistentValue == null? nullValue : persistentValue.intValue();
+		return persistentValue == null? (Integer) nullValue : (Integer) persistentValue.intValue();
 	}
 
 	@Override
@@ -14,9 +12,9 @@ public class IntegerConverter implements Converter<Integer, Long> {
 		return javaValue == null? null : javaValue.longValue();
 	}
 	
-	public IntegerConverter withNullValue(Integer nullValue) {
-		this.nullValue = nullValue;
-		return this;
+	@Override
+	public IntegerConverter setNullValue(Integer nullValue) {
+		return (IntegerConverter) super.setNullValue(nullValue);
 	}
 
 }

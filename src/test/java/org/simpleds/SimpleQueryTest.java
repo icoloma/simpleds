@@ -51,9 +51,14 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		query.equal("date", new Date());
 		query.equal("name", null);
 		query.equal("int1", 2);
-		query.equal("int2", 2);
 		query.equal("__key__", KeyFactory.createKey(Dummy1.class.getSimpleName(), 1));
 		query.sortAsc("name");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testValidateUnindexedProperty() throws Exception {
+		SimpleQuery query = entityManager.createQuery(Dummy1.class);
+		query.equal("int2", 2);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)

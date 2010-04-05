@@ -2,7 +2,7 @@ package org.simpleds.converter;
 
 import java.math.BigDecimal;
 
-public class BigDecimalConverter implements Converter<BigDecimal, String> {
+public class BigDecimalConverter extends AbstractConverter<BigDecimal, String> {
 
 	@Override
 	public BigDecimal datastoreToJava(String persistentValue) {

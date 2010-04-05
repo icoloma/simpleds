@@ -28,6 +28,11 @@ public abstract class AbstractCollectionConverter<C extends Collection> implemen
 		}
 		return collection;
 	}
+	
+	@Override
+	public C getNullValue() {
+		return null;
+	}
 
 	@Override
 	public C javaToDatastore(C javaValue) {

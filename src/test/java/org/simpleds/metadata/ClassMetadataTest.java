@@ -50,14 +50,16 @@ public class ClassMetadataTest extends AbstractDatastoreTest {
 	
 	@Test
 	public void testEmbeddedProperties() throws Exception {
-		metadata.getProperty("int2");
 		PropertyMetadata property = metadata.getProperty("int1");
+		PropertyMetadata embeddedName = metadata.getProperty("embeddedName");
 		assertTrue(property.getConverter() instanceof IntegerConverter);
 		Dummy1 dummy = new Dummy1();
-		assertNull(property.getValue(dummy));
+		assertEquals(0, property.getValue(dummy));
+		assertEquals(null, embeddedName.getValue(dummy));
+		assertEquals(null, metadata.getProperty("int2").getValue(dummy));
+		
 		property.setValue(dummy, Integer.valueOf(1));
 		assertEquals(1, property.getValue(dummy));
-		assertEquals(0, metadata.getProperty("embedded1.int1").getValue(dummy));
 	}
 	
 	@Test

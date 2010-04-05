@@ -4,6 +4,8 @@ import javax.persistence.Embedded;
 
 public class Embedded1 {
 
+	private String embeddedName;
+	
 	private int int1;
 	
 	@Embedded

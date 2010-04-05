@@ -32,16 +32,16 @@ public class ConverterFactory {
 	static {
 		addConverter(Boolean.TYPE, new NullConverter());
 		addConverter(Boolean.class, new NullConverter());
-		addConverter(Short.TYPE, new ShortConverter());
+		addConverter(Short.TYPE, new ShortConverter().setNullValue((short)0));
 		addConverter(Short.class, new ShortConverter());
-		addConverter(Integer.TYPE, new IntegerConverter().withNullValue(0));
+		addConverter(Integer.TYPE, new IntegerConverter().setNullValue(0));
 		addConverter(Integer.class, new IntegerConverter());
-		addConverter(Long.TYPE, new NullConverter());
+		addConverter(Long.TYPE, new NullConverter().setNullValue(0l));
 		addConverter(Long.class, new NullConverter());
-		addConverter(Float.TYPE, new NullConverter());
+		addConverter(Float.TYPE, new NullConverter().setNullValue(0f));
 		addConverter(Float.class, new NullConverter());
 		addConverter(Double.TYPE, new NullConverter());
-		addConverter(Double.class, new NullConverter());
+		addConverter(Double.class, new NullConverter().setNullValue(0d));
 		addConverter(Date.class, new NullConverter());
 		addConverter(String.class, new NullConverter());
 		addConverter(BigDecimal.class, new BigDecimalConverter());

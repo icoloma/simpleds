@@ -1,7 +1,7 @@
 package org.simpleds.converter;
 
 
-public class EnumToStringConverter implements Converter<Enum, String> {
+public class EnumToStringConverter extends AbstractConverter<Enum, String> {
 
 	/** the enum class this converter converts to/from */
 	private Class<Enum> enumClass;

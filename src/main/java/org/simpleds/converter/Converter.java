@@ -18,4 +18,12 @@ public interface Converter<J, D> {
 	 */
 	public D javaToDatastore(J value);
 	
+	/**
+	 * Return the value to use for null values. This method will usually 
+	 * return null, except for embedded primitive values (int, long, etc)
+	 * that will return zero instead.
+	 * @return
+	 */
+	public J getNullValue();
+	
 }

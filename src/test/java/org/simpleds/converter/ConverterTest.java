@@ -21,7 +21,8 @@ public class ConverterTest extends AbstractDatastoreTest {
 		Map<Class, Converter>  converters = (Map<Class, Converter>) convertersField.get(null);
 		for (Converter converter : converters.values()) {
 			assertNull(converter.javaToDatastore(null));
-			assertNull(converter.datastoreToJava(null));
+			Object nullValue = converter instanceof AbstractConverter? ((AbstractConverter) converter).getNullValue() : null;
+			assertEquals(nullValue, converter.datastoreToJava(null));
 		}
 	}
 	
