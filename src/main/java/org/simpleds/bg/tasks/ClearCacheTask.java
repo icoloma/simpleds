@@ -1,21 +1,27 @@
-package org.simpleds.schema.task;
+package org.simpleds.bg.tasks;
 
 import java.util.Map;
 
-import org.simpleds.schema.AbstractTask;
+import org.simpleds.bg.AbstractBackgroundTask;
 
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 /**
- * Delete the memcache contents
+ * Delete the memcache contents. 
  * @author icoloma
  *
  */
-public class ClearCacheTask extends AbstractTask {
+public class ClearCacheTask extends AbstractBackgroundTask {
+	
+	/** the dafult ID of this task */
+	public static final String DEFAULT_ID = "clear-cache";
 
+	/**
+	 * Creates a new instance with id=ClearCacheTask.DEFAULT_ID
+	 */
 	public ClearCacheTask() {
-		super("clear-cache");
+		super(DEFAULT_ID);
 	}
 	
 	private ClearCacheTask(String id) {

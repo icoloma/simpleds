@@ -1,28 +1,23 @@
-package org.simpleds.schema.task;
+package org.simpleds.bg.tasks;
 
-import java.util.List;
 import java.util.Map;
 
-import org.simpleds.schema.AbstractTask;
+import org.simpleds.bg.AbstractBackgroundTask;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultIterator;
-import com.google.common.collect.Lists;
 
 /**
- * Delete all entities returned by a query. This class will use batch operations to improve efficiency,
- * and applies a default batchSize value of 500.
+ * Process entities, one at a time
  * @author icoloma
  *
  */
-public abstract class DeleteTask extends AbstractTask {
+public abstract class IterableTask extends AbstractBackgroundTask {
 
-	public DeleteTask(String id) {
+	public IterableTask(String id) {
 		super(id);
-		withBatchSize(500);
 	}
 	
 	@Override
@@ -32,22 +27,26 @@ public abstract class DeleteTask extends AbstractTask {
 		query.setKeysOnly();
 		PreparedQuery pq = datastoreService.prepare(query);
 		
-		// retrieve the primary keys
-		List<Key> keys = Lists.newArrayListWithExpectedSize(batchSize);
 		QueryResultIterator<Entity> it = pq.asQueryResultIterator(createFetchOptions(params));
+		int count = 0;
 		while (it.hasNext()) {
-			keys.add(it.next().getKey());
+			update(it.next());
+			count++;
 		}
-		datastoreService.delete(keys);
 		
 		// postpone
-		if (keys.size() == batchSize) {
+		if (count == batchSize) {
 			deferProceed(it.getCursor(), uri, params);
 		} else {
 			doNestedTasks(uri, params);
 		}
-		return keys.size();
+		return count;
 	}
+
+	/**
+	 * Update and store the entity
+	 */
+	protected abstract void update(Entity entity);
 
 	/**
 	 * Create the query according to the proposed params

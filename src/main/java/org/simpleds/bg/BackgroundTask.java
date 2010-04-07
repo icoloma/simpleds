@@ -1,4 +1,4 @@
-package org.simpleds.schema;
+package org.simpleds.bg;
 
 import java.util.List;
 import java.util.Map;
@@ -14,9 +14,9 @@ import com.google.appengine.api.datastore.Cursor;
  * invoked, so it must be capable of resuming work. Specifically, a previous execution
  * may have failed at any point.
  * <li>
- * Immutability: When using an static structure, several threads may be 
- * executing tasks at the same time. To be on the safe side of things, once configured 
- * a task should not be modified by data in any servlet request. 
+ * Thread-safe and immutability: When using an static structure, several threads 
+ * may be executing tasks at the same time. A task should not be modified by 
+ * the servlet request. 
  * </li>
  * <li>
  * Break up into smaller parts: tasks should try to complete in 30 seconds or less,
@@ -26,10 +26,13 @@ import com.google.appengine.api.datastore.Cursor;
  * @author icoloma
  *
  */
-public interface Task {
+public interface BackgroundTask {
 	
 	/** the default batch size to use */
 	public static int DEFAULT_BATCH_SIZE = 150;
+	
+	/** the cursor request parameter. Will be not null if this is a deferred task */
+	public static final String CURSOR_PARAM = "cursor";
 
 	/**
 	 * Executes this task. 
@@ -55,12 +58,12 @@ public interface Task {
 	/**
 	 * @return the list of nested tasks 
 	 */
-	public List<Task> getTasks();
+	public List<BackgroundTask> getTasks();
 
 	/**
 	 * Specifies the number of entities to process per execution, default 150
 	 */
-	public Task withBatchSize(int batchSize);
+	public BackgroundTask withBatchSize(int batchSize);
 
 	/**
 	 * Add nested task/s to this instance. The added tasks will be executed after 
@@ -68,14 +71,14 @@ public interface Task {
 	 * @param tasks the list of tasks to add.
 	 * @return this instance, for chaining.
 	 */
-	Task add(Task... tasks);
+	BackgroundTask add(BackgroundTask... tasks);
 
 	/**
 	 * Set the queue name to use. If not specified, the default queue will be used.
 	 * @param queueName the name of the queue to use
 	 * @return this instance, for chaining
 	 */
-	Task withQueue(String queueName);
+	BackgroundTask withQueue(String queueName);
 
 	/**
 	 * @return the Queue to be used by this task when deferring

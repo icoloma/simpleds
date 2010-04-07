@@ -1,4 +1,4 @@
-package org.simpleds.schema.task;
+package org.simpleds.bg.tasks;
 
 import static org.junit.Assert.assertEquals;
 

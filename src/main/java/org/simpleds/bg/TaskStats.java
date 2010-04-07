@@ -1,4 +1,4 @@
-package org.simpleds.schema;
+package org.simpleds.bg;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -80,7 +80,7 @@ public class TaskStats {
 		return result;
 	}
 	
-	public static void start(Task task) {
+	public static void start(BackgroundTask task) {
 		String path = task.getPath();
 		log.info("Entering task: " + path);
 		MemcacheService memcache = getMemcache();
@@ -91,13 +91,13 @@ public class TaskStats {
 		memcache.deleteAll(keys);
 	}
 	
-	public static void end(Task task) {
+	public static void end(BackgroundTask task) {
 		String path = task.getPath();
 		log.info("Task " + path + " completed.");
 		getMemcache().put(END + path, System.currentTimeMillis());
 	}
 	
-	public static void addResults(Task task, long entitiesProcessed) {
+	public static void addResults(BackgroundTask task, long entitiesProcessed) {
 		String path = task.getPath();
 		log.info(path + " processed " + entitiesProcessed + " entities");
 		MemcacheService memcache = getMemcache();

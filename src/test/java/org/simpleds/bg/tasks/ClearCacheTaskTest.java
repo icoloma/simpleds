@@ -1,4 +1,4 @@
-package org.simpleds.schema.task;
+package org.simpleds.bg.tasks;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.simpleds.bg.tasks.ClearCacheTask;
 
 public class ClearCacheTaskTest extends AbstractTaskTest {
 

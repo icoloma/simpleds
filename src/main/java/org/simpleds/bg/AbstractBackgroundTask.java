@@ -1,4 +1,4 @@
-package org.simpleds.schema;
+package org.simpleds.bg;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,9 @@ import com.google.common.collect.Lists;
  * @author icoloma
  *
  */
-public abstract class AbstractTask implements Task {
+public abstract class AbstractBackgroundTask implements BackgroundTask {
+
+	private static final long serialVersionUID = 1L;
 
 	static final char PATH_SEPARATOR = '/'; 
 	
@@ -34,16 +36,16 @@ public abstract class AbstractTask implements Task {
 	protected Integer batchSize;
 
 	/** subtasks that will be executed in parallel after this instance */
-	protected List<Task> tasks = Lists.newArrayList();
+	protected List<BackgroundTask> tasks = Lists.newArrayList();
 	
 	/** the parent task, null if none */
-	protected Task parent;
+	protected BackgroundTask parent;
 	
 	protected DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
 
 	protected Log log = LogFactory.getLog(getClass());
 	
-	protected AbstractTask(String id) {
+	protected AbstractBackgroundTask(String id) {
 		if (id.indexOf(PATH_SEPARATOR) != -1) {
 			throw new IllegalArgumentException("'/' is not allowed as part of id names");
 		}
@@ -53,9 +55,8 @@ public abstract class AbstractTask implements Task {
 	@Override
 	public final long proceed(String uri, Map<String, String> params) {
 		if (batchSize == null) {
-			batchSize = Task.DEFAULT_BATCH_SIZE;
+			batchSize = BackgroundTask.DEFAULT_BATCH_SIZE;
 		}
-		String path = getPath();
 		TaskStats.start(this);
 		long numResults = doProceed(uri, params);
 		TaskStats.addResults(this, numResults);
@@ -65,7 +66,7 @@ public abstract class AbstractTask implements Task {
 	protected abstract long doProceed(String uri, Map<String, String> params);
 	
 	@Override
-	public Task withQueue(String queueName) {
+	public BackgroundTask withQueue(String queueName) {
 		this.queueName = queueName;
 		return this;
 	}
@@ -76,7 +77,7 @@ public abstract class AbstractTask implements Task {
 	 * @return the serialized cursor value, if any. 
 	 */
 	protected Cursor deserializeCursor(Map<String, String> params) {
-		String serializedCursor = params.get(TaskParamNames.CURSOR);
+		String serializedCursor = params.get(CURSOR_PARAM);
 		return serializedCursor == null? null : Cursor.fromWebSafeString(serializedCursor);
 	}
 	
@@ -108,10 +109,10 @@ public abstract class AbstractTask implements Task {
 		// set all params
 		Queue queue = queueName == null? QueueFactory.getDefaultQueue() : QueueFactory.getQueue(queueName);
 		TaskOptions url = TaskOptions.Builder.url(uri); 
-		url.param(TaskParamNames.TASK, getPath());
+		url.param(TasksServlet.TASK_PARAM, getPath());
 		for (Map.Entry<String, String> entry : params.entrySet()) {
 			String key = entry.getKey();
-			if (!key.equals(TaskParamNames.TASK) && !key.equals(TaskParamNames.CURSOR) && entry.getValue() != null) {
+			if (!key.equals(TasksServlet.TASK_PARAM) && !key.equals(CURSOR_PARAM) && entry.getValue() != null) {
 				url.param(key, entry.getValue());
 			}
 		}
@@ -119,7 +120,7 @@ public abstract class AbstractTask implements Task {
 		// add the cursor
 		if (cursor != null) {
 			String sc = cursor.toWebSafeString();
-			url.param(TaskParamNames.CURSOR, sc);
+			url.param(CURSOR_PARAM, sc);
 			log.info("Deferring " + getPath() + " with cursor " + sc);
 		} else {
 			log.info("Deferring " + getPath());
@@ -135,21 +136,21 @@ public abstract class AbstractTask implements Task {
 	 */
 	protected void doNestedTasks(String uri, Map<String, String> params) {
 		TaskStats.end(this);
-		for (Task task : tasks) {
+		for (BackgroundTask task : tasks) {
 			task.deferProceed(null, uri, params);
 		}
 	}
 
 	@Override
-	public Task add(Task... tasks) {
-		for (Task task : tasks) {
+	public BackgroundTask add(BackgroundTask... tasks) {
+		for (BackgroundTask task : tasks) {
 			this.tasks.add(task);
-			((AbstractTask)task).setParent(this);
+			((AbstractBackgroundTask)task).setParent(this);
 		}
 		return this;
 	}
 	
-	public Task withBatchSize(int batchSize) {
+	public BackgroundTask withBatchSize(int batchSize) {
 		this.batchSize = batchSize;
 		return this;
 	}
@@ -162,16 +163,16 @@ public abstract class AbstractTask implements Task {
 		return parent == null? id : parent.getPath() + PATH_SEPARATOR + id;
 	}
 
-	public Task getParent() {
+	public BackgroundTask getParent() {
 		return parent;
 	}
 
-	public void setParent(Task parent) {
+	public void setParent(BackgroundTask parent) {
 		this.parent = parent;
 	}
 
 	@Override
-	public List<Task> getTasks() {
+	public List<BackgroundTask> getTasks() {
 		return tasks;
 	}
 

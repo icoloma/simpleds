@@ -1,4 +1,4 @@
-package org.simpleds.schema.task;
+package org.simpleds.bg.tasks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.schema.TaskParamNames;
-import org.simpleds.schema.task.DeleteTask;
+import org.simpleds.bg.BackgroundTask;
+import org.simpleds.bg.TasksServlet;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
@@ -44,8 +44,8 @@ public class DeleteTaskTest extends AbstractTaskTest {
 		
 		// first execution, should delay work
 		params = parseTaskBody();
-		assertEquals("delete-test", params.get(TaskParamNames.TASK));
-		assertNotNull(params.get(TaskParamNames.CURSOR));
+		assertEquals("delete-test", params.get(TasksServlet.TASK_PARAM));
+		assertNotNull(params.get(BackgroundTask.CURSOR_PARAM));
 
 		// second execution,  finish the work but maybe there is more
 		assertEquals(2, action.proceed("/mock-uri", params));

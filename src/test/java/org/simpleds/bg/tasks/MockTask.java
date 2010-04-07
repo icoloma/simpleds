@@ -1,15 +1,15 @@
-package org.simpleds.schema.task;
+package org.simpleds.bg.tasks;
 
 import java.util.Map;
 
-import org.simpleds.schema.AbstractTask;
+import org.simpleds.bg.AbstractBackgroundTask;
 
 /**
  * Doe snot do anything
  * @author icoloma
  *
  */
-public class MockTask extends AbstractTask {
+public class MockTask extends AbstractBackgroundTask {
 
 	public MockTask() {
 		super("mock-action");

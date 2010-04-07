@@ -1,4 +1,4 @@
-package org.simpleds.schema.task;
+package org.simpleds.bg.tasks;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.schema.task.IterableTask;
+import org.simpleds.bg.tasks.IterableTask;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;

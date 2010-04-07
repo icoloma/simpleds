@@ -1,8 +1,8 @@
-package org.simpleds.schema.task;
+package org.simpleds.bg.tasks;
 
 import java.util.Map;
 
-import org.simpleds.schema.AbstractTask;
+import org.simpleds.bg.AbstractBackgroundTask;
 
 import com.google.appengine.api.datastore.Key;
 
@@ -12,7 +12,7 @@ import com.google.appengine.api.datastore.Key;
  * @author icoloma
  *
  */
-public class DeleteByKeysAction extends AbstractTask {
+public class DeleteByKeysAction extends AbstractBackgroundTask {
 
 	protected Key[] keys;
 	
