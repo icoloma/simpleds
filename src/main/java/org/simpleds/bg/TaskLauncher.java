@@ -34,9 +34,6 @@ public class TaskLauncher {
 	 */
 	public TaskLauncher add(BackgroundTask... tasks) {
 		for (BackgroundTask task : tasks) {
-			if (this.tasks.containsKey(task.getId())) {
-				throw new IllegalArgumentException("Attempted to register two root tasks with the same id: " + task.getId());
-			}
 			this.tasks.put(task.getId(), task);
 		}
 		log.info("Registered tasks: " + this.tasks.keySet());
