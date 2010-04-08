@@ -1,13 +1,11 @@
 package org.simpleds.bg;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.appengine.repackaged.com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -20,30 +18,34 @@ public class TaskLauncher {
 	
 	private static final long serialVersionUID = 1L;
 
-	/** repository of all tasks to process */
+	/** list of registered tasks */
 	private Map<String, BackgroundTask> tasks = Maps.newHashMap();
-	
-	/** list of root tasks */
-	private List<BackgroundTask> rootTasks = Lists.newArrayList();
 	
 	private static Log log = LogFactory.getLog(TaskLauncher.class);
 	
 	public TaskLauncher(BackgroundTask... tasks) {
 		this.add(tasks);
 	}
-	
+
+	/**
+	 * Add a series of tasks
+	 */
 	public TaskLauncher add(BackgroundTask... tasks) {
 		for (BackgroundTask task : tasks) {
-			if (this.tasks.containsKey(task.getPath())) {
-				throw new IllegalArgumentException("Attempted to register two root tasks with the same id: " + task.getPath());
+			if (this.tasks.containsKey(task.getId())) {
+				throw new IllegalArgumentException("Attempted to register two root tasks with the same id: " + task.getId());
 			}
-			rootTasks.add(task);
-			this.tasks.put(task.getPath(), task);
-			for (BackgroundTask nested : task.getTasks()) {
-				this.tasks.put(nested.getPath(), nested);
-			}
+			this.tasks.put(task.getId(), task);
 		}
 		log.info("Registered tasks: " + this.tasks.keySet());
+		return this;
+	}
+	
+	/**
+	 * Remove a task by its ID
+	 */
+	public TaskLauncher remove(String taskID) {
+		tasks.remove(taskID);
 		return this;
 	}
 	
@@ -90,12 +92,12 @@ public class TaskLauncher {
 	 * @param taskId the id of the task to launch. 
 	 * @param params the params to pass to the task
 	 */
-	public long launch(String uri, String taskId, Map<String, String> params) {
-		BackgroundTask task = tasks.get(taskId);
+	public long launch(TaskRequest request) {
+		BackgroundTask task = tasks.get(request.getTaskId());
 		if (task == null) {
-			throw new IllegalArgumentException("Could not find task: " + taskId);
+			throw new IllegalArgumentException("Could not find task: " + request.getTaskId());
 		}
-		return task.proceed(uri, params);
+		return task.proceed(request);
 	}
 	
 }

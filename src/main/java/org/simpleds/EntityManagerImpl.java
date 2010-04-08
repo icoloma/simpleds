@@ -17,6 +17,7 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -103,19 +104,28 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> List<T> find(SimpleQuery simpleQuery) {
-		Query query = simpleQuery.getQuery();
-		
-		// check that all constraints and sort properties belong to this schema
-		ClassMetadata metadata = simpleQuery.getClassMetadata();
-		
-		PreparedQuery preparedQuery = datastoreService.prepare(simpleQuery.getTransaction(), query);
-		FetchOptions fetchOptions = simpleQuery.getFetchOptions();
-		Iterable<Entity> entities = fetchOptions == null? preparedQuery.asIterable() : preparedQuery.asIterable(fetchOptions);
 		List result = Lists.newArrayList();
-		for (Entity entity : entities) {
-			result.add(query.isKeysOnly()? entity.getKey() : (T)metadata.datastoreToJava(entity));
+		SimpleQueryResultIterable<T> iterable = asIterable(simpleQuery);
+		for (T item : iterable) {
+			result.add(item);
 		}
 		return result;
+	}
+	
+	@Override
+	public <T> SimpleQueryResultIterable<T> asIterable(SimpleQuery simpleQuery) {
+		Query query = simpleQuery.getQuery();
+		ClassMetadata metadata = simpleQuery.getClassMetadata();
+		PreparedQuery preparedQuery = datastoreService.prepare(simpleQuery.getTransaction(), query);
+		FetchOptions fetchOptions = simpleQuery.getFetchOptions();
+		QueryResultIterable<Entity> iterable = fetchOptions == null? preparedQuery.asQueryResultIterable() : preparedQuery.asQueryResultIterable(fetchOptions);
+		return new SimpleQueryResultIterableImpl<T>(metadata, iterable).setKeysOnly(simpleQuery.isKeysOnly());
+	}
+	
+	@Override
+	public <T> SimpleQueryResultIterator<T> asIterator(SimpleQuery simpleQuery) {
+		SimpleQueryResultIterable<T> iterable = asIterable(simpleQuery);
+		return iterable.iterator();
 	}
 	
 	@Override

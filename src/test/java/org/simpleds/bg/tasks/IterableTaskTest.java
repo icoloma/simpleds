@@ -1,60 +1,55 @@
 package org.simpleds.bg.tasks;
 
 import static org.junit.Assert.assertEquals;
-
-import java.util.Map;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.bg.tasks.IterableTask;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.FilterOperator;
-import com.google.appengine.repackaged.com.google.common.collect.Maps;
+import org.simpleds.SimpleQuery;
+import org.simpleds.bg.TaskRequest;
+import org.simpleds.testdb.Dummy1;
 
 public class IterableTaskTest extends AbstractTaskTest {
 
-	private IterableTask action;
+	private IterableTask<Dummy1> task;
 	
 	@Before
 	public void prepareTest() {
-		action = new IterableTask("set-foo") {
-			
+		task = new IterableTask<Dummy1>("set-foo") {
+
 			@Override
-			protected void update(Entity entity) {
-				entity.setProperty("foo", Boolean.TRUE);
-				datastoreService.put(entity);
+			protected SimpleQuery createQuery(TaskRequest request) {
+				return entityManager.createQuery(Dummy1.class);
 			}
-			
+
 			@Override
-			protected Query createQuery(Map<String, String> params) {
-				return new Query("myclass");
+			protected void process(Dummy1 entity, TaskRequest request) {
+				entity.setName("processed");
+				entityManager.put(entity);
 			}
 		};
-		action.withBatchSize(2);
+		task.withBatchSize(2);
 		
 		for (int i = 0; i < 3; i++) {
-			Entity entity = new Entity("myclass");
-			datastoreService.put(entity);
+			entityManager.put(Dummy1.create());
 		}
 	}
 	
 	@Test
 	public void testProceed() {
 		assertEntitiesProcessed(0);
-		Map<String, String> params = Maps.newHashMap();
-		assertEquals(2, action.proceed("/mock-uri", params));
+		assertEquals(2, task.proceed(request));
 		assertEntitiesProcessed(2);
+		assertNotNull(request.getCursor());
+		assertQueueEntries(1);
 		
-		// first execution, should delay work
-		params = parseTaskBody();
-		assertEquals(1, action.proceed("/mock-uri", params));
+		// second execution
+		assertEquals(1, task.proceed(request));
 		assertEntitiesProcessed(3);
-        assertQueueEmpty();
 	}
 	
 	private void assertEntitiesProcessed(int count) {
-		assertEquals(count, datastoreService.prepare(new Query("myclass").addFilter("foo", FilterOperator.EQUAL, Boolean.TRUE)).countEntities());
+		SimpleQuery query = entityManager.createQuery(Dummy1.class).equal("name", "processed");
+		assertEquals(count, entityManager.count(query));
 	}
 }

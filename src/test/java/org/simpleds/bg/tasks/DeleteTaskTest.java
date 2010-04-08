@@ -3,29 +3,26 @@ package org.simpleds.bg.tasks;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.bg.BackgroundTask;
-import org.simpleds.bg.TasksServlet;
+import org.simpleds.bg.TaskRequest;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.repackaged.com.google.common.collect.Maps;
 
 public class DeleteTaskTest extends AbstractTaskTest {
 
-	private DeleteTask action;
+	private DeleteTask task;
 	
 	@Before
 	public void prepareTest() {
-		action = new DeleteTask("delete-test") {
+		task = new DeleteTask("delete-test") {
 			
 			@Override
-			protected Query createQuery(Map<String, String> params) {
+			protected Query createQuery(TaskRequest request) {
 				return new Query("foo");
 			}
+			
 		};
 		
 		for (int i = 0; i < 4; i++) {
@@ -36,34 +33,31 @@ public class DeleteTaskTest extends AbstractTaskTest {
 	
 	@Test
 	public void testProceed() {
-		action.withBatchSize(2);
-		assertEntitiesCount(4);
-		Map<String, String> params = Maps.newHashMap();
-		assertEquals(2, action.proceed("/mock-uri", params));
-		assertEntitiesCount(2);
-		
 		// first execution, should delay work
-		params = parseTaskBody();
-		assertEquals("delete-test", params.get(TasksServlet.TASK_PARAM));
-		assertNotNull(params.get(BackgroundTask.CURSOR_PARAM));
+		task.withBatchSize(2);
+		assertEntitiesCount(4);
+		assertEquals(2, task.proceed(request));
+		assertEntitiesCount(2);
+		assertQueueEntries(1);
+		
+		assertNotNull(request.getCursor());
 
 		// second execution,  finish the work but maybe there is more
-		assertEquals(2, action.proceed("/mock-uri", params));
+		assertEquals(2, task.proceed(request));
 		assertEntitiesCount(0);
+		assertQueueEntries(2);
 		
 		// third execution, empty
-		params = parseTaskBody();
-		assertEquals(0, action.proceed("/mock-uri", params));
-        assertQueueEmpty();
+		assertEquals(0, task.proceed(request));
+		assertQueueEntries(2);
 	}
 	
 	@Test
 	public void testBigBatch() {
 		assertEntitiesCount(4);
-		Map<String, String> params = Maps.newHashMap();
-		assertEquals(4, action.proceed("/mock-uri", params));
+		assertEquals(4, task.proceed(request));
 		assertEntitiesCount(0);
-		assertQueueEmpty();
+		assertQueueEntries(0);
 	}
 
 	private void assertEntitiesCount(int count) {

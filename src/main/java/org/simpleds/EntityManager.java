@@ -255,5 +255,19 @@ public interface EntityManager {
 	 * @return the created {@link Transaction}
 	 */
 	public Transaction beginTransaction();
+
+	/** 
+	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterable} of java objects
+	 * @param query the query to execute
+	 * @return the list of resulting java entities
+	 */
+	public <T> SimpleQueryResultIterable<T> asIterable(SimpleQuery simpleQuery);
 	
+	/** 
+	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterator} of java objects
+	 * @param query the query to execute
+	 * @return the list of resulting java entities
+	 */
+	public <T> SimpleQueryResultIterator<T> asIterator(SimpleQuery simpleQuery);
+
 }

@@ -1,44 +1,47 @@
 package org.simpleds.bg.tasks;
 
-import java.util.Map;
-
+import org.simpleds.EntityManager;
+import org.simpleds.EntityManagerFactory;
+import org.simpleds.SimpleQuery;
+import org.simpleds.SimpleQueryResultIterator;
 import org.simpleds.bg.AbstractBackgroundTask;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.QueryResultIterator;
+import org.simpleds.bg.TaskRequest;
 
 /**
- * Process entities, one at a time
+ * Process SimpleDS entities, one at a time
+ * 
  * @author icoloma
  *
  */
-public abstract class IterableTask extends AbstractBackgroundTask {
+public abstract class IterableTask<T> extends AbstractBackgroundTask {
 
+	protected EntityManager entityManager;
+	
 	public IterableTask(String id) {
 		super(id);
 	}
 	
 	@Override
-	public long doProceed(String uri, Map<String, String> params) {
-		// execute the query and locate the cursor, if any
-		Query query = createQuery(params);
-		query.setKeysOnly();
-		PreparedQuery pq = datastoreService.prepare(query);
+	public long doProceed(TaskRequest request) {
+		if (entityManager == null) {
+			entityManager = EntityManagerFactory.getEntityManager();
+		}
 		
-		QueryResultIterator<Entity> it = pq.asQueryResultIterator(createFetchOptions(params));
+		// execute the query and locate the cursor, if any
+		SimpleQuery query = createQuery(request).withFetchOptions(createFetchOptions(request));
+		
+		SimpleQueryResultIterator<T> it = entityManager.asIterator(query);
 		int count = 0;
 		while (it.hasNext()) {
-			update(it.next());
+			process(it.next(), request);
 			count++;
 		}
 		
 		// postpone
 		if (count == batchSize) {
-			deferProceed(it.getCursor(), uri, params);
+			deferProceed(request.withCursor(it.getCursor()));
 		} else {
-			doNestedTasks(uri, params);
+			notifyFinalization();
 		}
 		return count;
 	}
@@ -46,11 +49,15 @@ public abstract class IterableTask extends AbstractBackgroundTask {
 	/**
 	 * Update and store the entity
 	 */
-	protected abstract void update(Entity entity);
+	protected abstract void process(T entity, TaskRequest request);
 
 	/**
 	 * Create the query according to the proposed params
 	 */
-	protected abstract Query createQuery(Map<String, String> params);
+	protected abstract SimpleQuery createQuery(TaskRequest request);
+
+	public void setEntityManager(EntityManager entityManager) {
+		this.entityManager = entityManager;
+	}
 	
 }

@@ -1,8 +1,5 @@
 package org.simpleds.bg;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -13,7 +10,6 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
-import com.google.common.collect.Lists;
 
 /**
  * Common superclass
@@ -22,10 +18,6 @@ import com.google.common.collect.Lists;
  */
 public abstract class AbstractBackgroundTask implements BackgroundTask {
 
-	private static final long serialVersionUID = 1L;
-
-	static final char PATH_SEPARATOR = '/'; 
-	
 	/** the id of this task */
 	protected String id;
 	
@@ -35,50 +27,31 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	/** the number of entities to process by each invocation, default 150 */
 	protected Integer batchSize;
 
-	/** subtasks that will be executed in parallel after this instance */
-	protected List<BackgroundTask> tasks = Lists.newArrayList();
-	
-	/** the parent task, null if none */
-	protected BackgroundTask parent;
-	
 	protected DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
 
 	protected Log log = LogFactory.getLog(getClass());
 	
 	protected AbstractBackgroundTask(String id) {
-		if (id.indexOf(PATH_SEPARATOR) != -1) {
-			throw new IllegalArgumentException("'/' is not allowed as part of id names");
-		}
 		this.id = id;
 	}
 
 	@Override
-	public final long proceed(String uri, Map<String, String> params) {
+	public final long proceed(TaskRequest request) {
 		if (batchSize == null) {
 			batchSize = BackgroundTask.DEFAULT_BATCH_SIZE;
 		}
 		TaskStats.start(this);
-		long numResults = doProceed(uri, params);
+		long numResults = doProceed(request);
 		TaskStats.addResults(this, numResults);
 		return numResults;
 	}
 
-	protected abstract long doProceed(String uri, Map<String, String> params);
+	protected abstract long doProceed(TaskRequest request);
 	
 	@Override
 	public BackgroundTask withQueue(String queueName) {
 		this.queueName = queueName;
 		return this;
-	}
-	
-
-	/**
-	 * @param params the params of the current request
-	 * @return the serialized cursor value, if any. 
-	 */
-	protected Cursor deserializeCursor(Map<String, String> params) {
-		String serializedCursor = params.get(CURSOR_PARAM);
-		return serializedCursor == null? null : Cursor.fromWebSafeString(serializedCursor);
 	}
 	
 	/**
@@ -88,9 +61,9 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	 * @param params the parameters map received by the servlet
 	 * @return 
 	 */
-	protected FetchOptions createFetchOptions(Map<String, String> params) {
+	protected FetchOptions createFetchOptions(TaskRequest request) {
 		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(batchSize);
-		Cursor cursor = deserializeCursor(params);
+		Cursor cursor = request.getCursor();
 		if (cursor != null) {
 			fetchOptions = fetchOptions.cursor(cursor);
 		}
@@ -101,53 +74,25 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	 * Defer task execution to another subsequent request 
 	 * @param cursor the cursor to continue at, null if none
 	 */
-	public void deferProceed(Cursor cursor, String uri, Map<String, String> params) {
-		if (uri == null) {
-			throw new IllegalArgumentException("uri must be specified");
+	public void deferProceed(TaskRequest request) {
+		log.info("Deferring " + getId() + " with cursor " + request.getCursor() == null? "<none>" : request.getCursor().toWebSafeString());
+		TaskOptions url = TaskOptions.Builder.url(request.getUri()); 
+		for (String paramName : request.getParameterNames()) {
+			url.param(paramName, request.getParameter(paramName));
 		}
-		
-		// set all params
-		Queue queue = queueName == null? QueueFactory.getDefaultQueue() : QueueFactory.getQueue(queueName);
-		TaskOptions url = TaskOptions.Builder.url(uri); 
-		url.param(TasksServlet.TASK_PARAM, getPath());
-		for (Map.Entry<String, String> entry : params.entrySet()) {
-			String key = entry.getKey();
-			if (!key.equals(TasksServlet.TASK_PARAM) && !key.equals(CURSOR_PARAM) && entry.getValue() != null) {
-				url.param(key, entry.getValue());
-			}
-		}
-
-		// add the cursor
-		if (cursor != null) {
-			String sc = cursor.toWebSafeString();
-			url.param(CURSOR_PARAM, sc);
-			log.info("Deferring " + getPath() + " with cursor " + sc);
-		} else {
-			log.info("Deferring " + getPath());
-		}
-
-		
-		queue.add(url);
+		getQueue().add(url);
+	}
+	
+	protected Queue getQueue() {
+		return queueName == null? QueueFactory.getDefaultQueue() : QueueFactory.getQueue(queueName);
 	}
 
 	/**
 	 * Process nested tasks
 	 * This should be invoked after task completion
 	 */
-	protected void doNestedTasks(String uri, Map<String, String> params) {
+	protected void notifyFinalization() {
 		TaskStats.end(this);
-		for (BackgroundTask task : tasks) {
-			task.deferProceed(null, uri, params);
-		}
-	}
-
-	@Override
-	public BackgroundTask add(BackgroundTask... tasks) {
-		for (BackgroundTask task : tasks) {
-			this.tasks.add(task);
-			((AbstractBackgroundTask)task).setParent(this);
-		}
-		return this;
 	}
 	
 	public BackgroundTask withBatchSize(int batchSize) {
@@ -159,21 +104,8 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	 * @return the nested path of this task. This path can be used to execute strictly this task when deferring work. 
 	 */
 	@Override
-	public String getPath() {
-		return parent == null? id : parent.getPath() + PATH_SEPARATOR + id;
-	}
-
-	public BackgroundTask getParent() {
-		return parent;
-	}
-
-	public void setParent(BackgroundTask parent) {
-		this.parent = parent;
-	}
-
-	@Override
-	public List<BackgroundTask> getTasks() {
-		return tasks;
+	public String getId() {
+		return id;
 	}
 
 	@Override

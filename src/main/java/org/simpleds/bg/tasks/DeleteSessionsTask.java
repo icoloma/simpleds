@@ -1,7 +1,8 @@
 package org.simpleds.bg.tasks;
 
 import java.util.Date;
-import java.util.Map;
+
+import org.simpleds.bg.TaskRequest;
 
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -36,17 +37,17 @@ public class DeleteSessionsTask extends DeleteTask {
 	}
 
 	@Override
-	protected Query createQuery(Map<String, String> params) {
+	protected Query createQuery(TaskRequest request) {
 		// get the timestamp
-		String sTimestamp = params.get(TIMESTAMP_PARAM);
+		String sTimestamp = request.getParameter(TIMESTAMP_PARAM);
 		long timestamp;
 		if (sTimestamp == null) {
 			timestamp = System.currentTimeMillis();
-			params.put(TIMESTAMP_PARAM, String.valueOf(timestamp));
+			request.setParameter(TIMESTAMP_PARAM, String.valueOf(timestamp));
 		} else {
 			timestamp = Long.valueOf(sTimestamp);
 		}
-		log.info("Deleting sessions expired before " + new Date(timestamp));
+		log.info("Deleting sessions where _expired <= " + new Date(timestamp));
 		
 		// create the query
 		return new Query("_ah_SESSION").addFilter("_expires", FilterOperator.LESS_THAN_OR_EQUAL, timestamp);

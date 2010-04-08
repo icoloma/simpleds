@@ -165,6 +165,11 @@ public class PagedQuery extends SimpleQuery {
 		return super.withCursor(cursor);
 	}
 	
+	@Override
+	public PagedQuery withFetchOptions(FetchOptions fetchOptions) {
+		return (PagedQuery) super.withFetchOptions(fetchOptions);
+	}
+	
 	public PagedQuery setPageSize(int pageSize) {
 		this.pageSize = pageSize;
 		return this;

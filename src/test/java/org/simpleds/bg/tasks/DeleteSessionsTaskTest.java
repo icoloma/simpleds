@@ -7,10 +7,11 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.bg.BackgroundTask;
+import org.simpleds.bg.TaskRequest;
 
 import com.google.appengine.api.datastore.Entity;
 
-public class DeleteSessionsTest extends AbstractTaskTest {
+public class DeleteSessionsTaskTest extends AbstractTaskTest {
 
 	private BackgroundTask task;
 	
@@ -24,9 +25,10 @@ public class DeleteSessionsTest extends AbstractTaskTest {
 	
 	@Test
 	public void test() {
-		assertEquals(2, task.proceed("/", new HashMap<String, String>()));
-		assertEquals(1, task.proceed("/", new HashMap<String, String>()));
-		assertEquals(0, task.proceed("/", new HashMap<String, String>()));
+		TaskRequest request = new TaskRequest("/", new HashMap<String, String>());
+		assertEquals(2, task.proceed(request));
+		assertEquals(1, task.proceed(request));
+		assertEquals(0, task.proceed(request));
 	}
 
 	/**

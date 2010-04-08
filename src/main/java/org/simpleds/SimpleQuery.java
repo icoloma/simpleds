@@ -221,6 +221,11 @@ public class SimpleQuery implements Cloneable {
 		return this;
 	}
 	
+	public SimpleQuery withFetchOptions(FetchOptions fetchOptions) {
+		this.fetchOptions = fetchOptions;
+		return this;
+	}
+	
 	/**
 	 * Convenience method that acts as withCursor(Cursor), but accepts a cursor serialized as String 
 	 */

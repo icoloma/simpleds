@@ -81,7 +81,7 @@ public class TaskStats {
 	}
 	
 	public static void start(BackgroundTask task) {
-		String path = task.getPath();
+		String path = task.getId();
 		log.info("Entering task: " + path);
 		MemcacheService memcache = getMemcache();
 		memcache.put(START + path, System.currentTimeMillis(), null, SetPolicy.ADD_ONLY_IF_NOT_PRESENT);
@@ -92,13 +92,13 @@ public class TaskStats {
 	}
 	
 	public static void end(BackgroundTask task) {
-		String path = task.getPath();
+		String path = task.getId();
 		log.info("Task " + path + " completed.");
 		getMemcache().put(END + path, System.currentTimeMillis());
 	}
 	
 	public static void addResults(BackgroundTask task, long entitiesProcessed) {
-		String path = task.getPath();
+		String path = task.getId();
 		log.info(path + " processed " + entitiesProcessed + " entities");
 		MemcacheService memcache = getMemcache();
 		memcache.increment(ENTITIES + path, entitiesProcessed, 0L);

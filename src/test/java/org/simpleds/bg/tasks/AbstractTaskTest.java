@@ -2,51 +2,40 @@ package org.simpleds.bg.tasks;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Map;
+import java.util.HashMap;
 
-import org.simpleds.test.AbstractDatastoreTest;
+import org.junit.After;
+import org.junit.Before;
+import org.simpleds.AbstractEntityManagerTest;
+import org.simpleds.bg.TaskRequest;
 
 import com.google.appengine.api.labs.taskqueue.dev.QueueStateInfo;
 import com.google.appengine.api.labs.taskqueue.dev.QueueStateInfo.TaskStateInfo;
-import com.google.appengine.repackaged.com.google.common.collect.Maps;
 
-public abstract class AbstractTaskTest extends AbstractDatastoreTest {
+public abstract class AbstractTaskTest extends AbstractEntityManagerTest {
 
-	public void assertQueueEmpty() {
-		QueueStateInfo qsi = queue.getQueueStateInfo().get("default");
-		assertEquals(0, qsi.getTaskInfo().size());
+	protected TaskRequest request;
+	
+	@Before
+	public void initTaskRequest() {
+		request = new TaskRequest("/", new HashMap<String, String>());
 	}
 	
-	/**
-	 * Parses the first entry in the queue and removes it
-	 */
-	protected Map<String, String> parseTaskBody() {
-		try {
-			QueueStateInfo qsi = queue.getQueueStateInfo().get("default");
-			assertEquals(1, qsi.getTaskInfo().size());
-			TaskStateInfo task = qsi.getTaskInfo().get(0);
-			String body = task.getBody();
-			Map<String, String> result = Maps.newHashMap();
-			for (String part : body.split("&")) {
-				String[] s = part.split("=");
-				result.put(s[0], URLDecoder.decode(s[1], "UTF-8"));
-			}
-			clearQueue();
-			return result;
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException();
-		}
-	}
-	
-	protected void clearQueue() {
+	@After
+	public void cleanQueue() {
 		QueueStateInfo qsi = queue.getQueueStateInfo().get("default");
 		for (TaskStateInfo task: qsi.getTaskInfo()) {
 			queue.deleteTask("default", task.getTaskName());
 		}
-		assertEquals(0, queue.getQueueStateInfo().get("default").getCountTasks());
+		// assertEquals(0, queue.getQueueStateInfo().get("default").getCountTasks());
 	}
 	
-
+	/**
+	 * Checks that there are n entries in the queue
+	 */
+	public void assertQueueEntries(int entriesCount) {
+		QueueStateInfo qsi = queue.getQueueStateInfo().get("default");
+		assertEquals(entriesCount, qsi.getTaskInfo().size());
+	}
+	
 }
