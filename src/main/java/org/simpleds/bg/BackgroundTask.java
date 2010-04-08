@@ -3,7 +3,7 @@ package org.simpleds.bg;
 
 /**
  * Unit of work on the Datastore. 
- * Implementing classes must take the following into consideration:
+ * Implementing classes must include:
  * <ul>
  * <li>
  * Idempotence: It is impossible to know in advance how many times a task will be 
@@ -12,7 +12,7 @@ package org.simpleds.bg;
  * <li>
  * Thread-safe and immutability: When using an static structure, several threads 
  * may be executing tasks at the same time. A task should not be modified by 
- * the servlet request. 
+ * the {@link TaskRequest} contents. 
  * </li>
  * <li>
  * Break up into smaller parts: tasks should try to complete in 30 seconds or less,
@@ -29,8 +29,8 @@ public interface BackgroundTask {
 
 	/**
 	 * Executes this task. 
-	 * @param uri The queue invocation uri 
-	 * @return the number of processed entities
+	 * @param request the task request
+	 * @return the number of entities processed in this batch execution
 	 */
 	public long proceed(TaskRequest request);
 	

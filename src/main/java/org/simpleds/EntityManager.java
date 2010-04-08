@@ -261,13 +261,13 @@ public interface EntityManager {
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
 	 */
-	public <T> SimpleQueryResultIterable<T> asIterable(SimpleQuery simpleQuery);
+	public <T> SimpleQueryResultIterable<T> asIterable(SimpleQuery query);
 	
 	/** 
 	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterator} of java objects
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
 	 */
-	public <T> SimpleQueryResultIterator<T> asIterator(SimpleQuery simpleQuery);
+	public <T> SimpleQueryResultIterator<T> asIterator(SimpleQuery query);
 
 }

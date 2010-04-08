@@ -22,7 +22,7 @@ public interface Converter<J, D> {
 	 * Return the value to use for null values. This method will usually 
 	 * return null, except for embedded primitive values (int, long, etc)
 	 * that will return zero instead.
-	 * @return
+	 * @return The value to use in Java in case the datastore value is null.
 	 */
 	public J getNullValue();
 	

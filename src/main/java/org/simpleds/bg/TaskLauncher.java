@@ -87,10 +87,8 @@ public class TaskLauncher {
 	}
 
 	/**
-	 * Launch a specific task ID.
-	 * @param uri the uri to use for enqueueing deferred tasks
-	 * @param taskId the id of the task to launch. 
-	 * @param params the params to pass to the task
+	 * Launch a specific task
+	 * @param request the TaskRequest to execute
 	 */
 	public long launch(TaskRequest request) {
 		BackgroundTask task = tasks.get(request.getTaskId());
