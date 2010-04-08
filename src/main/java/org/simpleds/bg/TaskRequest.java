@@ -18,10 +18,10 @@ import com.google.common.collect.Maps;
 public class TaskRequest implements Cloneable {
 
 	/** the id of the task to execute */
-	private static final String TASK_PARAM = "_task";
+	public static final String TASK_PARAM = "_task";
 	
 	/** the cursor request parameter. Will be not null if this is a deferred task */
-	private static final String CURSOR_PARAM = "_cursor";
+	public static final String CURSOR_PARAM = "_cursor";
 
 	/** the URI that received this request */
 	private String uri;

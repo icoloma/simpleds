@@ -24,7 +24,9 @@ public class TaskLauncher {
 	private static Log log = LogFactory.getLog(TaskLauncher.class);
 	
 	public TaskLauncher(BackgroundTask... tasks) {
-		this.add(tasks);
+		if (tasks != null && tasks.length > 0) {
+			this.add(tasks);
+		}
 	}
 
 	/**

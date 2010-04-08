@@ -76,9 +76,8 @@ public class TaskServlet extends HttpServlet {
 		return taskLauncher;
 	}
 	
-	public TaskServlet add(BackgroundTask... tasks) {
+	public static void add(BackgroundTask... tasks) {
 		taskLauncher.add(tasks);
-		return this;
 	}
 	
 	@Override
