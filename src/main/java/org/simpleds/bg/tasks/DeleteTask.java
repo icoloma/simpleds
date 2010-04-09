@@ -22,7 +22,6 @@ public abstract class DeleteTask extends AbstractBackgroundTask {
 
 	public DeleteTask(String id) {
 		super(id);
-		withBatchSize(500);
 	}
 	
 	@Override

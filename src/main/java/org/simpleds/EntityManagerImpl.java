@@ -314,9 +314,9 @@ public class EntityManagerImpl implements EntityManager {
 	public <T> List<T> get(Transaction transaction, Iterable<Key> keys) {
 		Map<Key, Entity> entities = datastoreService.get(transaction, keys);
 		List<T> result = Lists.newArrayList();
-		for (Map.Entry<Key, Entity> entry : entities.entrySet()) {
-			ClassMetadata metadata = repository.get(entry.getKey().getKind());
-			T javaObject = (T) metadata.datastoreToJava(entry.getValue());
+		for (Key key : keys) {
+			ClassMetadata metadata = repository.get(key.getKind());
+			T javaObject = (T) metadata.datastoreToJava(entities.get(key));
 			result.add(javaObject);
 		}
 		return result;

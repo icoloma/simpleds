@@ -40,7 +40,9 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 		if (batchSize == null) {
 			batchSize = BackgroundTask.DEFAULT_BATCH_SIZE;
 		}
-		TaskStats.start(this);
+		if (request.getCursor() == null) {
+			TaskStats.start(this);
+		}
 		long numResults = doProceed(request);
 		TaskStats.addResults(this, numResults);
 		return numResults;

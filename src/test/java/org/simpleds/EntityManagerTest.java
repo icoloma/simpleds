@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.simpleds.exception.RequiredFieldException;
+import org.simpleds.functions.EntityToKeyFunction;
 import org.simpleds.testdb.Child;
 import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
@@ -19,6 +20,8 @@ import org.simpleds.testdb.Root;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 
 public class EntityManagerTest extends AbstractEntityManagerTest {
 
@@ -43,6 +46,25 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		assertNotNull(retrieved);
 		assertEquals(dummy.getKey(),  retrieved.getKey());
 		assertEquals("foobar", dummy.getBigString());
+	}
+	
+	@Test
+	public void testMultipleGet() {
+		Dummy1 dummy1 = Dummy1.create();
+		Dummy1 dummy2 = Dummy1.create();
+		ImmutableList<Dummy1> dummies = ImmutableList.of(dummy1, dummy2);
+		entityManager.put(dummies);
+		
+		// same order
+		List<Dummy1> retrieved = entityManager.get(Collections2.transform(dummies, new EntityToKeyFunction<Dummy1>(Dummy1.class)));
+		assertEquals(dummies.get(0).getKey(), retrieved.get(0).getKey());
+		assertEquals(dummies.get(1).getKey(), retrieved.get(1).getKey());
+		
+		// reverse order
+		dummies = ImmutableList.of(dummy2, dummy1);
+		retrieved = entityManager.get(Collections2.transform(dummies, new EntityToKeyFunction<Dummy1>(Dummy1.class)));
+		assertEquals(dummies.get(0).getKey(), retrieved.get(0).getKey());
+		assertEquals(dummies.get(1).getKey(), retrieved.get(1).getKey());
 	}
 	
 	@Test
