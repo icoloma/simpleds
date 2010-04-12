@@ -50,11 +50,14 @@ public class PagedList<T> {
 	
 	/**
 	 * Transform this PagedList of Keys to a similar PagedList of persistent entities, using a single batch call 
-	 * to retrieve the entities data. If this PagedList contains something different from Keys, undefined behavior may occur.
+	 * to retrieve the entities data. If this PagedList contains something different from Keys, IllegalArgumentException will be thrown.
 	 * @param <O> the type of the resulting PagedList, after retrieving the persistent data
 	 * @return a new PagedList instance. The original instance is not modified.
 	 */
 	public <O> PagedList<O> transformToEntities() {
+		if (!query.isKeysOnly()) {
+			throw new IllegalArgumentException("load() can only be invoked with keys-only queries");
+		}
 		List<O> entities = EntityManagerFactory.getEntityManager().get((List<Key>)data);
 		PagedList<O> copy = new PagedList<O>(query, entities);
 		copy.setTotalResults(totalResults);
@@ -82,23 +85,6 @@ public class PagedList<T> {
 	 */
 	public int getFirstRecordIndex() {
 		return query.getFirstRecordIndex();
-	}
-	
-	/**
-	 * Load all the entities of a Keys query. Invoke this method on a keys-only query result to get the list of corresponding entities.
-	 * A single invocation will be used to retrieve this page of results.
-	 * @return a copy of this {@link PagedList} instance, containing entities instead of {@link Key} values. Notice that the 
-	 * {@link PagedQuery} instance will be the same.
-	 */
-	@SuppressWarnings("unchecked")
-	public <O> PagedList<O> load() {
-		if (!query.isKeysOnly()) {
-			throw new IllegalArgumentException("load() can only be invoked with keys-only queries");
-		}
-		List<O> entities = EntityManagerFactory.getEntityManager().get((List<Key>) this.data);
-		PagedList<O> copy = new PagedList<O>(query, entities);
-		copy.setTotalResults(totalResults);
-		return copy;
 	}
 
 	public List<T> getData() {
