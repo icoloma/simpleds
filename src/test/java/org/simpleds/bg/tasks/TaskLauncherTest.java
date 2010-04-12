@@ -69,10 +69,4 @@ public class TaskLauncherTest extends AbstractTaskTest {
 		launcher.launch(request);
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
-	public void testExistingTaskID() throws Exception {
-		launcher.add(new DeleteSessionsTask());
-		launcher.add(new DeleteSessionsTask());
-	}
-	
 }
