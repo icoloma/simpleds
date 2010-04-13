@@ -25,7 +25,7 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 	}
 
 	@Before
-	public void setup() {
+	public void setupEntityManager() {
 		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
 		repository = factory.initialize();

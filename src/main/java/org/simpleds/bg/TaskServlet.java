@@ -83,6 +83,14 @@ public class TaskServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
+		// if launched by cron.xml, execute as POST
+		if (request.getHeader("X-AppEngine-Cron") != null) {
+			doPost(request, response);
+			return;
+		}
+			
+		// otherwise, display task stats
 		PrintWriter writer = response.getWriter();
 		writer.print("<html><head><title>Task stats</title>" + STYLESHEET + "</head><body>");
 		writer.print("<h1>Task stats</h1>");
