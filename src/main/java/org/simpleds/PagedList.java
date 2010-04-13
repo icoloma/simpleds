@@ -1,5 +1,6 @@
 package org.simpleds;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.appengine.api.datastore.Key;
@@ -11,7 +12,7 @@ import com.google.common.collect.Lists;
  * The result of executing a paged query
  * @author icoloma
  */
-public class PagedList<T> {
+public class PagedList<T> implements Cloneable {
 
 	/** the executed PagedQuery */
 	private PagedQuery query;
@@ -37,22 +38,26 @@ public class PagedList<T> {
 	}
 	
 	/**
-	 * Transform this PagedList instance by applying the transformation function to each data list item
+	 * Transform this PagedList instance by applying the transformation function to each data list item.
 	 * @param <O> the type of the resulting PagedList, after applying the transformation
 	 * @param function the function to apply to each data item
 	 * @return a new PagedList instance. The original instance is not modified.
 	 */
 	public <O> PagedList<O> transform(Function<? super T, ? extends O> function) {
-		PagedList<O> copy = new PagedList<O>(query, Lists.transform(this.data, function));
+		// copy the source data, since "live" collections are incompatible with paged results.
+		List<O> dest = Lists.newArrayListWithCapacity(data.size());
+		Collections.copy(dest, Lists.transform(this.data, function));
+		PagedList<O> copy = new PagedList<O>(query, dest);
 		copy.setTotalResults(totalResults);
 		return copy;
 	}
 	
 	/**
 	 * Transform this PagedList of Keys to a similar PagedList of persistent entities, using a single batch call 
-	 * to retrieve the entities data. If this PagedList contains something different from Keys, IllegalArgumentException will be thrown.
-	 * @param <O> the type of the resulting PagedList, after retrieving the persistent data
-	 * @return a new PagedList instance. The original instance is not modified.
+	 * to retrieve the entities data. 
+	 * @param <O> the type of the resulting {@link PagedList} after retrieving the persistent entities
+	 * @return a new {@link PagedList} instance. The original instance is not modified.
+	 * @throws IllegalArgumentException if this {@link PagedList} contains something different from Keys.
 	 */
 	public <O> PagedList<O> transformToEntities() {
 		if (!query.isKeysOnly()) {
