@@ -1,6 +1,6 @@
 package org.simpleds;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.appengine.api.datastore.Key;
@@ -45,9 +45,8 @@ public class PagedList<T> implements Cloneable {
 	 */
 	public <O> PagedList<O> transform(Function<? super T, ? extends O> function) {
 		// copy the source data, since "live" collections are incompatible with paged results.
-		List<O> dest = Lists.newArrayListWithCapacity(data.size());
-		Collections.copy(dest, Lists.transform(this.data, function));
-		PagedList<O> copy = new PagedList<O>(query, dest);
+		ArrayList<O> dataCopy = Lists.newArrayList(Lists.transform(this.data, function));
+		PagedList<O> copy = new PagedList<O>(query, dataCopy);
 		copy.setTotalResults(totalResults);
 		return copy;
 	}
@@ -59,6 +58,7 @@ public class PagedList<T> implements Cloneable {
 	 * @return a new {@link PagedList} instance. The original instance is not modified.
 	 * @throws IllegalArgumentException if this {@link PagedList} contains something different from Keys.
 	 */
+	@SuppressWarnings("unchecked")
 	public <O> PagedList<O> transformToEntities() {
 		if (!query.isKeysOnly()) {
 			throw new IllegalArgumentException("load() can only be invoked with keys-only queries");
