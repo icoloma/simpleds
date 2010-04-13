@@ -52,17 +52,13 @@ public class PagedList<T> implements Cloneable {
 	}
 	
 	/**
-	 * Transform this PagedList of Keys to a similar PagedList of persistent entities, using a single batch call 
-	 * to retrieve the entities data. 
+	 * Transform this {@link PagedList} of Keys to a similar {@link PagedList} of persistent entities, 
+	 * using a single batch call to retrieve all the entities. 
 	 * @param <O> the type of the resulting {@link PagedList} after retrieving the persistent entities
 	 * @return a new {@link PagedList} instance. The original instance is not modified.
-	 * @throws IllegalArgumentException if this {@link PagedList} contains something different from Keys.
 	 */
 	@SuppressWarnings("unchecked")
 	public <O> PagedList<O> transformToEntities() {
-		if (!query.isKeysOnly()) {
-			throw new IllegalArgumentException("load() can only be invoked with keys-only queries");
-		}
 		List<O> entities = EntityManagerFactory.getEntityManager().get((List<Key>)data);
 		PagedList<O> copy = new PagedList<O>(query, entities);
 		copy.setTotalResults(totalResults);

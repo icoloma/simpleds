@@ -15,7 +15,7 @@
 	<classpathentry kind="lib" path="src/test/genlib/aspectjweaver-1.6.6.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/geronimo-jpa_3.0_spec-1.1.1.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/google-collections-1.0.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/google-collections-1.0.jar" sourcepath="src/test/genlib/google-collections-1.0-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-aop-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-asm-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-beans-3.0.0.RELEASE.jar" sourcepath="src/test/genlib/spring-beans-3.0.0.RELEASE-sources.jar"/>
