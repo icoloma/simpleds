@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.simpleds.cache.CacheManager;
+import org.simpleds.cache.NonCachedPredicate;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PropertyMetadata;
@@ -20,6 +22,8 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 
@@ -28,6 +32,8 @@ public class EntityManagerImpl implements EntityManager {
 	private DatastoreService datastoreService;
 	
 	private PersistenceMetadataRepository repository; 
+	
+	private CacheManager cacheManager;
 	
 	/** true to check the schema constraints before persisting changes to the database, default true */
 	private boolean enforceSchemaConstraints = true;
@@ -198,6 +204,9 @@ public class EntityManagerImpl implements EntityManager {
 		if (providedKey == null) {
 			keyProperty.setValue(javaObject, newKey);
 		}
+		
+		// cache the stored value
+		cacheManager.put(javaObject, entity);
 		return newKey;
 	}
 	
@@ -266,6 +275,9 @@ public class EntityManagerImpl implements EntityManager {
 		
 		// persist 
 		datastoreService.put(transaction, entities);
+		
+		// store in cache
+		cacheManager.put(javaObjects, entities);
 	}
 	
 	@Override
@@ -275,7 +287,7 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public void delete(Transaction transaction, Key... keys) {
-		datastoreService.delete(transaction, keys);
+		delete(transaction, ImmutableList.of(keys));
 	}
 	
 	@Override
@@ -286,6 +298,7 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	public void delete(Transaction transaction, Iterable<Key> keys) {
 		datastoreService.delete(transaction, keys);
+		cacheManager.delete(keys instanceof Collection? (Collection<Key>) keys : Lists.newArrayList(keys));
 	}
 	
 	@Override
@@ -298,8 +311,13 @@ public class EntityManagerImpl implements EntityManager {
 	@SuppressWarnings("unchecked")
 	public <T> T get(Transaction transaction, Key key) {
 		try {
+			T cachedValue = cacheManager.get(key);
+			if (cachedValue != null) {
+				return cachedValue;
+			}
 			Entity entity = datastoreService.get(transaction, key);
-			return (T) repository.get(key.getKind()).datastoreToJava(entity);
+			ClassMetadata metadata = repository.get(key.getKind());
+			return (T) metadata.datastoreToJava(entity);
 		} catch (EntityNotFoundException e) {
 			throw new org.simpleds.exception.EntityNotFoundException(e);
 		}
@@ -310,13 +328,19 @@ public class EntityManagerImpl implements EntityManager {
 		return get(null, keys);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> List<T> get(Transaction transaction, Iterable<Key> keys) {
-		Map<Key, Entity> entities = datastoreService.get(transaction, keys);
+		Map<Key, T> cachedValues = cacheManager.get(keys instanceof Collection? (Collection) keys : Lists.newArrayList(keys));
+		Iterable<Key> noncachedKeys = Iterables.filter(keys, new NonCachedPredicate(cachedValues.keySet()));
+		Map<Key, Entity> noncachedEntities = datastoreService.get(transaction, noncachedKeys);
 		List<T> result = Lists.newArrayList();
 		for (Key key : keys) {
-			ClassMetadata metadata = repository.get(key.getKind());
-			T javaObject = (T) metadata.datastoreToJava(entities.get(key));
+			T javaObject = cachedValues.get(key);
+			if (javaObject == null) {
+				ClassMetadata metadata = repository.get(key.getKind());
+				javaObject = (T) metadata.datastoreToJava(noncachedEntities.get(key));
+			}
 			result.add(javaObject);
 		}
 		return result;
@@ -355,6 +379,10 @@ public class EntityManagerImpl implements EntityManager {
 	
 	public void setEnforceSchemaConstraints(boolean enforceSchemaConstraints) {
 		this.enforceSchemaConstraints = enforceSchemaConstraints;
+	}
+
+	public void setCacheManager(CacheManager cacheManager) {
+		this.cacheManager = cacheManager;
 	}
 		
 }
