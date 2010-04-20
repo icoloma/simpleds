@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.simpleds.metadata.ClassMetadata;
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 
@@ -36,14 +38,14 @@ public interface CacheManager {
 	 * @param key the key of the persistent entity to return
 	 * @return the cached value, or null if not found.
 	 */
-	public <T> T get(Key key);
+	public <T> T get(Key key, ClassMetadata metadata);
 	
 	/**
 	 * Put an instance in the cache
 	 * @param instance the java object
 	 * @param entity the datastore-equivalent Entity instance
 	 */
-	public void put(Object instance, Entity entity);
+	public void put(Object instance, Entity entity, ClassMetadata metadata);
 	
 	/**
 	 * Remove an entity from the cache
@@ -56,7 +58,7 @@ public interface CacheManager {
 	 * @param keys the keys to retrieve from the cache
 	 * @return a Map of retrieved persistent entities.
 	 */
-	public <T> Map<Key, T> get(Collection<Key> keys);
+	public <T> Map<Key, T> get(Collection<Key> keys, ClassMetadata metadata);
 
 	/**
 	 * Delete a set of entities from the cache
@@ -69,6 +71,7 @@ public interface CacheManager {
 	 * @param javaObjects the persistent objects to put into the Level 1 cache
 	 * @param entities the list of entities to put into the Level 2 cache
 	 */
-	public void put(Collection javaObjects, List<Entity> entities);
+	public <T> void put(Collection<T> javaObjects, List<Entity> entities, ClassMetadata metadata);
+
 	
 }

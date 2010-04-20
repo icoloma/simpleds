@@ -18,8 +18,10 @@ import javax.persistence.Transient;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.simpleds.annotations.Cacheable;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
+import org.simpleds.converter.Converter;
 import org.simpleds.converter.ConverterFactory;
 import org.simpleds.exception.ConfigException;
 
@@ -27,7 +29,7 @@ public class ClassMetadataFactory {
 
 	private static Log log = LogFactory.getLog(ClassMetadataFactory.class);
 	
-	public ClassMetadata createMetadata(Class clazz) {
+	public ClassMetadata createMetadata(Class<?> clazz) {
 		ClassMetadata metadata = new ClassMetadata();
 		metadata.setPersistentClass(clazz);
 		visit(clazz, metadata, new HashSet<String>());
@@ -41,7 +43,7 @@ public class ClassMetadataFactory {
 				return;
 			}
 			
-			// process any RelationIndex
+			// process @MultivaluedIndex
 			if (clazz.getAnnotation(MultivaluedIndexes.class) != null) {
 				for (MultivaluedIndex index : clazz.getAnnotation(MultivaluedIndexes.class).value()) {
 					addMultivaluedIndex(classMetadata, index);
@@ -49,6 +51,12 @@ public class ClassMetadataFactory {
 			}
 			if (clazz.getAnnotation(MultivaluedIndex.class) != null) {
 				addMultivaluedIndex(classMetadata, clazz.getAnnotation(MultivaluedIndex.class));
+			}
+			
+			// process @Cacheable
+			if (clazz.getAnnotation(Cacheable.class) != null) {
+				Cacheable cacheable = clazz.getAnnotation(Cacheable.class);
+				classMetadata.setCacheSeconds(cacheable.value());
 			}
 			
 			// add standard javabean properties
@@ -89,17 +97,18 @@ public class ClassMetadataFactory {
 		classMetadata.add(metadata);
 	}
 
-	private void addProperty(ClassMetadata classMetadata, SinglePropertyMetadata propertyMetadata) {
+	private <J, D> void addProperty(ClassMetadata classMetadata, SinglePropertyMetadata<J, D> propertyMetadata) {
 		if (propertyMetadata.getAnnotation(OneToOne.class) != null || 
 				propertyMetadata.getAnnotation(ManyToOne.class) != null ||
 				propertyMetadata.getAnnotation(OneToMany.class) !=  null ||
 				propertyMetadata.getAnnotation(ManyToMany.class) != null) {
 			throw new IllegalArgumentException("Property " + classMetadata.getKind() + "." + propertyMetadata.getName() + " cannot be processed. The following annotations are not supported: @OneToOne, @ManyToOne, @OneToMany, @ManyToMany");
 		}
-		if (propertyMetadata.getAnnotation(Embedded.class) != null) {
+		if (propertyMetadata.getAnnotation(Embedded.class) != null || propertyMetadata.getAnnotation(org.simpleds.annotations.Embedded.class) != null) {
 			addEmbeddedProperties(classMetadata, propertyMetadata);
 		} else {
-			propertyMetadata.setConverter(ConverterFactory.getConverter(propertyMetadata));
+			Converter<J, D> converter = ConverterFactory.getConverter(propertyMetadata);
+			propertyMetadata.setConverter(converter);
 			classMetadata.add(propertyMetadata);
 		}
 	}

@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.simpleds.functions.DatastoreEntityToKeyFunction;
 import org.simpleds.metadata.ClassMetadata;
-import org.simpleds.metadata.PersistenceMetadataRepository;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -19,12 +19,9 @@ public class CacheManagerImpl implements CacheManager {
 	/** the underlying memcache service */
 	private MemcacheService memcache;
 	
-	/** the {@link PersistenceMetadataRepository} instance */
-	private PersistenceMetadataRepository persistenceMetadataRepository;
-	
 	@Override
-	public <T> T get(Key key) {
-		Level1Cache level1 = Level1Cache.get();
+	public <T> T get(Key key, ClassMetadata metadata) {
+		Level1Cache level1 = Level1Cache.getCacheInstance();
 		T cachedValue = null;
 		if (level1 != null) {
 			cachedValue = level1.get(key);
@@ -32,10 +29,9 @@ public class CacheManagerImpl implements CacheManager {
 		if (cachedValue == null) {
 			Entity entity = (Entity) memcache.get(key);
 			if (entity != null) {
-				ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
 				cachedValue = metadata.datastoreToJava(entity);
 				if (level1 != null) {
-					level1.put(cachedValue, entity);
+					level1.put(entity.getKey(), cachedValue);
 				}
 			}
 		}
@@ -43,17 +39,17 @@ public class CacheManagerImpl implements CacheManager {
 	}
 
 	@Override
-	public void put(Object instance, Entity entity) {
-		Level1Cache level1 = Level1Cache.get();
+	public void put(Object instance, Entity entity, ClassMetadata metadata) {
+		Level1Cache level1 = Level1Cache.getCacheInstance();
 		if (level1 != null) {
-			level1.put(instance, entity);
+			level1.put(entity.getKey(), instance);
 		}
-		memcache.put(entity.getKey(), entity);
+		memcache.put(entity.getKey(), entity, metadata.createCacheExpiration());
 	}
 
 	@Override
 	public void delete(Key key) {
-		Level1Cache level1 = Level1Cache.get();
+		Level1Cache level1 = Level1Cache.getCacheInstance();
 		if (level1 != null) {
 			level1.delete(key);
 		}
@@ -61,8 +57,9 @@ public class CacheManagerImpl implements CacheManager {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void delete(Collection<Key> keys) {
-		Level1Cache level1 = Level1Cache.get();
+		Level1Cache level1 = Level1Cache.getCacheInstance();
 		if (level1 != null) {
 			level1.delete(keys);
 		}
@@ -71,8 +68,8 @@ public class CacheManagerImpl implements CacheManager {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> Map<Key, T> get(Collection<Key> keys) {
-		Level1Cache level1 = Level1Cache.get();
+	public <T> Map<Key, T> get(Collection<Key> keys, ClassMetadata metadata) {
+		Level1Cache level1 = Level1Cache.getCacheInstance();
 		Map<Key, T> result = null;
 		if (level1 != null) {
 			result = level1.get(keys);
@@ -81,14 +78,12 @@ public class CacheManagerImpl implements CacheManager {
 		if (result == null) {
 			result = Maps.newHashMapWithExpectedSize(keys.size());
 		}
-		Set<Map.Entry> entrySet = result2.entrySet();
-		for (Map.Entry entry : entrySet) {
+		for (Map.Entry entry : (Set<Map.Entry>) result2.entrySet()) {
 			Key key = (Key) entry.getKey();
 			Entity entity = (Entity) entry.getValue();
-			ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
 			Object javaObject = metadata.datastoreToJava(entity);
 			if (level1 != null) {
-				level1.put(javaObject, entity);
+				level1.put(entity.getKey(), javaObject);
 			}
 			result.put(key, (T) javaObject);
 		}
@@ -96,25 +91,20 @@ public class CacheManagerImpl implements CacheManager {
 	}
 
 	@Override
-	public void put(Collection javaObjects, List<Entity> entities) {
-		Level1Cache level1 = Level1Cache.get();
+	public <T> void put(Collection<T> javaObjects, List<Entity> entities, ClassMetadata metadata) {
+		Level1Cache level1 = Level1Cache.getCacheInstance();
 		if (level1 != null) {
-			level1.put(javaObjects, entities);
+			level1.put(Collections2.transform(entities, new DatastoreEntityToKeyFunction()), javaObjects);
 		}
 		Map<Object, Object> map = Maps.newHashMap();
 		for (Entity entity : entities) {
 			map.put(entity.getKey(), entity);
 		}
-		memcache.putAll(map);
+		memcache.putAll(map, metadata.createCacheExpiration());
 	}
 
 	public void setMemcache(MemcacheService memcache) {
 		this.memcache = memcache;
-	}
-
-	public void setPersistenceMetadataRepository(
-			PersistenceMetadataRepository persistenceMetadataRepository) {
-		this.persistenceMetadataRepository = persistenceMetadataRepository;
 	}
 
 }

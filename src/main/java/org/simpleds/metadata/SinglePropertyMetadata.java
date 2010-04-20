@@ -11,7 +11,7 @@ import org.simpleds.converter.Converter;
  * A single property
  * @author icoloma
  */
-public class SinglePropertyMetadata implements PropertyMetadata {
+public class SinglePropertyMetadata<J, D> implements PropertyMetadata<J, D> {
 
 	/** property name */
 	private String name;
@@ -26,13 +26,13 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 	private Field field;
 	
 	/** the converter used to convert values between java and the Google datastore */
-	private Converter converter;
+	private Converter<J, D> converter;
 	
 	/** the type  of this property object */
-	private Class<?> propertyType;
+	private Class<J> propertyType;
 	
 	/** true if this property is indexed, false otherwise */
-	private boolean indexed;
+	private boolean indexed = true;
 	
 	@Override
 	public String toString() {
@@ -44,9 +44,10 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 			", converter=" + converter + " }";
 	}
 	
-	public Object getValue(Object container) {
+	@SuppressWarnings("unchecked")
+	public J getValue(Object container) {
 		try {
-			return getter != null? getter.invoke(container) : field.get(container);
+			return getter != null? (J) getter.invoke(container) : (J) field.get(container);
 		} catch (IllegalArgumentException e) {
 			throw new RuntimeException(e);
 		} catch (IllegalAccessException e) {
@@ -56,6 +57,7 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 		} 
 	}
 	
+	@Override
 	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
 		T annotation = getter == null? null : getter.getAnnotation(annotationClass);
 		if (annotation == null && field != null) {
@@ -64,6 +66,7 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 		return annotation;
 	}
 	
+	@Override
 	public void setValue(Object container, Object value) {
 		try {
 			if (setter != null) {
@@ -112,19 +115,19 @@ public class SinglePropertyMetadata implements PropertyMetadata {
 		this.field = field;
 	}
 
-	public Converter getConverter() {
+	public Converter<J, D> getConverter() {
 		return converter;
 	}
 
-	public void setConverter(Converter converter) {
+	public void setConverter(Converter<J, D> converter) {
 		this.converter = converter;
 	}
 
-	public Class<?> getPropertyType() {
+	public Class<J> getPropertyType() {
 		return propertyType;
 	}
 
-	public void setPropertyType(Class<?> propertyType) {
+	public void setPropertyType(Class<J> propertyType) {
 		this.propertyType = propertyType;
 	}
 

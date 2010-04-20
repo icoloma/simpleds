@@ -21,10 +21,8 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 
 public class EntityManagerImpl implements EntityManager {
@@ -140,7 +138,7 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	public List<Key> findChildrenKeys(Key parentKey, Class childrenClass) {
+	public List<Key> findChildrenKeys(Key parentKey, Class<?> childrenClass) {
 		return find(createQuery(parentKey, childrenClass).keysOnly());
 	}
 	
@@ -150,7 +148,8 @@ public class EntityManagerImpl implements EntityManager {
 		if (entity == null) {
 			throw new org.simpleds.exception.EntityNotFoundException();
 		}
-		return (T) datastoreToJava(entity);
+		T javaObject = datastoreToJava(entity);
+		return javaObject;
 	}
 	
 	@Override
@@ -181,8 +180,8 @@ public class EntityManagerImpl implements EntityManager {
 		ClassMetadata metadata = repository.get(javaObject.getClass());
 		
 		// generate primary key if missing
-		PropertyMetadata keyProperty = metadata.getKeyProperty();
-		Key providedKey = (Key) keyProperty.getValue(javaObject);
+		PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
+		Key providedKey = keyProperty.getValue(javaObject);
 		if (providedKey == null && !metadata.isGenerateKeyValue()) {
 			throw new IllegalArgumentException("No key value provided for " + javaObject.getClass().getSimpleName() + " instance, but key generation is not enabled for this class (missing @GeneratedValue?)");
 		}
@@ -206,62 +205,64 @@ public class EntityManagerImpl implements EntityManager {
 		}
 		
 		// cache the stored value
-		cacheManager.put(javaObject, entity);
+		if (metadata.isCacheable()) {
+			cacheManager.put(javaObject, entity, metadata);
+		}
 		return newKey;
 	}
 	
 	@Override
-	public void put(Collection javaObjects) {
+	public <T> void put(Collection<T> javaObjects) {
 		put(null, null, javaObjects);
 	}
 	
 	@Override
-	public void put(Transaction transaction, Collection javaObjects) {
+	public <T> void put(Transaction transaction, Collection<T> javaObjects) {
 		put(transaction, null, javaObjects);
 	}
 	
 	@Override
-	public void put(Key parentKey, Collection javaObjects) {
+	public <T> void put(Key parentKey, Collection<T> javaObjects) {
 		put(null, parentKey, javaObjects);
 	}
 	
 	@Override
-	public void put(Transaction transaction, Key parentKey, Collection javaObjects) {
+	public <T> void put(Transaction transaction, Key parentKey, Collection<T> javaObjects) {
 		
-		Iterator it = javaObjects.iterator();
+		Iterator<T> it = javaObjects.iterator();
 		if (!it.hasNext()) {
 			return;
 		}
 		
 		// allocate and set missing primary keys (in bulk)
-		ListMultimap<Class, Object> transientInstances = ArrayListMultimap.create();
-		for (Object javaObject : javaObjects) {
-			Class<? extends Object> clazz = javaObject.getClass();
-			ClassMetadata metadata = repository.get(clazz);
-			Key key = (Key) metadata.getKeyProperty().getValue(javaObject);
+		List<T> transientInstances = Lists.newArrayListWithCapacity(javaObjects.size());
+		ClassMetadata metadata = repository.get(javaObjects.iterator().next().getClass());
+		PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
+		for (T javaObject : javaObjects) {
+			Key key = keyProperty.getValue(javaObject);
 			if (key == null) {
 				if (!metadata.isGenerateKeyValue()) {
 					throw new IllegalArgumentException("No key value provided for " + javaObject + ", but key generation is not enabled for " + metadata.getKind() + " (missing @GeneratedValue?)");
 				}
-				transientInstances.put(clazz, javaObject);
+				transientInstances.add(javaObject);
 			}
 		}
-		for (Class clazz : transientInstances.keySet()) {
-			List<Object> instances = transientInstances.get(clazz);
-			ClassMetadata metadata = repository.get(clazz);
+
+		if (!transientInstances.isEmpty()) {
 			if (enforceSchemaConstraints) {
 				metadata.validateParentKey(parentKey);
 			}
-			Iterator<Key> allocatedKeys = datastoreService.allocateIds(parentKey, metadata.getKind(), instances.size()).iterator();
-			for (Object javaObject : instances) {
-				metadata.getKeyProperty().setValue(javaObject, allocatedKeys.next());
+			Iterator<Key> allocatedKeys = datastoreService.allocateIds(parentKey, metadata.getKind(), transientInstances.size()).iterator();
+			for (T javaObject : transientInstances) {
+				keyProperty.setValue(javaObject, allocatedKeys.next());
 			}
 		}
 		
 		// transform to entity instances and persist
+		List<T> cacheableInstances = Lists.newArrayListWithCapacity(javaObjects.size());
+		List<Entity> cacheableEntities = Lists.newArrayListWithCapacity(javaObjects.size());
 		List<Entity> entities = new ArrayList<Entity>(javaObjects.size());
-		for (Object javaObject : javaObjects) {
-			ClassMetadata metadata = repository.get(javaObject.getClass()); 
+		for (T javaObject : javaObjects) {
 			Entity entity = metadata.javaToDatastore(parentKey, javaObject);
 			
 			// check required fields
@@ -270,6 +271,10 @@ public class EntityManagerImpl implements EntityManager {
 			}
 			
 			entities.add(entity);
+			if (metadata.isCacheable()) {
+				cacheableInstances.add(javaObject);
+				cacheableEntities.add(entity);
+			}
 		}
 		
 		
@@ -277,7 +282,9 @@ public class EntityManagerImpl implements EntityManager {
 		datastoreService.put(transaction, entities);
 		
 		// store in cache
-		cacheManager.put(javaObjects, entities);
+		if (!cacheableInstances.isEmpty()) {
+			cacheManager.put(cacheableInstances, cacheableEntities, metadata);
+		}
 	}
 	
 	@Override
@@ -296,9 +303,19 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public void delete(Transaction transaction, Iterable<Key> keys) {
+		List<Key> cacheableKeys = Lists.newArrayListWithCapacity(keys instanceof Collection? ((Collection<Key>) keys).size() : 10);
+		for (Key key : keys) {
+			ClassMetadata metadata = repository.get(key.getKind());
+			if (metadata.isCacheable()) {
+				cacheableKeys.add(key);
+			}
+		}
 		datastoreService.delete(transaction, keys);
-		cacheManager.delete(keys instanceof Collection? (Collection<Key>) keys : Lists.newArrayList(keys));
+		if (!cacheableKeys.isEmpty()) {
+			cacheManager.delete(cacheableKeys);
+		}
 	}
 	
 	@Override
@@ -311,13 +328,20 @@ public class EntityManagerImpl implements EntityManager {
 	@SuppressWarnings("unchecked")
 	public <T> T get(Transaction transaction, Key key) {
 		try {
-			T cachedValue = cacheManager.get(key);
-			if (cachedValue != null) {
-				return cachedValue;
-			}
-			Entity entity = datastoreService.get(transaction, key);
 			ClassMetadata metadata = repository.get(key.getKind());
-			return (T) metadata.datastoreToJava(entity);
+			T javaObject;
+			if (metadata.isCacheable()) {
+				javaObject = cacheManager.get(key, metadata);
+				if (javaObject == null) {
+					Entity entity = datastoreService.get(transaction, key);
+					javaObject = (T) metadata.datastoreToJava(entity);
+					cacheManager.put(javaObject, entity, metadata);
+				}
+			} else {
+				Entity entity = datastoreService.get(transaction, key);
+				javaObject = (T) metadata.datastoreToJava(entity);
+			}
+			return javaObject;
 		} catch (EntityNotFoundException e) {
 			throw new org.simpleds.exception.EntityNotFoundException(e);
 		}
@@ -331,17 +355,49 @@ public class EntityManagerImpl implements EntityManager {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> List<T> get(Transaction transaction, Iterable<Key> keys) {
-		Map<Key, T> cachedValues = cacheManager.get(keys instanceof Collection? (Collection) keys : Lists.newArrayList(keys));
-		Iterable<Key> noncachedKeys = Iterables.filter(keys, new NonCachedPredicate(cachedValues.keySet()));
-		Map<Key, Entity> noncachedEntities = datastoreService.get(transaction, noncachedKeys);
-		List<T> result = Lists.newArrayList();
-		for (Key key : keys) {
-			T javaObject = cachedValues.get(key);
-			if (javaObject == null) {
-				ClassMetadata metadata = repository.get(key.getKind());
-				javaObject = (T) metadata.datastoreToJava(noncachedEntities.get(key));
+		Iterator<Key> itKey = keys.iterator();
+		if (!itKey.hasNext()) {
+			return (List<T>) Lists.newArrayList();
+		}
+		
+		ClassMetadata metadata = repository.get(itKey.next().getKind());
+		List<T> result;
+		if (metadata.isCacheable()) { 
+			
+			// retrieve cached and non-cached data
+			Collection keysCollection = keys instanceof Collection? (Collection) keys : Lists.newArrayList(keys);
+			Map<Key, T> cachedValues = cacheManager.get(keysCollection, metadata);
+			Iterable<Key> noncachedKeys = Iterables.filter(keys, new NonCachedPredicate(cachedValues.keySet()));
+			Map<Key, Entity> noncachedEntitiesMap = datastoreService.get(transaction, noncachedKeys);
+			List<T> noncachedValues = Lists.newArrayListWithCapacity(noncachedEntitiesMap.size());
+			List<Entity> noncachedEntities = Lists.newArrayListWithCapacity(noncachedEntitiesMap.size());
+			
+			// merge both
+			result = Lists.newArrayListWithCapacity(keysCollection.size());
+			for (Key key : keys) {
+				T javaObject = cachedValues.get(key);
+				if (javaObject == null) {
+					Entity entity = noncachedEntitiesMap.get(key);
+					javaObject = (T) metadata.datastoreToJava(entity);
+					noncachedValues.add(javaObject);
+					noncachedEntities.add(entity);
+				}
+				result.add(javaObject);
 			}
-			result.add(javaObject);
+			if (!noncachedValues.isEmpty()) {
+				cacheManager.put(noncachedValues, noncachedEntities, metadata);
+			}
+			
+		} else { // not cacheable
+			
+			Map<Key, Entity> entities = datastoreService.get(transaction, keys);
+			result = Lists.newArrayListWithCapacity(keys instanceof Collection? ((Collection) keys).size() : 10);
+			for (Key key : keys) {
+				Entity entity = entities.get(key);
+				T javaObject = (T) metadata.datastoreToJava(entity);
+				result.add(javaObject);
+			}
+			
 		}
 		return result;
 	}
@@ -383,6 +439,11 @@ public class EntityManagerImpl implements EntityManager {
 
 	public void setCacheManager(CacheManager cacheManager) {
 		this.cacheManager = cacheManager;
+	}
+
+	@Override
+	public CacheManager getCacheManager() {
+		return cacheManager;
 	}
 		
 }

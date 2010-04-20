@@ -1,23 +1,22 @@
 package org.simpleds.converter;
 
 
-public class EnumToStringConverter extends AbstractConverter<Enum, String> {
+public class EnumToStringConverter<J extends Enum> extends AbstractConverter<J, String> {
 
 	/** the enum class this converter converts to/from */
-	private Class<Enum> enumClass;
+	private Class<J> enumClass;
 	
-	public EnumToStringConverter(Class<Enum> enumClass) {
+	public EnumToStringConverter(Class<J> enumClass) {
 		this.enumClass = enumClass;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Enum datastoreToJava(String name) {
-		return name == null? null : Enum.valueOf(enumClass, name);
+	public J datastoreToJava(String name) {
+		return name == null? null : (J) Enum.valueOf(enumClass, name);
 	}
 
 	@Override
-	public String javaToDatastore(Enum value) {
+	public String javaToDatastore(J value) {
 		return value == null? null : value.toString();
 	}
 

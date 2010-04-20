@@ -74,11 +74,9 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		Key key = KeyFactory.createKey(Dummy1.class.getSimpleName(), 1);
 		Dummy1 dummy1 = Dummy1.create();
 		dummy1.setKey(key);
-		Dummy2 dummy2 = createDummy2();
-		dummy2.setKey(KeyFactory.createKey(Dummy2.class.getSimpleName(), 1));
-		Dummy3 dummy3 = createDummy3();
-		dummy3.setKey(KeyFactory.createKey(Dummy3.class.getSimpleName(), 1));
-		entityManager.put(Arrays.asList((Object)dummy1, (Object)dummy2, (Object)dummy3));
+		Dummy1 dummy2 = Dummy1.create();
+		dummy2.setKey(KeyFactory.createKey(Dummy1.class.getSimpleName(), 2));
+		entityManager.put(Arrays.asList(dummy1, dummy2));
 		
 		// parent-childs
 		entityManager.put(key, Arrays.asList(createDummy2(), createDummy2(), createDummy2()));
@@ -90,10 +88,10 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	public void testMultiplePutWithoutKeysSuccess() {
 		// root entities
 		Dummy1 dummy1 = Dummy1.create();
-		Dummy2 dummy2 = createDummy2();
-		Dummy3 dummy3 = createDummy3();
-		dummy3.setKey(KeyFactory.createKey(Dummy3.class.getSimpleName(), 1));
-		entityManager.put(Arrays.asList((Object)dummy1, (Object)dummy2, (Object)dummy3));
+		Dummy1 dummy2 = Dummy1.create();
+		Dummy1 dummy3 = Dummy1.create();
+		dummy3.setKey(Dummy1.createDummyKey());
+		entityManager.put(Arrays.asList(dummy1, dummy2, dummy3));
 		assertNotNull(dummy1.getKey());
 		assertNotNull(dummy2.getKey());
 		assertNotNull(dummy3.getKey());

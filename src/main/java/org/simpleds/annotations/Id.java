@@ -7,20 +7,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates a persistent class. 
- * 
+ * Marks the primary key attribute.
  * @author icoloma
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE })
+@Target({ ElementType.FIELD, ElementType.METHOD })
 @Documented
-public @interface Entity {
-
+public @interface Id {
+	
+	/**
+	 * If set to true, the primary key will be assigned automatically. Default is false.
+	 */
+	boolean generated() default false;
+	
 	/** 
 	 * The parent class. Indicates the possible parent types when generating 
 	 * key values for this class. Leave empty for root entities. 
-	 * @deprecated specify the parent using {@link Id} instead
 	 */
 	Class<?>[] parent() default {};
-	
+
 }

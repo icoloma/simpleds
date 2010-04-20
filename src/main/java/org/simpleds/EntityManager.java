@@ -3,6 +3,7 @@ package org.simpleds;
 import java.util.Collection;
 import java.util.List;
 
+import org.simpleds.cache.CacheManager;
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
 
@@ -34,14 +35,16 @@ public interface EntityManager {
 	Entity javaToDatastore(Object javaObject);
 
 	/**
-	 * Persists a java object to the datastore. This method is equivalent to invoking merge(null, javaObject)
+	 * Persists a java object to the datastore. If the entity is cacheable, it will be written to the cache.
+	 * If the primary key has not yet been assigned, a new one will be generated and assigned to the Java object.
 	 * @param javaObject the instance to persist.
 	 * @return the allocated/existing key
 	 */
 	Key put(Object javaObject);
 	
 	/**
-	 * Persists a java object to the datastore. This method is equivalent to invoking merge(null, javaObject)
+	 * Persists a java object to the datastore. If the entity is cacheable, it will be written to the cache.
+	 * If the primary key has not yet been assigned, a new one will be generated and assigned to the Java object.
 	 * @param transaction the transaction instance to use.  May be null.
 	 * @param javaObject the instance to persist.
 	 * @return the allocated/existing key
@@ -49,26 +52,63 @@ public interface EntityManager {
 	Key put(Transaction transaction, Object javaObject);
 
 	/**
-	 * Persists a java object to the datastore. 
-	 * If the primary key has not yet been assigned, a new one will be generated and assigned.
-	 * The entity will also be checked for missing required fields 
-	 * @param parentKey the parent entity key that will be used to generate the persisted entity key. May be null.
+	 * Persists a java object to the datastore. If the entity is cacheable, it will be written to the cache.
+	 * If the primary key has not yet been assigned, a new one will be generated and assigned to the Java object.
+	 * @param parentKey the parent entity key to use while generating the persistent entity key. May be null.
 	 * @param javaObject the instance to persist.
 	 * @return the allocated/existing key
 	 */
 	Key put(Key parentKey, Object javaObject);
 
 	/**
-	 * Persists a java object to the datastore. 
-	 * If the primary key has not yet been assigned, a new one will be generated and assigned.
-	 * The entity will also be checked for missing required fields 
-	 * @param parentKey the parent entity key that will be used to generate the persisted entity key. May be null.
+	 * Persists a java object to the datastore. If the entity is cacheable, it will be written to the cache.
+	 * If the primary key has not yet been assigned, a new one will be generated and assigned to the Java object.
+	 * @param parentKey the parent entity key to use while generating the persistent entity key. May be null.
 	 * @param transaction the transaction instance to use.  May be null.
 	 * @param javaObject the instance to persist.
 	 * @return the allocated/existing key
 	 */
 	Key put(Transaction transaction, Key parentKey, Object javaObject);
 	
+	/**
+	 * Store a collection of persistent objects into the datastore. 
+	 * Primary keys will be generated and assigned if needed. If these objects are cacheable,
+	 * the cache contents will also be updated.
+	 * 
+	 * @param javaObjects the Collection of java objects to store
+	 */
+	<T> void put(Collection<T> javaObjects);
+	
+	/**
+	 * Store a collection of persistent objects into the datastore.
+	 * Primary keys will be generated and assigned if needed. If these objects are cacheable,
+	 * the cache contents will also be updated.
+	 * @param javaObjects the Collection of java objects to store
+	 * @param transaction the transaction instance to use.  May be null.
+	 */
+	<T> void put(Transaction transaction, Collection<T> javaObjects);
+
+	/**
+	 * Store a collection of persistent objects into the datastore.
+	 * Primary keys will be generated and assigned if needed. If these objects are cacheable,
+	 * the cache contents will also be updated.
+	 * @param parentKey the key of the parent instance. If not null, it will be used as parent
+	 * of the generated entity Keys
+	 * @param javaObjects the Collection of java objects to store
+	 */
+	<T> void put(Key parentKey, Collection<T> javaObjects);
+	
+	/**
+	 * Store a collection of persistent objects into the datastore.
+	 * Primary keys will be generated and assigned if needed. If these objects are cacheable,
+	 * the cache contents will also be updated.
+	 * @param parentKey the key of the parent instance. If not null, it will be used as parent
+	 * of the generated entity Keys
+	 * @param transaction the transaction instance to use.  May be null.
+	 * @param javaObjects the Collection of java objects to store
+	 */
+	<T> void put(Transaction transaction, Key parentKey, Collection<T> javaObjects);
+
 	/**
 	 * Return a persistent java instance by key
 	 * @param key the key of the persistent entity to retrieve
@@ -100,24 +140,28 @@ public interface EntityManager {
 	<T> List<T> get(Transaction transaction, Iterable<Key> keys);
 	
 	/**
-	 * Wrapper method around DatastoreService.delete()
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 */
 	void delete(Key... keys);
 	
 	/**
-	 * Wrapper method around DatastoreService.delete()
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 * @param transaction the transaction instance to use.  May be null.
 	 */
 	void delete(Transaction transaction, Key... keys);
 	
 	/**
-	 * Wrapper method around DatastoreService.delete()
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 */
 	void delete(Iterable<Key> keys);
 	
 	/**
-	 * Wrapper method around DatastoreService.delete()
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
 	 * @param transaction the transaction instance to use.  May be null.
+	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 */
 	void delete(Transaction transaction, Iterable<Key> keys);
 
@@ -147,37 +191,7 @@ public interface EntityManager {
 	 * @param childrenClass the class of the children to return
 	 * @return the list of keys of the children
 	 */
-	List<Key> findChildrenKeys(Key parentKey, Class childrenClass);
-
-	/**
-	 * Store a set of persistent objects in the datastore
-	 * @param javaObjects the list of java objects to store
-	 */
-	void put(Collection javaObjects);
-	
-	/**
-	 * Store a set of persistent objects in the datastore
-	 * @param javaObjects the list of java objects to store
-	 * @param transaction the transaction instance to use.  May be null.
-	 */
-	void put(Transaction transaction, Collection javaObjects);
-
-	/**
-	 * Store a set of persistent objects in the datastore. 
-	 * @param parentKey the key of the parent instance. If not null, all the provided objects 
-	 * will get a primary key automatically generated
-	 * @param javaObjects the list of java objects to store
-	 */
-	void put(Key parentKey, Collection javaObjects);
-	
-	/**
-	 * Store a set of persistent objects in the datastore. 
-	 * @param parentKey the key of the parent instance. If not null, all the provided objects 
-	 * will get a primary key automatically generated
-	 * @param transaction the transaction instance to use.  May be null.
-	 * @param javaObjects the list of java objects to store
-	 */
-	void put(Transaction transaction, Key parentKey, Collection javaObjects);
+	List<Key> findChildrenKeys(Key parentKey, Class<?> childrenClass);
 
 	/**
 	 * Return a {@link PagedList} result after computing a PagedQuery
@@ -257,7 +271,8 @@ public interface EntityManager {
 	public Transaction beginTransaction();
 
 	/** 
-	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterable} of java objects
+	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterable} of java objects.
+	 * This method does not check the cache.
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
 	 */
@@ -265,9 +280,15 @@ public interface EntityManager {
 	
 	/** 
 	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterator} of java objects
+	 * This method does not check the cache.
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
 	 */
 	public <T> SimpleQueryResultIterator<T> asIterator(SimpleQuery query);
+
+	/**
+	 * @return the {@link CacheManager} instance used by this {@link EntityManager}
+	 */
+	CacheManager getCacheManager();
 
 }

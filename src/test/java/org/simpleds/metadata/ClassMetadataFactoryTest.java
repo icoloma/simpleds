@@ -45,9 +45,15 @@ public class ClassMetadataFactoryTest {
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
-	public void testTransient() throws Exception {
+	public void testJpaTransient() throws Exception {
 		ClassMetadata metadata = factory.createMetadata(MyClass.class);
 		metadata.getProperty("xxx");
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testSimpledsTransient() throws Exception {
+		ClassMetadata metadata = factory.createMetadata(MyClass.class);
+		metadata.getProperty("yyy");
 	}
 	
 	/*
@@ -91,6 +97,9 @@ public class ClassMetadataFactoryTest {
 		
 		@Transient
 		private String xxx;
+		
+		@org.simpleds.annotations.Transient
+		private String yyy;
 		
 		// left empty on purpose
 		@Column

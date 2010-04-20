@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.persistence.Entity;
 
+import org.simpleds.annotations.Id;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -18,6 +19,8 @@ import com.google.common.collect.Sets;
 
 public class PersistenceMetadataRepositoryFactory {
 
+	private static final Class<?>[] ROOT_ANCESTORS = new Class<?>[] {};
+	
 	private ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 	
 	private ClassMetadataFactory classMetadataFactory = new ClassMetadataFactory();
@@ -27,6 +30,7 @@ public class PersistenceMetadataRepositoryFactory {
 	
 	private static PersistenceMetadataRepository instance;
 	
+	@SuppressWarnings("deprecation")
 	public PersistenceMetadataRepository initialize() {
 		try {
 			if (locations == null) {
@@ -42,7 +46,7 @@ public class PersistenceMetadataRepositoryFactory {
 						AnnotationMetadata am = metadataReader.getAnnotationMetadata();
 						if (am.hasAnnotation(Entity.class.getName()) || 
 								am.hasAnnotation(org.simpleds.annotations.Entity.class.getName())) {
-							Class clazz = ClassUtils.forName(am.getClassName());
+							Class<?> clazz = ClassUtils.forName(am.getClassName(), ClassUtils.getDefaultClassLoader());
 							ClassMetadata metadata = classMetadataFactory.createMetadata(clazz);
 							repository.add(metadata);
 						}
@@ -52,14 +56,19 @@ public class PersistenceMetadataRepositoryFactory {
 			
 			// assign expected parent kinds
 			for (ClassMetadata metadata: repository.getAll()) {
-				org.simpleds.annotations.Entity entity = (org.simpleds.annotations.Entity) metadata.getPersistentClass().getAnnotation(org.simpleds.annotations.Entity.class);
-				if (entity != null) {
+				org.simpleds.annotations.Entity entity = metadata.getPersistentClass().getAnnotation(org.simpleds.annotations.Entity.class);
+				Id idAnn = metadata.getKeyProperty().getAnnotation(Id.class);
+				Class<?>[] cparents = idAnn != null? idAnn.parent() : 
+									 entity != null? entity.parent() : 
+									 ROOT_ANCESTORS; 
+				if (cparents.length > 0) {
 					Set<String> parents = Sets.newTreeSet();
-					for (Class<?> clazz : entity.parent()) {
+					for (Class<?> clazz : cparents) {
 						parents.add(repository.get(clazz).getKind());
 					}
 					metadata.setParents(parents);
 				}
+				
 			}
 			
 			instance = repository;

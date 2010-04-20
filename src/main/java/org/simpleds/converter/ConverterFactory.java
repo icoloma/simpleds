@@ -30,44 +30,44 @@ public class ConverterFactory {
 	private static Map<Class, Converter> converters = Maps.newHashMap();
 	
 	static {
-		addConverter(Boolean.TYPE, new NullConverter());
-		addConverter(Boolean.class, new NullConverter());
+		addConverter(Boolean.TYPE, new NullConverter<Boolean>());
+		addConverter(Boolean.class, new NullConverter<Boolean>());
 		addConverter(Short.TYPE, new ShortConverter().setNullValue((short)0));
 		addConverter(Short.class, new ShortConverter());
 		addConverter(Integer.TYPE, new IntegerConverter().setNullValue(0));
 		addConverter(Integer.class, new IntegerConverter());
-		addConverter(Long.TYPE, new NullConverter().setNullValue(0l));
-		addConverter(Long.class, new NullConverter());
-		addConverter(Float.TYPE, new NullConverter().setNullValue(0f));
-		addConverter(Float.class, new NullConverter());
-		addConverter(Double.TYPE, new NullConverter());
-		addConverter(Double.class, new NullConverter().setNullValue(0d));
-		addConverter(Date.class, new NullConverter());
-		addConverter(String.class, new NullConverter());
+		addConverter(Long.TYPE, new NullConverter<Long>().setNullValue(0l));
+		addConverter(Long.class, new NullConverter<Long>());
+		addConverter(Float.TYPE, new NullConverter<Float>().setNullValue(0f));
+		addConverter(Float.class, new NullConverter<Float>());
+		addConverter(Double.TYPE, new NullConverter<Double>());
+		addConverter(Double.class, new NullConverter<Double>().setNullValue(0d));
+		addConverter(Date.class, new NullConverter<Date>());
+		addConverter(String.class, new NullConverter<Date>());
 		addConverter(BigDecimal.class, new BigDecimalConverter());
 		
 		// native Google classes
-		addConverter(Key.class, new NullConverter());
-		addConverter(GeoPt.class, new NullConverter());
-		addConverter(Link.class, new NullConverter());
-		addConverter(PostalAddress.class, new NullConverter());
-		addConverter(Email.class, new NullConverter());
-		addConverter(IMHandle.class, new NullConverter());
-		addConverter(PhoneNumber.class, new NullConverter());
-		addConverter(Rating.class, new NullConverter());
-		addConverter(Blob.class, new NullConverter());
-		addConverter(Text.class, new NullConverter());
-		addConverter(User.class, new NullConverter());
+		addConverter(Key.class, new NullConverter<Key>());
+		addConverter(GeoPt.class, new NullConverter<GeoPt>());
+		addConverter(Link.class, new NullConverter<Link>());
+		addConverter(PostalAddress.class, new NullConverter<PostalAddress>());
+		addConverter(Email.class, new NullConverter<Email>());
+		addConverter(IMHandle.class, new NullConverter<IMHandle>());
+		addConverter(PhoneNumber.class, new NullConverter<PhoneNumber>());
+		addConverter(Rating.class, new NullConverter<Rating>());
+		addConverter(Blob.class, new NullConverter<Blob>());
+		addConverter(Text.class, new NullConverter<Text>());
+		addConverter(User.class, new NullConverter<User>());
 	}
 	
 	/**
 	 * @return the converter for a PropertyMetadata instance
 	 */
-	public static Converter getConverter(SinglePropertyMetadata metadata) {
+	public static <J, D> Converter<J, D> getConverter(SinglePropertyMetadata<J, D> metadata) {
 		// assign converter
-		Class propertyType = metadata.getPropertyType();
+		Class<J> propertyType = metadata.getPropertyType();
 		if (Collection.class.isAssignableFrom(propertyType)) {
-			return ConverterFactory.getCollectionConverter(propertyType, guessCollectionGenericType(metadata));
+			return ConverterFactory.getCollectionConverter((Class<? extends Iterable>) propertyType, guessCollectionGenericType(metadata));
 		} else {
 			return ConverterFactory.getConverter(propertyType);
 		}
@@ -75,7 +75,7 @@ public class ConverterFactory {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Converter getConverter(Class clazz) {
+	public static <J, D> Converter<J, D> getConverter(Class<J> clazz) {
 		if (Enum.class.isAssignableFrom(clazz)) {
 			return new EnumToStringConverter(clazz);
 		}
@@ -86,7 +86,7 @@ public class ConverterFactory {
 		return converter;
 	}
 	
-	public static CollectionConverter getCollectionConverter(Class collectionType, Class itemType) {
+	public static CollectionConverter getCollectionConverter(Class<? extends Iterable> collectionType, Class<?> itemType) {
 		if (itemType == null) {
 			throw new IllegalArgumentException("Cannot create collection converter for unspecified node type");
 		}

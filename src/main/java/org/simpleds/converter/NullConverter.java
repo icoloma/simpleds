@@ -1,14 +1,15 @@
 package org.simpleds.converter;
 
-public class NullConverter<J, D> extends AbstractConverter<J, D> {
+public class NullConverter<J> extends AbstractConverter<J, J> {
 
-	public J datastoreToJava(D value) {
+	@Override
+	public J datastoreToJava(J value) {
 		return value == null? nullValue : (J) value;
 	}
-	
+
 	@Override
-	public D javaToDatastore(J value) {
-		return (D) value;
+	public J javaToDatastore(J value) {
+		return value;
 	}
 
 }

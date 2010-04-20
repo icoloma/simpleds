@@ -21,10 +21,10 @@ public class CacheFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
 		try {
-			Level1Cache.initialize();
+			Level1Cache.setCacheInstance();
 			chain.doFilter(req, resp);
 		} finally {
-			Level1Cache.clear();
+			Level1Cache.clearCacheInstance();
 		}
 	}
 

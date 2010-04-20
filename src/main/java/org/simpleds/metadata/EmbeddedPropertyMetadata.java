@@ -15,7 +15,8 @@ import com.google.common.collect.Lists;
  * Used to handle properties provided through embeddedable classes
  * @author icoloma
  */
-public class EmbeddedPropertyMetadata implements PropertyMetadata {
+@SuppressWarnings("unchecked")
+public class EmbeddedPropertyMetadata<J, D> implements PropertyMetadata<J, D> {
 
 	private List<SinglePropertyMetadata> nodes = Lists.newArrayList();
 	
@@ -24,7 +25,7 @@ public class EmbeddedPropertyMetadata implements PropertyMetadata {
 		if (child instanceof SinglePropertyMetadata) {
 			nodes.add((SinglePropertyMetadata) child);
 		} else {
-			for (SinglePropertyMetadata node : ((EmbeddedPropertyMetadata)child).getNodes()) {
+			for (SinglePropertyMetadata node : (List<SinglePropertyMetadata>)((EmbeddedPropertyMetadata)child).getNodes()) {
 				nodes.add(node);
 			}
 		}
@@ -49,7 +50,7 @@ public class EmbeddedPropertyMetadata implements PropertyMetadata {
 		nodes.add(property);
 	}
 
-	SinglePropertyMetadata getLastNode() {
+	SinglePropertyMetadata<J, D> getLastNode() {
 		return nodes.get(nodes.size() - 1);
 	}
 	
@@ -69,11 +70,11 @@ public class EmbeddedPropertyMetadata implements PropertyMetadata {
 	}
 	
 	@Override
-	public Object getValue(Object container) {
+	public J getValue(Object container) {
 		for (Iterator<SinglePropertyMetadata> i = nodes.iterator(); i.hasNext(); ) {
 			SinglePropertyMetadata node = i.next();
 			if (!i.hasNext()) {
-				return node.getValue(container);
+				return ((SinglePropertyMetadata<J, D>)node).getValue(container);
 			}
 			container = node.getValue(container);
 			if (container == null) {

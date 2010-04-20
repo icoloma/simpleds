@@ -7,20 +7,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates a persistent class. 
+ * Marks a persistent class as cacheable.
  * 
  * @author icoloma
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE })
 @Documented
-public @interface Entity {
-
-	/** 
-	 * The parent class. Indicates the possible parent types when generating 
-	 * key values for this class. Leave empty for root entities. 
-	 * @deprecated specify the parent using {@link Id} instead
-	 */
-	Class<?>[] parent() default {};
+public @interface Cacheable {
+	
+	/** the number of seconds that this class should be cached in memcache */
+	int value();
 	
 }

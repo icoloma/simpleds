@@ -10,7 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import org.simpleds.annotations.MultivaluedIndex;
-import org.simpleds.annotations.Unindexed;
+import org.simpleds.annotations.Property;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -39,7 +39,7 @@ public class Dummy1 {
 	@Embedded
 	private Embedded1 embedded;
 	
-	@Unindexed
+	@Property(unindexed=true)
 	private String bigString;
 	
 	/**

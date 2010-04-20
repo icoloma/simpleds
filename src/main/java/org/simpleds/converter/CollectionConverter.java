@@ -2,6 +2,14 @@ package org.simpleds.converter;
 
 import java.util.Collection;
 
+/**
+ * Collection converter
+ * @author icoloma
+ *
+ * @param <C> the collection type
+ * @param <I> the item java type
+ * @param <ID> the item datastore type
+ */
 public interface CollectionConverter<C extends Collection> extends Converter<C, C> {
 	
 	/**

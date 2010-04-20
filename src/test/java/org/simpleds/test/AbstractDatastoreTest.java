@@ -30,6 +30,11 @@ public abstract class AbstractDatastoreTest {
 	
 	protected Log log = LogFactory.getLog(getClass());
 	
+	public AbstractDatastoreTest() {
+		// to let Spring initialize Datastore-dependent classes
+		helper.setUp();
+	}
+	
 	@Before
 	public void setupDatastore() {
 		helper.setUp();

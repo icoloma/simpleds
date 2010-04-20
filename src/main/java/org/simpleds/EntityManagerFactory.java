@@ -36,7 +36,6 @@ public class EntityManagerFactory extends AbstractDatastoreServiceAwareFactory {
 			MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 			memcache.setNamespace(CacheManager.MEMCACHE_NAMESPACE);
 			cmi.setMemcache(memcache);
-			cmi.setPersistenceMetadataRepository(persistenceMetadataRepository);
 			cacheManager = cmi;
 		}
 		EntityManagerImpl emi = new EntityManagerImpl();

@@ -2,11 +2,9 @@ package org.simpleds.cache;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.collect.Maps;
 
@@ -15,7 +13,7 @@ import com.google.common.collect.Maps;
  * @author Nacho
  *
  */
-class Level1Cache implements CacheManager {
+class Level1Cache {
 	
 	/** the thread-bound instance */
 	private static ThreadLocal<Level1Cache> threadLocal = new ThreadLocal<Level1Cache>();
@@ -27,7 +25,7 @@ class Level1Cache implements CacheManager {
 	 * Initializes the Level 1 cache for this thread.
 	 * This method should be invoked at the beginning of processing this request.
 	 */
-	public static void initialize() {
+	public static void setCacheInstance() {
 		threadLocal.set(new Level1Cache());
 	}
 	
@@ -35,7 +33,7 @@ class Level1Cache implements CacheManager {
 	 * Clears the Level1Cache associated to this thread
 	 * This method should be invoked at the end of processing this request.
 	 */
-	public static void clear() {
+	public static void clearCacheInstance() {
 		threadLocal.remove();
 	}
 	
@@ -43,26 +41,23 @@ class Level1Cache implements CacheManager {
 	 * Return the Level1Cache associated to this thread.
 	 * @return the Level1Cache associated to this thread. May be null.
 	 */
-	public static Level1Cache get() {
+	public static Level1Cache getCacheInstance() {
 		return threadLocal.get();
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T get(Key key) {
 		return (T) contents.get(key);
 	}
 
-	@Override
-	public void put(Object instance, Entity entity) {
-		contents.put(entity.getKey(), instance);
+	public void put(Key key, Object instance) {
+		contents.put(key, instance);
 	}
 
-	@Override
 	public void delete(Key key) {
 		contents.remove(key);
 	}
 
-	@Override
 	public void delete(Collection<Key> keys) {
 		for (Key key : keys) {
 			contents.remove(key);
@@ -70,7 +65,6 @@ class Level1Cache implements CacheManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public <T> Map<Key, T> get(Collection<Key> keys) {
 		Map<Key, T> result = Maps.newHashMapWithExpectedSize(keys.size());
 		for (Key key : keys) {
@@ -82,12 +76,11 @@ class Level1Cache implements CacheManager {
 		return result;
 	}
 
-	@Override
-	public void put(Collection javaObjects, List<Entity> entities) {
-		Iterator<Entity> itEnt = entities.iterator();
-		Iterator<Object> itJava = javaObjects.iterator();
-		while (itEnt.hasNext()) {
-			contents.put(itEnt.next().getKey(), itJava.next());
+	public <T> void put(Collection<Key> keys, Collection<T> javaObjects) {
+		Iterator<Key> itKey = keys.iterator();
+		Iterator<T> itJava = javaObjects.iterator();
+		while (itKey.hasNext()) {
+			contents.put(itKey.next(), itJava.next());
 		}
 	}
 	

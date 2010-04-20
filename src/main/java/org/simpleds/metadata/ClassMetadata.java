@@ -12,10 +12,13 @@ import javax.persistence.Id;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.simpleds.annotations.Property;
+import org.simpleds.annotations.Transient;
 import org.simpleds.exception.RequiredFieldException;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.memcache.Expiration;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -24,13 +27,13 @@ import com.google.common.collect.Sets;
 public class ClassMetadata {
 
 	/** persistent class */
-	private Class persistentClass;
+	private Class<?> persistentClass;
 	
 	/** datastore kind */
 	private String kind;
 	
 	/** primary key property */
-	private PropertyMetadata keyProperty;
+	private PropertyMetadata<Key, Key> keyProperty;
 	
 	/** not null if the key value should be generated automatically, null otherwise */
 	private boolean generateKeyValue;
@@ -39,7 +42,7 @@ public class ClassMetadata {
 	private Set<String> parents = ImmutableSet.of();
 	
 	/** persistent properties */
-	private Map<String, PropertyMetadata> properties = Maps.newHashMap();
+	private Map<String, PropertyMetadata<?, ?>> properties = Maps.newHashMap();
 	
 	/** required properties */
 	private Set<String> requiredProperties = Sets.newHashSet();
@@ -47,8 +50,8 @@ public class ClassMetadata {
 	/** relation indexes */
 	private Map<String, MultivaluedIndexMetadata> multivaluedIndexes = Maps.newHashMap();
 	
-	/** true to validate parent key kind when inserting */
-	private boolean validateParentKey;
+	/** the number of seconds that this class can be cached in memcache */
+	private Integer cacheSeconds;
 	
 	private static final Log log = LogFactory.getLog(ClassMetadata.class);
 	
@@ -100,9 +103,9 @@ public class ClassMetadata {
 	@SuppressWarnings("unchecked")
 	public Entity javaToDatastore(Key parentKey, Object javaObject) {
 		String kind = javaObject.getClass().getSimpleName();
-		Key key = (Key) keyProperty.getValue(javaObject);
+		Key key = keyProperty.getValue(javaObject);
 		Entity entity = key == null? new Entity(kind, parentKey) : new Entity(key); 
-		for (Entry<String, PropertyMetadata> property : properties.entrySet()) {
+		for (Entry<String, PropertyMetadata<?, ?>> property : properties.entrySet()) {
 			String name = property.getKey();
 			PropertyMetadata metadata = property.getValue();
 			Object value = metadata.getConverter().javaToDatastore(metadata.getValue(javaObject));
@@ -121,21 +124,24 @@ public class ClassMetadata {
 		}	
 	} 
 	
-	public void add(PropertyMetadata property) {
-		if (property.getAnnotation(Id.class) != null) {
+	@SuppressWarnings("unchecked")
+	public void add(PropertyMetadata<?, ?> property) {
+		org.simpleds.annotations.Id simpledsId = property.getAnnotation(org.simpleds.annotations.Id.class);
+		if (property.getAnnotation(Id.class) != null || simpledsId != null) {
 			if (keyProperty != null) {
 				throw new IllegalArgumentException("Key property specified more than once for class " + persistentClass.getSimpleName() + "(" + keyProperty.getName() + ", " + property.getName() + ")");
 			}
-			keyProperty = property;
-			generateKeyValue = property.getAnnotation(GeneratedValue.class) != null;
-			Class type = property.getPropertyType();
+			keyProperty = (PropertyMetadata<Key, Key>) property;
+			generateKeyValue = property.getAnnotation(GeneratedValue.class) != null || (simpledsId != null && simpledsId.generated());
+			Class<?> type = property.getPropertyType();
 			if (!Key.class.equals(type)) {
 				throw new IllegalArgumentException("Error processing " + persistentClass.getSimpleName() + ". Only Key.class is supported as primary key");
 			}
-		} else {
+		} else if (property.getAnnotation(Transient.class) == null){
 			Basic basic = property.getAnnotation(Basic.class);
 			Column column = property.getAnnotation(Column.class);
-			if (basic != null && !basic.optional() || column != null && !column.nullable()) {
+			Property propertyAnn = property.getAnnotation(Property.class); 
+			if (basic != null && !basic.optional() || column != null && !column.nullable() || propertyAnn != null && propertyAnn.required()) {
 				requiredProperties.add(property.getName());
 			}
 			if (properties.keySet().contains(property.getName())) {
@@ -155,17 +161,18 @@ public class ClassMetadata {
 		return  properties.keySet().contains(propertyName) || (keyProperty != null && keyProperty.getName().equals(propertyName));
 	}
 	
-	public Class getPersistentClass() {
+	public Class<?> getPersistentClass() {
 		return persistentClass;
 	}
 
-	public void setPersistentClass(Class persistentClass) {
+	public void setPersistentClass(Class<?> persistentClass) {
 		this.persistentClass = persistentClass;
-		this.kind = persistentClass.getSimpleName();
+		this.kind = persistentClass.getSimpleName().intern();
 	}
 
-	public PropertyMetadata getProperty(String propertyName) {
-		PropertyMetadata metadata = properties.get(propertyName);
+	@SuppressWarnings("unchecked")
+	public <J, D> PropertyMetadata<J, D> getProperty(String propertyName) {
+		PropertyMetadata<J, D> metadata = (PropertyMetadata<J, D>) properties.get(propertyName);
 		if (metadata == null) {
 			throwPropertyNotFoundException(propertyName);
 		}
@@ -188,21 +195,25 @@ public class ClassMetadata {
 	 * Validates the parent key when inserting
 	 */
 	public void validateParentKey(Key parentKey) {
-		if (validateParentKey) {
-			if (parents.isEmpty()) {
-				if (parentKey != null) {
-					throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.kind + " is configured as a root class (missing @Entity(parent)?)");
-				}
-			} else {
-				if (parentKey == null) {
-					throw new IllegalArgumentException("Missing parent key for entity " + this.kind + ". Expected: " + Joiner.on(", ").join(parents));
-				}
-				if (!parents.contains(parentKey.getKind())) {
-					throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.kind + " expects parents with type " + Joiner.on(", ").join(parents));
-				}
+		if (parents.isEmpty()) {
+			if (parentKey != null) {
+				throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.kind + " is configured as a root class (missing @Id(parent)?)");
 			}
-			
+		} else {
+			if (parentKey == null) {
+				throw new IllegalArgumentException("Missing parent key for entity " + this.kind + ". Expected: " + Joiner.on(", ").join(parents));
+			}
+			if (!parents.contains(parentKey.getKind())) {
+				throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.kind + " expects parents with type " + Joiner.on(", ").join(parents));
+			}
 		}
+	}
+	
+	/**
+	 * @return true if this class is cacheable
+	 */
+	public boolean isCacheable() {
+		return cacheSeconds != null;
 	}
 	
 	public void add(MultivaluedIndexMetadata metadata) {
@@ -213,7 +224,7 @@ public class ClassMetadata {
 		return properties.keySet().iterator();
 	}
 
-	public void setProperties(Map<String, PropertyMetadata> properties) {
+	public void setProperties(Map<String, PropertyMetadata<?, ?>> properties) {
 		this.properties = properties;
 	}
 	public boolean isGenerateKeyValue() {
@@ -223,7 +234,7 @@ public class ClassMetadata {
 		this.generateKeyValue = generateKey;
 	}
 
-	public PropertyMetadata getKeyProperty() {
+	public PropertyMetadata<Key, Key> getKeyProperty() {
 		return keyProperty;
 	}
 
@@ -239,17 +250,27 @@ public class ClassMetadata {
 		this.kind = kind;
 	}
 
-	public boolean isValidateParentKey() {
-		return validateParentKey;
-	}
-
 	public void setParents(Set<String> parents) {
 		this.parents = parents;
-		this.validateParentKey = true;
 	}
 
 	public Set<String> getParents() {
 		return parents;
+	}
+
+	public int getCacheSeconds() {
+		return cacheSeconds;
+	}
+
+	public void setCacheSeconds(int cacheSeconds) {
+		this.cacheSeconds = cacheSeconds;
+	}
+
+	/**
+	 * Create a Expiration instance to be used with memcache 
+	 */
+	public Expiration createCacheExpiration() {
+		return Expiration.byDeltaSeconds(cacheSeconds);
 	}
 
 }
