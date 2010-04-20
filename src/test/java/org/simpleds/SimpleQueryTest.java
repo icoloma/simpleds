@@ -15,6 +15,7 @@ import org.simpleds.testdb.Dummy1;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.common.collect.ImmutableList;
 
 public class SimpleQueryTest extends AbstractEntityManagerTest {
 
@@ -85,6 +86,20 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		addMetadata(CollectionDummy.class);
 		SimpleQuery query = entityManager.createQuery(CollectionDummy.class);
 		query.equal("intList", "foo");
+	}
+	
+	@Test
+	public void testIn() throws Exception {
+		Date now = new Date();
+		
+		Dummy1 baz = Dummy1.create();
+		baz.setOverridenNameDate(now);
+		entityManager.put(baz);
+		entityManager.put(Dummy1.create());
+		SimpleQuery query = entityManager.createQuery(Dummy1.class.getSimpleName()).in("date", ImmutableList.of(now));
+		List<Dummy1> list = entityManager.find(query);
+		assertEquals(1, list.size());
+		assertEquals(baz.getKey(), list.get(0).getKey());
 	}
 
 	@javax.persistence.Entity

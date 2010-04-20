@@ -20,16 +20,17 @@ public class CacheManagerImpl implements CacheManager {
 	private MemcacheService memcache;
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T get(Key key, ClassMetadata metadata) {
 		Level1Cache level1 = Level1Cache.getCacheInstance();
 		T cachedValue = null;
 		if (level1 != null) {
-			cachedValue = level1.get(key);
+			cachedValue = (T) level1.get(key);
 		}
 		if (cachedValue == null) {
 			Entity entity = (Entity) memcache.get(key);
 			if (entity != null) {
-				cachedValue = metadata.datastoreToJava(entity);
+				cachedValue = (T) metadata.datastoreToJava(entity);
 				if (level1 != null) {
 					level1.put(entity.getKey(), cachedValue);
 				}

@@ -1,6 +1,8 @@
 package org.simpleds;
 
 
+import java.util.Collection;
+
 import org.simpleds.metadata.ClassMetadata;
 
 import com.google.appengine.api.datastore.Cursor;
@@ -78,6 +80,11 @@ public class PagedQuery extends SimpleQuery {
 	@Override
 	public PagedQuery notEqual(String propertyName, Object value) {
 		return (PagedQuery) super.notEqual(propertyName, value);
+	}
+	
+	@Override
+	public PagedQuery in(String propertyName, Collection<?> values) {
+		return (PagedQuery) super.in(propertyName, values);
 	}
 	
 	@Override

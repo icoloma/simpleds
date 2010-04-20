@@ -148,7 +148,7 @@ public class EntityManagerImpl implements EntityManager {
 		if (entity == null) {
 			throw new org.simpleds.exception.EntityNotFoundException();
 		}
-		T javaObject = datastoreToJava(entity);
+		T javaObject = (T) datastoreToJava(entity);
 		return javaObject;
 	}
 	
@@ -331,7 +331,7 @@ public class EntityManagerImpl implements EntityManager {
 			ClassMetadata metadata = repository.get(key.getKind());
 			T javaObject;
 			if (metadata.isCacheable()) {
-				javaObject = cacheManager.get(key, metadata);
+				javaObject = (T) cacheManager.get(key, metadata);
 				if (javaObject == null) {
 					Entity entity = datastoreService.get(transaction, key);
 					javaObject = (T) metadata.datastoreToJava(entity);

@@ -5,7 +5,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.simpleds.converter.CollectionConverter;
 import org.simpleds.converter.Converter;
+import org.springframework.util.ClassUtils;
 
 /**
  * A single property
@@ -81,6 +83,24 @@ public class SinglePropertyMetadata<J, D> implements PropertyMetadata<J, D> {
 		} catch (InvocationTargetException e) {
 			throw new RuntimeException(e);
 		} 
+	}
+	
+	@Override
+	public Object convertQueryParam(Object value) {
+		Converter converter = getConverter();
+		Object convertedValue;
+		Class expectedClass;
+		if (converter instanceof CollectionConverter) {
+			convertedValue = ((CollectionConverter)converter).itemJavaToDatastore(value);
+			expectedClass = ((CollectionConverter)converter).getItemType();
+		} else {
+			convertedValue = converter.javaToDatastore(value);
+			expectedClass = getPropertyType();
+		}
+		if (!ClassUtils.isAssignable(expectedClass, value.getClass())) {
+			throw new IllegalArgumentException("Value of " + getName() + " has wrong type. Expected " + expectedClass.getSimpleName() + ", but provided " + value.getClass().getSimpleName());
+		}
+		return convertedValue;
 	}
 
 	public String getName() {

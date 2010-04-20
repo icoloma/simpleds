@@ -1,12 +1,10 @@
 package org.simpleds;
 
+import java.util.Collection;
 import java.util.List;
 
-import org.simpleds.converter.CollectionConverter;
-import org.simpleds.converter.Converter;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PropertyMetadata;
-import org.springframework.util.ClassUtils;
 
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.FetchOptions;
@@ -17,6 +15,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.SortPredicate;
+import com.google.common.collect.Lists;
 
 /**
  * Provides an easy way to create a Datastore {@link Query} 
@@ -74,36 +73,23 @@ public class SimpleQuery implements Cloneable {
 	
 	public SimpleQuery addFilter(String propertyName, FilterOperator operator, Object value) {
 		if (value != null) {
-			
-			// convert from java to google datastore
-			Object convertedValue;
-			Class expectedClass;
-			if ("__key__".equals(propertyName)) {
-				convertedValue = value;
-				expectedClass = Key.class;
-			} else {
-				PropertyMetadata propertyMetadata = classMetadata.getProperty(propertyName);
-				if (!propertyMetadata.isIndexed()) {
-					throw new IllegalArgumentException(propertyName + " is not indexed. Correct your query, or remove @Unindexed and update your existing entities accordingly.");
-				}
-				Converter converter = propertyMetadata.getConverter();
-				if (converter instanceof CollectionConverter) {
-					convertedValue = ((CollectionConverter)converter).itemJavaToDatastore(value);
-					expectedClass = ((CollectionConverter)converter).getItemType();
-				} else {
-					convertedValue = converter.javaToDatastore(value);
-					expectedClass = propertyMetadata.getPropertyType();
-				}
-			}
-			if (!ClassUtils.isAssignable(expectedClass, value.getClass())) {
-				throw new IllegalArgumentException("Value of " + propertyName + " has wrong type. Expected " + expectedClass.getSimpleName() + ", but the query provided " + value.getClass().getSimpleName());
-			}
-			
-			query.addFilter(propertyName, operator, convertedValue);
+			PropertyMetadata propertyMetadata = getPropertyMetadata(propertyName);
+			query.addFilter(propertyName, operator, propertyMetadata.convertQueryParam(value));
 		}
 		return this;
 	}
 	
+	/**
+	 * @return the {@link PropertyMetadata} instance associated to the provided propertyName. Accepts "__key__"
+	 */
+	private PropertyMetadata getPropertyMetadata(String propertyName) {
+		PropertyMetadata propertyMetadata = "__key__".equals(propertyName)? classMetadata.getKeyProperty() : classMetadata.getProperty(propertyName);
+		if (!propertyMetadata.isIndexed()) {
+			throw new IllegalArgumentException(propertyName + " is not indexed. Correct your query, or remove @Unindexed and update your existing entities accordingly.");
+		}	
+		return propertyMetadata;
+	}
+
 	public SimpleQuery equal(String propertyName, Object value) {
 		return addFilter(propertyName, FilterOperator.EQUAL, value);
 	}
@@ -142,6 +128,18 @@ public class SimpleQuery implements Cloneable {
 		return addFilter(propertyName, FilterOperator.NOT_EQUAL, value);
 	}
 	
+	public SimpleQuery in(String propertyName, Collection<?> values) {
+		if (values != null) {
+			PropertyMetadata propertyMetadata = getPropertyMetadata(propertyName);
+			List convertedValues = Lists.newArrayListWithCapacity(values.size());
+			for (Object value : values) {
+				convertedValues.add(propertyMetadata.convertQueryParam(value));
+			}
+			query.addFilter(propertyName, FilterOperator.IN, convertedValues);
+		}
+		return this;
+	}
+
 	/**
 	 * Adds a LIKE clause. This like clause will only match strings that START
 	 * with the provided argument. In other words, this clause will match "foo%" 

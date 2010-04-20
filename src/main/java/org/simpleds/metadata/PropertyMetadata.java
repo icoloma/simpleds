@@ -48,4 +48,9 @@ public interface PropertyMetadata<J, D> {
 	 */
 	public boolean isIndexed();
 
+	/**
+	 * Convert a SimpleQuery parameter into something that the datastore can handle
+	 */
+	public Object convertQueryParam(Object value);
+
 }

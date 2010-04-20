@@ -70,6 +70,11 @@ public class EmbeddedPropertyMetadata<J, D> implements PropertyMetadata<J, D> {
 	}
 	
 	@Override
+	public Object convertQueryParam(Object value) {
+		return getLastNode().convertQueryParam(value);
+	}
+	
+	@Override
 	public J getValue(Object container) {
 		for (Iterator<SinglePropertyMetadata> i = nodes.iterator(); i.hasNext(); ) {
 			SinglePropertyMetadata node = i.next();
