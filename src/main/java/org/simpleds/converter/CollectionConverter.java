@@ -7,8 +7,6 @@ import java.util.Collection;
  * @author icoloma
  *
  * @param <C> the collection type
- * @param <I> the item java type
- * @param <ID> the item datastore type
  */
 public interface CollectionConverter<C extends Collection> extends Converter<C, C> {
 	

@@ -57,11 +57,10 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	}
 	
 	/**
-	 * Ćreate fetch options from the servlet-provided parameters.
+	 * Create fetch options from the servlet-provided parameters.
 	 * The returned instance will apply the batchSize attribute limit of this instance 
-	 * and the cursor provided by the request parameter, if any. 
+	 * and the cursor provided by the request, if any. 
 	 * @param params the parameters map received by the servlet
-	 * @return 
 	 */
 	protected FetchOptions createFetchOptions(TaskRequest request) {
 		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(batchSize);
@@ -74,7 +73,7 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	
 	/**
 	 * Defer task execution to another subsequent request 
-	 * @param cursor the cursor to continue at, null if none
+	 * @param request the current request object
 	 */
 	public void deferProceed(TaskRequest request) {
 		log.info("Deferring " + getId() + " with cursor " + request.getCursor() == null? "<none>" : request.getCursor().toWebSafeString());
