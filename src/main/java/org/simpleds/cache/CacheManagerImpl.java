@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.simpleds.functions.DatastoreEntityToKeyFunction;
 import org.simpleds.metadata.ClassMetadata;
 
@@ -19,6 +21,8 @@ public class CacheManagerImpl implements CacheManager {
 	/** the underlying memcache service */
 	private MemcacheService memcache;
 	
+	private Log log = LogFactory.getLog(CacheManagerImpl.class);
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T get(Key key, ClassMetadata metadata) {
@@ -27,9 +31,12 @@ public class CacheManagerImpl implements CacheManager {
 		if (level1 != null) {
 			cachedValue = (T) level1.get(key);
 		}
-		if (cachedValue == null) {
+		if (cachedValue == null && metadata.useLevel2Cache()) {
 			Entity entity = (Entity) memcache.get(key);
 			if (entity != null) {
+				if (log.isDebugEnabled()) {
+					log.debug("Level 2 cache hit: " + key);
+				}
 				cachedValue = (T) metadata.datastoreToJava(entity);
 				if (level1 != null) {
 					level1.put(entity.getKey(), cachedValue);
@@ -45,7 +52,9 @@ public class CacheManagerImpl implements CacheManager {
 		if (level1 != null) {
 			level1.put(entity.getKey(), instance);
 		}
-		memcache.put(entity.getKey(), entity, metadata.createCacheExpiration());
+		if (metadata.useLevel2Cache()) {
+			memcache.put(entity.getKey(), entity, metadata.createCacheExpiration());
+		}
 	}
 
 	@Override
@@ -75,9 +84,15 @@ public class CacheManagerImpl implements CacheManager {
 		if (level1 != null) {
 			result = level1.get(keys);
 		}
+		if (!metadata.useLevel2Cache()) {
+			return result;
+		}
 		Map result2 = memcache.getAll(result == null? (Collection) keys : (Collection) Collections2.filter(keys, new NonCachedPredicate(result.keySet())));
 		if (result == null) {
 			result = Maps.newHashMapWithExpectedSize(keys.size());
+		}
+		if (log.isDebugEnabled() && !result2.isEmpty()) {
+			log.debug("Level 2 cache multiple hit: " + result2.keySet());
 		}
 		for (Map.Entry entry : (Set<Map.Entry>) result2.entrySet()) {
 			Key key = (Key) entry.getKey();
@@ -97,11 +112,13 @@ public class CacheManagerImpl implements CacheManager {
 		if (level1 != null) {
 			level1.put(Collections2.transform(entities, new DatastoreEntityToKeyFunction()), javaObjects);
 		}
-		Map<Object, Object> map = Maps.newHashMap();
-		for (Entity entity : entities) {
-			map.put(entity.getKey(), entity);
+		if (metadata.useLevel2Cache()) {
+			Map<Object, Object> map = Maps.newHashMap();
+			for (Entity entity : entities) {
+				map.put(entity.getKey(), entity);
+			}
+			memcache.putAll(map, metadata.createCacheExpiration());
 		}
-		memcache.putAll(map, metadata.createCacheExpiration());
 	}
 
 	public void setMemcache(MemcacheService memcache) {

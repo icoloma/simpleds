@@ -16,9 +16,9 @@ import java.lang.annotation.Target;
 public @interface Id {
 	
 	/**
-	 * If set to true, the primary key will be assigned automatically. Default is false.
+	 * Indicates if missing primary keys should be generated automatically. Default is true.
 	 */
-	boolean generated() default false;
+	boolean generated() default true;
 	
 	/** 
 	 * The parent class. Indicates the possible parent types when generating 

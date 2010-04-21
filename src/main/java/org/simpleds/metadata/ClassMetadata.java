@@ -273,4 +273,8 @@ public class ClassMetadata {
 		return Expiration.byDeltaSeconds(cacheSeconds);
 	}
 
+	public boolean useLevel2Cache() {
+		return cacheSeconds > 0;
+	}
+
 }

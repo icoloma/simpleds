@@ -10,8 +10,20 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * Configure this filter in web.xml to get caching in all SimpleDS
- * operations.
+ * Configure this filter in web.xml to get Level 1 caching in SimpleDS get()
+ * operations. 
+ * 
+ * <pre>
+ &lt;filter>
+	&lt;filter-name>simpleds-cache&lt;/filter-name>
+	&lt;filter-class>org.simpleds.cache.CacheFilter&lt;/filter-class>
+&lt;/filter>
+&lt;filter-mapping>
+	&lt;filter-name>simpleds-cache&lt;/filter-name>
+	&lt;url-pattern>/*&lt;/url-pattern>
+	&lt;dispatcher>REQUEST&lt;/dispatcher>
+&lt;/filter-mapping>
+ * </pre>
  * 
  * @author Nacho
  *

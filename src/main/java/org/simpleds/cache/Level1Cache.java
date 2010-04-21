@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.appengine.api.datastore.Key;
 import com.google.common.collect.Maps;
 
@@ -20,6 +23,8 @@ class Level1Cache {
 
 	/** the cache contents */
 	private Map<Key, Object> contents = new WeakHashMap<Key, Object>();
+	
+	private Log log = LogFactory.getLog(Level1Cache.class);
 	
 	/**
 	 * Initializes the Level 1 cache for this thread.
@@ -47,7 +52,11 @@ class Level1Cache {
 
 	@SuppressWarnings("unchecked")
 	public <T> T get(Key key) {
-		return (T) contents.get(key);
+		T value = (T) contents.get(key);
+		if (log.isDebugEnabled() && value != null) {
+			log.debug("Level 1 cache hit: " + key);
+		}
+		return value;
 	}
 
 	public void put(Key key, Object instance) {
@@ -72,6 +81,9 @@ class Level1Cache {
 			if (value != null) {
 				result.put(key, value);
 			}
+		}
+		if (log.isDebugEnabled() && !result.isEmpty()) {
+			log.debug("Level 1 cache multiple hit: " + result.keySet());
 		}
 		return result;
 	}

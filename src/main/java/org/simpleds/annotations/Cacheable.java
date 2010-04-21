@@ -16,7 +16,10 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Cacheable {
 	
-	/** the number of seconds that this class should be cached in memcache */
-	int value();
+	/** 
+	 * The number of seconds that this class should be cached in memcache.
+	 * If not specified, the class will be stored in Level 1 cache but not in Level 2 
+	 */
+	int value() default 0;
 	
 }
