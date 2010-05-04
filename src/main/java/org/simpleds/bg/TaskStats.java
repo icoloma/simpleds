@@ -36,8 +36,8 @@ public class TaskStats {
 	
 	private static Log log = LogFactory.getLog(TaskStats.class);
 
-	/** task path */
-	private String path;
+	/** task id */
+	private String id;
 	
 	/** start timestamp */
 	private Date start;
@@ -51,19 +51,19 @@ public class TaskStats {
 	/** number of processed entities */
 	private Long entityCount;
 	
-	TaskStats(String path) {
+	TaskStats(String id) {
 		MemcacheService memcache = getMemcache();
-		this.path = path;
-		Long l = (Long) memcache.get(START + path);
+		this.id = id;
+		Long l = (Long) memcache.get(START + id);
 		if (l != null) {
 			this.start = new Date(l);
 		}
-		l = (Long) memcache.get(END + path);
+		l = (Long) memcache.get(END + id);
 		if (l != null) {
 			this.end = new Date(l);
 		}
-		this.executionCount = (Long) memcache.get(EXECUTIONS + path); 
-		this.entityCount = (Long) memcache.get(ENTITIES + path); 
+		this.executionCount = (Long) memcache.get(EXECUTIONS + id); 
+		this.entityCount = (Long) memcache.get(ENTITIES + id); 
 	}
 
 	private static MemcacheService getMemcache() {
@@ -72,14 +72,20 @@ public class TaskStats {
 		return memcache;
 	}
 	
-	static Collection<TaskStats> getTaskStats(Iterable<String> paths) {
+	static Collection<TaskStats> getTaskStats(Iterable<String> ids) {
 		Set<TaskStats> result = Sets.newTreeSet(new TaskStatsComparator());
-		for (String path : paths) {
+		for (String path : ids) {
 			result.add(new TaskStats(path));
 		}
 		return result;
 	}
 	
+	/**
+	 * Trigger the start of a task. This method will be invoked for the first 
+	 * batch execution of this task.
+	 * @param task
+	 */
+	@SuppressWarnings("unchecked")
 	public static void start(BackgroundTask task) {
 		String path = task.getId();
 		log.info("Entering task: " + path);
@@ -91,12 +97,22 @@ public class TaskStats {
 		memcache.deleteAll(keys);
 	}
 	
+	/**
+	 * Trigger the end of a task. This method will be invoked for the last 
+	 * batch execution of this task.
+	 * @param task
+	 */
 	public static void end(BackgroundTask task) {
 		String path = task.getId();
 		log.info("Task " + path + " completed.");
 		getMemcache().put(END + path, System.currentTimeMillis());
 	}
 	
+	/**
+	 * Add results for a task. This method will be invoked with every batch execution of this task.
+	 * @param task
+	 * @param entitiesProcessed
+	 */
 	public static void addResults(BackgroundTask task, long entitiesProcessed) {
 		String path = task.getId();
 		log.info(path + " processed " + entitiesProcessed + " entities");
@@ -105,8 +121,8 @@ public class TaskStats {
 		memcache.increment(EXECUTIONS + path, 1, 0L);
 	}
 	
-	public String getPath() {
-		return path;
+	public String getId() {
+		return id;
 	}
 
 	public Date getStart() {
@@ -129,7 +145,7 @@ public class TaskStats {
 
 		@Override
 		public int compare(TaskStats t1, TaskStats t2) {
-			return t1.getPath().compareTo(t2.getPath());
+			return t1.getId().compareTo(t2.getId());
 		}
 		
 	}

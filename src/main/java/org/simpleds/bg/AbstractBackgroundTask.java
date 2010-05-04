@@ -60,7 +60,7 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	 * Create fetch options from the servlet-provided parameters.
 	 * The returned instance will apply the batchSize attribute limit of this instance 
 	 * and the cursor provided by the request, if any. 
-	 * @param params the parameters map received by the servlet
+	 * @param request the current task request
 	 */
 	protected FetchOptions createFetchOptions(TaskRequest request) {
 		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(batchSize);

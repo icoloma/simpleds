@@ -6,13 +6,13 @@ package org.simpleds.bg;
  * Implementing classes must include:
  * <ul>
  * <li>
- * Idempotence: It is impossible to know in advance how many times a task will be 
+ * Idempotent: It is impossible to know in advance how many times a task will be 
  * invoked, so it must be capable of resuming work. Specifically, a previous execution
  * may have failed at any point.
  * <li>
- * Thread-safe and immutability: When using an static structure, several threads 
- * may be executing tasks at the same time. A task should not be modified by 
- * the {@link TaskRequest} contents. 
+ * Thread-safe and immutability: Tasks are stored in a static structure, which means 
+ * that several threads may be executing tasks at the same time. A task should not be 
+ * modified by the {@link TaskRequest} contents. 
  * </li>
  * <li>
  * Break up into smaller parts: tasks should try to complete in 30 seconds or less,

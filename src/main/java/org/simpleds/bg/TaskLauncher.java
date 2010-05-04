@@ -56,8 +56,8 @@ public class TaskLauncher {
 	}
 	
 	/**
-	 * Set the queue to be used by all configured tasks. This value is ignored for tasks configured 
-	 * explicitely using {@link BackgroundTask}.withQueue()
+	 * Set the queue to be used by all configured tasks. This value is ignored for 
+	 * tasks configured explicitely using {@link BackgroundTask}.withQueue()
 	 * @param queueName the name of the queue to be used. 
 	 * @return this instance for chaining
 	 */

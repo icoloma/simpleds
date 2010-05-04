@@ -13,8 +13,7 @@ import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.common.collect.Lists;
 
 /**
- * Delete all entities returned by a query. This class will use batch operations to improve efficiency,
- * and applies a default batchSize value of 500.
+ * Delete all entities returned by a query. This class will use batch operations to improve efficiency.
  * @author icoloma
  *
  */
@@ -49,7 +48,8 @@ public abstract class DeleteTask extends AbstractBackgroundTask {
 	}
 
 	/**
-	 * Create the query according to the proposed params
+	 * Create the query that will return the list of entities to delete.
+	 * @param request the current task request
 	 */
 	protected abstract Query createQuery(TaskRequest request);
 	

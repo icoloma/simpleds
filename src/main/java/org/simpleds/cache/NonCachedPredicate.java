@@ -6,13 +6,13 @@ import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Predicate;
 
 /**
- * Filter a collection of Key, leaving only the ones that 
+ * Filter a collection leaving only the keys that 
  * have not yet been retrieved from the cache
  * 
  * @author Nacho
  *
  */
-public class NonCachedPredicate implements Predicate<Key> {
+class NonCachedPredicate implements Predicate<Key> {
 	
 	private Set<Key> cachedKeys;
 	

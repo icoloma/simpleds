@@ -5,7 +5,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Function;
 
 /**
- * Converts a Datastore Entity its Key 
+ * Converts a Datastore Entity to its Key 
  * @author icoloma
  *
  */

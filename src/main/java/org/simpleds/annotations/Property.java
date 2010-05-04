@@ -10,8 +10,8 @@ import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Text;
 
 /**
- * Overrides how a property gets mapped on the Datastore. 
- * By default all properties are mapped unless annotated with {@link Transient}. 
+ * Specify how a property should get mapped to the Datastore. 
+ * All properties are mapped by default unless annotated with {@link Transient}. 
  * @author icoloma
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -25,15 +25,15 @@ public @interface Property {
 	String name() default "";
 	
 	/**
-	 * Marks the annotated attribute as required. Default is false.
+	 * Marks this attribute as required. Default is false.
 	 */
 	boolean required() default false;
 	
 	/**
-	 * Marks the annotated attribute as unindexed. Unindexed attributes do not create an automatic 
-	 * index. The default for all attributes is being indexed except for {@link Text} and {@link Blob}.
-	 * <p>
-	 * Details can be found at <a href="http://code.google.com/appengine/articles/storage_breakdown.html">The GAE Official docs</a>.
+	 * Marks this attribute as unindexed. Unindexed attributes do not create an automatic 
+	 * index. 
+	 * <p>All attributes are <a href="http://code.google.com/appengine/articles/storage_breakdown.html">indexed by default</a> 
+	 * except {@link Text} and {@link Blob} data types.
 	 */
 	boolean unindexed() default false;
 }
