@@ -3,10 +3,10 @@ package org.simpleds.bg;
 
 /**
  * Unit of work on the Datastore. 
- * Implementing classes must include:
+ * Implementing classes must implement:
  * <ul>
  * <li>
- * Idempotent: It is impossible to know in advance how many times a task will be 
+ * Idempotence: It is impossible to know in advance how many times a task will be 
  * invoked, so it must be capable of resuming work. Specifically, a previous execution
  * may have failed at any point.
  * <li>

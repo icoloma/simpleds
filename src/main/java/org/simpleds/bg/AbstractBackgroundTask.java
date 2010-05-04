@@ -21,7 +21,7 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	/** the id of this task */
 	protected String id;
 	
-	/** queue name to execute the schema migration, defaults to "default" */
+	/** queue name to execute this task when deferring, defaults to "default" */
 	protected String queueName;
 	
 	/** the number of entities to process by each invocation, default 150 */
