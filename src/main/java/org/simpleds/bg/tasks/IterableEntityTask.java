@@ -9,7 +9,7 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.QueryResultIterator;
 
 /**
- * Process Datastore entities
+ * Process Datastore entities one by one
  * 
  * @author icoloma
  *
@@ -44,12 +44,13 @@ public abstract class IterableEntityTask extends AbstractBackgroundTask {
 	}
 
 	/**
-	 * Update and store the entity
+	 * Process one {@link Entity}
 	 */
 	protected abstract void process(Entity entity, TaskRequest request);
 
 	/**
-	 * Create the query according to the proposed params
+	 * Create the query that will return the list of entities to process.
+	 * @param request the current task request
 	 */
 	protected abstract Query createQuery(TaskRequest request);
 	

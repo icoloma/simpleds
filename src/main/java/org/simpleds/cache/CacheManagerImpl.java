@@ -16,6 +16,10 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 
+/**
+ * Implementation of {@link CacheManager}
+ * @author icoloma
+ */
 public class CacheManagerImpl implements CacheManager {
 
 	/** the underlying memcache service */

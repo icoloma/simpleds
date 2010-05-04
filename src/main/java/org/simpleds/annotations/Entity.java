@@ -6,9 +6,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.simpleds.cache.CacheFilter;
+
 /**
  * Annotates a persistent class. 
  * 
+ * @see CacheFilter
  * @author icoloma
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -19,7 +22,7 @@ public @interface Entity {
 	/** 
 	 * The parent class. Indicates the possible parent types when generating 
 	 * key values for this class. Leave empty for root entities. 
-	 * @deprecated specify the parent using {@link Id} instead
+	 * @deprecated use {@link Id} instead
 	 */
 	Class<?>[] parent() default {};
 	

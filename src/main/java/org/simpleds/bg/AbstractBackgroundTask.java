@@ -21,7 +21,7 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	/** the id of this task */
 	protected String id;
 	
-	/** queue name to execute the schema migration, defaults to "default" */
+	/** queue name to execute this task when deferring, defaults to "default" */
 	protected String queueName;
 	
 	/** the number of entities to process by each invocation, default 150 */
@@ -60,7 +60,7 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	 * Create fetch options from the servlet-provided parameters.
 	 * The returned instance will apply the batchSize attribute limit of this instance 
 	 * and the cursor provided by the request, if any. 
-	 * @param params the parameters map received by the servlet
+	 * @param request the current task request
 	 */
 	protected FetchOptions createFetchOptions(TaskRequest request) {
 		FetchOptions fetchOptions = FetchOptions.Builder.withLimit(batchSize);

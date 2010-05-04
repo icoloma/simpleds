@@ -15,7 +15,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
  */
 public class DeleteSessionsTask extends DeleteTask {
 	
-	/** the dafult ID of this task */
+	/** the default ID of this task */
 	public static final String DEFAULT_ID = "delete-sessions";
 	
 	/** 
@@ -26,7 +26,7 @@ public class DeleteSessionsTask extends DeleteTask {
 	public static final String TIMESTAMP_PARAM = "delete-sessions.timestamp";
 
 	/**
-	 * Creates a new instance with id=ClearCacheTask.DEFAULT_ID
+	 * Creates a new instance with id=DEFAULT_ID
 	 */
 	public DeleteSessionsTask() {
 		super(DEFAULT_ID);

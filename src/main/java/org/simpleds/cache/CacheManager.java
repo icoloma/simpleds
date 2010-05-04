@@ -18,7 +18,7 @@ import com.google.appengine.api.datastore.Key;
  * <li>Level 2: Any entity that has not been returned by the level 1 cache 
  * will be tested against the level 2 cache, which is backed by memcache.
  * This level will use the {@link Entity} representation, so an unmarshall 
- * will be required (same as would with any value returned by the datastore).
+ * will be required (same as it would with any value returned by the datastore).
  * </ul>
  * 
  * @author Nacho
@@ -44,6 +44,7 @@ public interface CacheManager {
 	 * Put an instance in the cache
 	 * @param instance the java object
 	 * @param entity the datastore-equivalent Entity instance
+	 * @param metadata the {@link ClassMetadata} instance for this entity
 	 */
 	public void put(Object instance, Entity entity, ClassMetadata metadata);
 	
@@ -70,6 +71,7 @@ public interface CacheManager {
 	 * Put a collection of java objects in the cache
 	 * @param javaObjects the persistent objects to put into the Level 1 cache
 	 * @param entities the list of entities to put into the Level 2 cache
+	 * @param metadata the {@link ClassMetadata} instance for this entity
 	 */
 	public <T> void put(Collection<T> javaObjects, List<Entity> entities, ClassMetadata metadata);
 

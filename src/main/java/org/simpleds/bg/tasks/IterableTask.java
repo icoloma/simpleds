@@ -8,7 +8,7 @@ import org.simpleds.bg.AbstractBackgroundTask;
 import org.simpleds.bg.TaskRequest;
 
 /**
- * Process SimpleDS entities, one at a time
+ * Process SimpleDS entities one by one.
  * 
  * @author icoloma
  *
@@ -47,12 +47,13 @@ public abstract class IterableTask<T> extends AbstractBackgroundTask {
 	}
 
 	/**
-	 * Update and store the entity
+	 * Process one entity.
 	 */
 	protected abstract void process(T entity, TaskRequest request);
 
 	/**
-	 * Create the query according to the proposed params
+	 * Create the query that will return the list of entities to process.
+	 * @param request the current task request
 	 */
 	protected abstract SimpleQuery createQuery(TaskRequest request);
 

@@ -7,12 +7,7 @@ import org.simpleds.metadata.PropertyMetadata;
 import com.google.common.base.Function;
 
 /**
- * Return a property value 
- * 
- * @author icoloma
- *
- * @param <T> the type  of the Java Object
- * @param <P> the type of the property to return
+ * Abstract superclass to all property-related functions
  */
 public abstract class AbstractPropertyFunction<T, P> implements Function<T, P> {
 	
