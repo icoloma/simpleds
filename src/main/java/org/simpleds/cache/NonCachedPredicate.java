@@ -12,7 +12,7 @@ import com.google.common.base.Predicate;
  * @author Nacho
  *
  */
-class NonCachedPredicate implements Predicate<Key> {
+public class NonCachedPredicate implements Predicate<Key> {
 	
 	private Set<Key> cachedKeys;
 	
