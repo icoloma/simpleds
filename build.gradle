@@ -1,6 +1,5 @@
-
-apply url: 'https://loom.svn.sourceforge.net/svnroot/loom/shared/trunk/extrema.gradle'
-apply id: 'maven'
+apply from: "$sharedLocation/extrema.gradle"
+apply plugin: 'maven'
 
 project.version=simpledsVersion
 
