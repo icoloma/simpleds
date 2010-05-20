@@ -33,6 +33,8 @@ public class ClassMetadataFactory {
 		ClassMetadata metadata = new ClassMetadata();
 		metadata.setPersistentClass(clazz);
 		visit(clazz, metadata, new HashSet<String>());
+		Class<?> instrumentedClass = instrument(clazz);
+		metadata.setInstrumentedClass(instrumentedClass);
 		return metadata;
 	}
 	
@@ -86,6 +88,25 @@ public class ClassMetadataFactory {
 		} catch (IntrospectionException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	/**
+	 * Return the instrumented version of this  class. Instrumented classes will intercept 
+	 * all relation methods invocation and create a cached attribute to store its value.
+	 * @param clazz the class to instrument
+	 * @return if there is no relation method, the same class.  Otherwise, returns an 
+	 * instrumented version that intercepts any invocation to relation methods. 
+	 */
+	protected Class instrument(Class<?> clazz) {
+		/*
+		ClassReader classReader = new ClassReader(clazz.getName());
+		ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS);
+		EnhancerVisitor visitor = new EnhancerVisitor(classWriter);
+		classReader.accept(visitor, 0);
+		byte[] output = classWriter.toByteArray();
+		return visitor.wasEnhanced()? ExtensibleClassLoader.instance.defineClass(clazz.getName() + "__ds__", output) : clazz;
+		*/
+		return clazz;
 	}
 
 	private void addMultivaluedIndex(ClassMetadata classMetadata, MultivaluedIndex index) {

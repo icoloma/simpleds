@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 import org.simpleds.metadata.ClassMetadata;
-import org.simpleds.metadata.ClassMetadataFactory;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
 import org.simpleds.test.AbstractDatastoreTest;
@@ -42,9 +41,6 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 	 * Add a ClassMetadata to this entityManager
 	 */
 	protected ClassMetadata addMetadata(Class<?> clazz) {
-		ClassMetadataFactory factory = new ClassMetadataFactory();
-		ClassMetadata cm = factory.createMetadata(clazz);
-		repository.add(cm);
-		return cm;
+		return repository.add(clazz);
 	}
 }

@@ -18,15 +18,23 @@ public class PersistenceMetadataRepository {
 	private Map<Class, ClassMetadata> metadataByClass = Maps.newHashMap();
 	
 	/** the list of ClassMetadata by simple (unqualified) class name */
-	private Map<String, ClassMetadata> metadataBySimpleClassName = Maps.newHashMap();
+	private Map<String, ClassMetadata> metadataByKind = Maps.newHashMap();
 	
+	private ClassMetadataFactory classMetadataFactory = new ClassMetadataFactory();
+
 	private static Log log = LogFactory.getLog(PersistenceMetadataRepository.class);
 	
-	public void add(ClassMetadata metadata) {
+	/**
+	 * Adds a persistent class to the repository
+	 * @return the ClassMetadata instance created for this persistent class
+	 */
+	public ClassMetadata add(Class<?> clazz) {
+		ClassMetadata metadata = classMetadataFactory.createMetadata(clazz);
 		log.debug("Adding persistent class " + metadata.getKind());
 		metadata.validate();
 		metadataByClass.put(metadata.getPersistentClass(), metadata);
-		metadataBySimpleClassName.put(metadata.getKind(), metadata);
+		metadataByKind.put(metadata.getKind(), metadata);
+		return metadata;
 	}
 	
 	/**
@@ -46,7 +54,7 @@ public class PersistenceMetadataRepository {
 	 * @return the ClassMetadata regsitered for the provided simple class name
 	 */
 	public ClassMetadata get(String kind) {
-		ClassMetadata result = metadataBySimpleClassName.get(kind);
+		ClassMetadata result = metadataByKind.get(kind);
 		if (result == null) {
 			throw new IllegalArgumentException("No persistent class " + kind + " could be found");
 		}
@@ -58,6 +66,10 @@ public class PersistenceMetadataRepository {
 	 */
 	public Collection<ClassMetadata> getAll() {
 		return metadataByClass.values();
+	}
+
+	public void setClassMetadataFactory(ClassMetadataFactory classMetadataFactory) {
+		this.classMetadataFactory = classMetadataFactory;
 	}
 	
 }

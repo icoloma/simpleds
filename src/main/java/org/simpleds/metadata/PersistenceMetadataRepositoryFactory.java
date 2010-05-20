@@ -37,6 +37,7 @@ public class PersistenceMetadataRepositoryFactory {
 				throw new IllegalArgumentException("locations has not been specified");
 			}
 			PersistenceMetadataRepository repository = new PersistenceMetadataRepository();
+			repository.setClassMetadataFactory(classMetadataFactory);
 			MetadataReaderFactory readerFactory = new CachingMetadataReaderFactory();
 			for (String location : locations) {
 				Resource[] resources = resolver.getResources(location);
@@ -47,8 +48,7 @@ public class PersistenceMetadataRepositoryFactory {
 						if (am.hasAnnotation(Entity.class.getName()) || 
 								am.hasAnnotation(org.simpleds.annotations.Entity.class.getName())) {
 							Class<?> clazz = ClassUtils.forName(am.getClassName(), ClassUtils.getDefaultClassLoader());
-							ClassMetadata metadata = classMetadataFactory.createMetadata(clazz);
-							repository.add(metadata);
+							repository.add(clazz);
 						}
 					}
 				}
