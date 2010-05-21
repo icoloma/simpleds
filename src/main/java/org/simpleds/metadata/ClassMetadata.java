@@ -29,9 +29,6 @@ public class ClassMetadata {
 	/** persistent class */
 	private Class<?> persistentClass;
 	
-	/** instrumented class (class once with all relations methods intercepted) */
-	private Class<?> instrumentedClass;
-	
 	/** datastore kind */
 	private String kind;
 	
@@ -278,14 +275,6 @@ public class ClassMetadata {
 
 	public boolean useLevel2Cache() {
 		return cacheSeconds > 0;
-	}
-
-	public Class<?> getInstrumentedClass() {
-		return instrumentedClass;
-	}
-
-	public void setInstrumentedClass(Class<?> instrumentedClass) {
-		this.instrumentedClass = instrumentedClass;
 	}
 
 }

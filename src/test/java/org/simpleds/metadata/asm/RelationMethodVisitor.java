@@ -2,7 +2,6 @@ package org.simpleds.metadata.asm;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.util.CheckAnnotationAdapter;
-import org.simpleds.annotations.One;
 
 /**
  * If the method is annotated as {@link One}, add the intercepting code to calculate the relation

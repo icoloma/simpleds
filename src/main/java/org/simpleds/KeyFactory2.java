@@ -1,11 +1,12 @@
 package org.simpleds;
 
 import java.util.Collection;
-import java.util.List;
+
+import org.simpleds.functions.IdToKeyFunction;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Collections2;
 
 /**
  * Extra methods not provided by KeyFactory class
@@ -46,25 +47,35 @@ public class KeyFactory2 {
 	 * @param parentKey the parent key, if any. Can be null.
 	 * @param kind the kind of keys to produce.
 	 * @param ids the long values to use as keys
+	 * @deprecated use Collections2.transform(ids, new IdToKeyFunction(kind).withParent(parentKey));
 	 */
-	public static List<Key> create(Key parentKey, String kind, Collection<Long> ids) {
-		List<Key> keys = Lists.newArrayListWithCapacity(ids.size());
-		for (Long id : ids) {
-			keys.add(KeyFactory.createKey(parentKey, kind, id));
-		}
-		return keys;
+	@Deprecated
+	public static Collection<Key> create(Key parentKey, String kind, Collection<Long> ids) {
+		return Collections2.transform(ids, new IdToKeyFunction(kind).withParent(parentKey));
+	}
+
+	/**
+	 * @deprecated use Collections2.transform(ids, new IdToKeyFunction(kind));
+	 */
+	@Deprecated
+	public static Collection<Key> create(String kind, Collection<Long> ids) {
+		return Collections2.transform(ids, new IdToKeyFunction(kind));
 	}
 	
-	public static List<Key> create(String kind, Collection<Long> ids) {
-		return create(null, kind, ids);
+	/**
+	 * @deprecated use Collections2.transform(ids, new IdToKeyFunction(clazz).withParent(parentKey));
+	 */
+	@Deprecated
+	public static Collection<Key> create(Key parentKey, Class<?> clazz, Collection<Long> ids) {
+		return Collections2.transform(ids, new IdToKeyFunction(clazz).withParent(parentKey));
 	}
 	
-	public static List<Key> create(Key parentKey, Class<?> clazz, Collection<Long> ids) {
-		return create(parentKey, clazz.getSimpleName(), ids);
-	}
-	
-	public static List<Key> create(Class<?> clazz, Collection<Long> ids) {
-		return create(clazz.getSimpleName(), ids);
+	/**
+	 * @deprecated use Collections2.transform(ids, new IdToKeyFunction(clazz));
+	 */
+	@Deprecated
+	public static Collection<Key> create(Class<?> clazz, Collection<Long> ids) {
+		return Collections2.transform(ids, new IdToKeyFunction(clazz));
 	}
 	
 }

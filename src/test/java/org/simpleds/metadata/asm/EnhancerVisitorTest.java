@@ -1,4 +1,4 @@
-package org.simpleds.metadata;
+package org.simpleds.metadata.asm;
 
 import static org.junit.Assert.assertTrue;
 
@@ -11,7 +11,8 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.ASMifierClassVisitor;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.simpleds.EntityManagerFactory;
-import org.simpleds.annotations.One;
+import org.simpleds.metadata.PersistenceMetadataRepository;
+import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
 import org.simpleds.metadata.asm.EnhancerVisitor;
 import org.simpleds.metadata.asm.ExtensibleClassLoader;
 import org.simpleds.test.AbstractDatastoreTest;
