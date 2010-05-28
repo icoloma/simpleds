@@ -418,10 +418,12 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> PagedList<T> findPaged(PagedQuery query) {
-		PagedList pagedList = new PagedList<T>(query, (List<T>) find(query));
+		int totalResults = -1;
 		if (query.calculateTotalResults()) {
-			pagedList.setTotalResults(count(query));
+			totalResults = count(query);
 		}
+		PagedList pagedList = new PagedList<T>(query, totalResults == 0? new ArrayList<T>() : (List<T>) find(query));
+		pagedList.setTotalResults(totalResults);
 		return pagedList;
 	}
 	
