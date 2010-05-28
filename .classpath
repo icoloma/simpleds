@@ -28,6 +28,7 @@
 	<classpathentry kind="lib" path="src/test/genlib/asm-3.2.jar" sourcepath="src/main/lib/asm-3.2-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/asm-util-3.2.jar" sourcepath="src/main/lib/asm-3.2-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/asm-tree-3.2.jar" sourcepath="src/main/lib/asm-3.2-sources.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/jr-sdk-2.1.1.jar" sourcepath="src/test/genlib/jr-sdk-2.1.1-sources.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
