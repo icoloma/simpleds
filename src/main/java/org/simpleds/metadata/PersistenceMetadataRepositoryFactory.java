@@ -1,11 +1,9 @@
 package org.simpleds.metadata;
 
 import java.io.IOException;
-import java.util.Set;
 
 import javax.persistence.Entity;
 
-import org.simpleds.annotations.Id;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -15,11 +13,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.ClassUtils;
 
-import com.google.common.collect.Sets;
-
 public class PersistenceMetadataRepositoryFactory {
-
-	private static final Class<?>[] ROOT_ANCESTORS = new Class<?>[] {};
 	
 	private ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 	
@@ -30,7 +24,6 @@ public class PersistenceMetadataRepositoryFactory {
 	
 	private static PersistenceMetadataRepository instance;
 	
-	@SuppressWarnings("deprecation")
 	public PersistenceMetadataRepository initialize() {
 		try {
 			if (locations == null) {
@@ -52,23 +45,6 @@ public class PersistenceMetadataRepositoryFactory {
 						}
 					}
 				}
-			}
-			
-			// assign expected parent kinds
-			for (ClassMetadata metadata: repository.getAll()) {
-				org.simpleds.annotations.Entity entity = metadata.getPersistentClass().getAnnotation(org.simpleds.annotations.Entity.class);
-				Id idAnn = metadata.getKeyProperty().getAnnotation(Id.class);
-				Class<?>[] cparents = idAnn != null? idAnn.parent() : 
-									 entity != null? entity.parent() : 
-									 ROOT_ANCESTORS; 
-				if (cparents.length > 0) {
-					Set<String> parents = Sets.newTreeSet();
-					for (Class<?> clazz : cparents) {
-						parents.add(repository.get(clazz).getKind());
-					}
-					metadata.setParents(parents);
-				}
-				
 			}
 			
 			instance = repository;

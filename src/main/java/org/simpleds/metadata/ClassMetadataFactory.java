@@ -19,13 +19,18 @@ import javax.persistence.Transient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.simpleds.annotations.Cacheable;
+import org.simpleds.annotations.Id;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
 import org.simpleds.converter.Converter;
 import org.simpleds.converter.ConverterFactory;
 import org.simpleds.exception.ConfigException;
 
+import com.google.common.collect.Sets;
+
 public class ClassMetadataFactory {
+
+	private static final Class<?>[] ROOT_ANCESTORS = new Class<?>[] {};
 
 	private static Log log = LogFactory.getLog(ClassMetadataFactory.class);
 	
@@ -33,9 +38,25 @@ public class ClassMetadataFactory {
 		ClassMetadata metadata = new ClassMetadata();
 		metadata.setPersistentClass(clazz);
 		visit(clazz, metadata, new HashSet<String>());
+		initParents(metadata);
 		return metadata;
 	}
 	
+	private void initParents(ClassMetadata metadata) {
+		org.simpleds.annotations.Entity entity = metadata.getPersistentClass().getAnnotation(org.simpleds.annotations.Entity.class);
+		Id idAnn = metadata.getKeyProperty().getAnnotation(Id.class);
+		Class<?>[] cparents = idAnn != null? idAnn.parent() : 
+							 entity != null? entity.parent() : 
+							 ROOT_ANCESTORS; 
+		if (cparents.length > 0) {
+			Set<String> parents = Sets.newTreeSet();
+			for (Class<?> clazz : cparents) {
+				parents.add(clazz.getSimpleName());
+			}
+			metadata.setParents(parents);
+		}
+	}
+
 	private void visit(Class<?> clazz, ClassMetadata classMetadata, Set<String> visitedPropertyNames) {
 		String name = null;
 		try {

@@ -33,6 +33,7 @@ public class ClassMetadataFactoryTest {
 		ClassMetadata metadata = factory.createMetadata(MyClass.class);
 		assertNotNull(metadata.getProperty("foo"));
 		assertNotNull(metadata.getProperty("bar"));
+		assertNotNull(metadata.getParents());
 		MultivaluedIndexMetadata index = metadata.getMultivaluedIndex("dummies1");
 		assertNotNull(index);
 		assertTrue(((AbstractCollectionConverter)index.getConverter()).getItemConverter() instanceof NullConverter);
