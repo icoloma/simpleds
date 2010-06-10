@@ -7,18 +7,12 @@ import org.simpleds.cache.CacheManager;
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
 
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 
 public interface EntityManager {
-
-	/** 
-	 * Execute the provided query and returns the result as a List of java objects 
-	 * @param query the query to execute
-	 * @return the list of resulting java entities
-	 */
-	<T> List<T> find(SimpleQuery query);
 
 	/**
 	 * Convert a Datastore representation to a Java object
@@ -165,92 +159,58 @@ public interface EntityManager {
 	 */
 	void delete(Transaction transaction, Iterable<Key> keys);
 
-	/**
-	 * Execute a query and return a single result
-	 * @return the first result of the query
-	 * @throws EntityNotFoundException if the query did not return any result
-	 */
-	<T> T findSingle(SimpleQuery q);
-
-	/**
-	 * Counts the number of instances returned from the specified query. This method will only
-	 * retrieve the matching keys, not the entities themselves.
-	 */
-	int count(SimpleQuery q);
-
-	/**
-	 * Return the list of children that have a provided parent instance
-	 * @param parentKey the key of the parent instance
-	 * @param childrenClass the class of the children to return
-	 */
-	<T> List<T> findChildren(Key parentKey, Class<T> childrenClass);
-
-	/**
-	 * Return the list of children keys that have a provided parent instance
-	 * @param parentKey the key of the parent instance
-	 * @param childrenClass the class of the children to return
-	 * @return the list of keys of the children
-	 */
-	List<Key> findChildrenKeys(Key parentKey, Class<?> childrenClass);
-
-	/**
-	 * Return a {@link PagedList} result after computing a PagedQuery
-	 * @param query the query to execute
-	 * @return the result of the query
-	 */
-	<T> PagedList<T> findPaged(PagedQuery query);
 
 	/**
 	 * Create a new {@link SimpleQuery} instance
 	 * @param kind the unqualified class name for this query
 	 */
-	public SimpleQuery createQuery(String kind);
+	SimpleQuery createQuery(String kind);
 	
 	/**
 	 * Create a new {@link SimpleQuery} instance
 	 * @param clazz the class for this query
 	 */
-	public SimpleQuery createQuery(Class<?> clazz);
+	SimpleQuery createQuery(Class<?> clazz);
 	
 	/**
 	 * Create a new {@link SimpleQuery} instance
 	 * @param ancestor the parent key to use for this query. Can be null.
 	 * @param kind the unqualified class name for this query
 	 */
-	public SimpleQuery createQuery(Key ancestor, String kind);
+	SimpleQuery createQuery(Key ancestor, String kind);
 	
 	/**
 	 * Create a new {@link SimpleQuery} instance
 	 * @param ancestor the parent key to use for this query. Can be null.
 	 * @param clazz the class for this query
 	 */
-	public SimpleQuery createQuery(Key ancestor, Class<?> clazz);
+	SimpleQuery createQuery(Key ancestor, Class<?> clazz);
 	
 	/**
 	 * Create a new {@link PagedQuery} instance
 	 * @param kind the unqualified class name for this query
 	 */
-	public PagedQuery createPagedQuery(String kind);
+	PagedQuery createPagedQuery(String kind);
 	
 	/**
 	 * Create a new {@link PagedQuery} instance
 	 * @param clazz the class for this query
 	 */
-	public PagedQuery createPagedQuery(Class<?> clazz);
+	PagedQuery createPagedQuery(Class<?> clazz);
 	
 	/**
 	 * Create a new {@link PagedQuery} instance
 	 * @param ancestor the parent key to use for this query. Can be null.
 	 * @param kind the unqualified class name for this query
 	 */
-	public PagedQuery createPagedQuery(Key ancestor, String kind);
+	PagedQuery createPagedQuery(Key ancestor, String kind);
 	
 	/**
 	 * Create a new {@link PagedQuery} instance
 	 * @param ancestor the parent key to use for this query. Can be null.
 	 * @param clazz the class for this query
 	 */
-	public PagedQuery createPagedQuery(Key ancestor, Class<?> clazz);
+	PagedQuery createPagedQuery(Key ancestor, Class<?> clazz);
 
 	/**
 	 * @return the configured {@link ClassMetadata} for the provided persistent class
@@ -268,27 +228,90 @@ public interface EntityManager {
 	 * Wrapper method for DatastoreService.beginTransaction
 	 * @return the created {@link Transaction}
 	 */
-	public Transaction beginTransaction();
+	Transaction beginTransaction();
 
+	/**
+	 * @return the {@link CacheManager} instance used by this {@link EntityManager}
+	 */
+	CacheManager getCacheManager();
+
+	/** 
+	 * Execute the provided query and returns the result as a List of java objects 
+	 * @param query the query to execute
+	 * @return the list of resulting java entities
+	 * @deprecated use SimpleQuery.find() instead
+	 */
+	@Deprecated
+	<T> List<T> find(SimpleQuery query);
+
+	/**
+	 * Execute a query and return a single result
+	 * @return the first result of the query
+	 * @throws EntityNotFoundException if the query did not return any result
+	 * @deprecated use SimpleQuery.findSingle() instead
+	 */
+	@Deprecated
+	<T> T findSingle(SimpleQuery q);
+
+	/**
+	 * Counts the number of instances returned from the specified query. This method will only
+	 * retrieve the matching keys, not the entities themselves.
+	 * @deprecated use SimpleQuery.count() instead
+	 */
+	@Deprecated
+	int count(SimpleQuery q);
+
+	/**
+	 * Return the list of children that have a provided parent instance
+	 * @param parentKey the key of the parent instance
+	 * @param childrenClass the class of the children to return
+	 * @deprecated 	use entityManager.createQuery(parentKey, childrenClass).find() instead.
+	 */
+	@Deprecated
+	<T> List<T> findChildren(Key parentKey, Class<T> childrenClass);
+
+	/**
+	 * Return the list of children keys that have a provided parent instance
+	 * @param parentKey the key of the parent instance
+	 * @param childrenClass the class of the children to return
+	 * @return the list of keys of the children
+	 * @deprecated 	use entityManager.createQuery(parentKey, childrenClass).keysOnly().find() instead.
+	 */
+	@Deprecated
+	List<Key> findChildrenKeys(Key parentKey, Class<?> childrenClass);
+
+	/**
+	 * Return a {@link PagedList} result after computing a PagedQuery
+	 * @param query the query to execute
+	 * @return the result of the query
+	 * @deprecated use PagedQuery.find() instead
+	 */
+	@Deprecated
+	<T> PagedList<T> findPaged(PagedQuery query);
+	
 	/** 
 	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterable} of java objects.
 	 * This method does not check the cache.
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
+	 * @deprecated use SimpleQuery.asIterable() instead
 	 */
-	public <T> SimpleQueryResultIterable<T> asIterable(SimpleQuery query);
+	@Deprecated
+	<T> SimpleQueryResultIterable<T> asIterable(SimpleQuery query);
 	
 	/** 
 	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterator} of java objects
 	 * This method does not check the cache.
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
+	 * @deprecated use SimpleQuery.asIterator() instead
 	 */
-	public <T> SimpleQueryResultIterator<T> asIterator(SimpleQuery query);
+	@Deprecated
+	<T> SimpleQueryResultIterator<T> asIterator(SimpleQuery query);
 
 	/**
-	 * @return the {@link CacheManager} instance used by this {@link EntityManager}
+	 * @return the {@link DatastoreService} used by this instance.
 	 */
-	CacheManager getCacheManager();
+	DatastoreService getDatastoreService();
 
 }

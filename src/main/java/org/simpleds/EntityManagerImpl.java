@@ -15,11 +15,7 @@ import org.simpleds.metadata.PropertyMetadata;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -95,69 +91,14 @@ public class EntityManagerImpl implements EntityManager {
 		if (enforceSchemaConstraints && ancestor != null) { 
 			metadata.validateParentKey(ancestor);
 		}
-		return new PagedQuery(ancestor, metadata);
+		return new PagedQuery(this, ancestor, metadata);
 	}
 	
 	private SimpleQuery createQueryImpl(Key ancestor, ClassMetadata metadata) {
 		if (enforceSchemaConstraints && ancestor != null) { 
 			metadata.validateParentKey(ancestor);
 		}
-		return new SimpleQuery(ancestor, metadata);
-	}
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> List<T> find(SimpleQuery simpleQuery) {
-		List result = Lists.newArrayList();
-		SimpleQueryResultIterable<T> iterable = asIterable(simpleQuery);
-		for (T item : iterable) {
-			result.add(item);
-		}
-		return result;
-	}
-	
-	@Override
-	public <T> SimpleQueryResultIterable<T> asIterable(SimpleQuery simpleQuery) {
-		Query query = simpleQuery.getQuery();
-		ClassMetadata metadata = simpleQuery.getClassMetadata();
-		PreparedQuery preparedQuery = datastoreService.prepare(simpleQuery.getTransaction(), query);
-		FetchOptions fetchOptions = simpleQuery.getFetchOptions();
-		QueryResultIterable<Entity> iterable = fetchOptions == null? preparedQuery.asQueryResultIterable() : preparedQuery.asQueryResultIterable(fetchOptions);
-		return new SimpleQueryResultIterableImpl<T>(metadata, iterable).setKeysOnly(simpleQuery.isKeysOnly());
-	}
-	
-	@Override
-	public <T> SimpleQueryResultIterator<T> asIterator(SimpleQuery simpleQuery) {
-		SimpleQueryResultIterable<T> iterable = asIterable(simpleQuery);
-		return iterable.iterator();
-	}
-	
-	@Override
-	public <T> List<T> findChildren(Key parentKey, Class<T> childrenClass) {
-		return find(createQuery(parentKey, childrenClass));
-	}
-	
-	@Override
-	public List<Key> findChildrenKeys(Key parentKey, Class<?> childrenClass) {
-		return find(createQuery(parentKey, childrenClass).keysOnly());
-	}
-	
-	@Override
-	public <T> T findSingle(SimpleQuery q) {
-		Entity entity = datastoreService.prepare(q.getQuery()).asSingleEntity();
-		if (entity == null) {
-			throw new org.simpleds.exception.EntityNotFoundException();
-		}
-		T javaObject = (T) datastoreToJava(entity);
-		return javaObject;
-	}
-	
-	@Override
-	public int count(SimpleQuery q) {
-		if (!q.isKeysOnly()) {
-			q = q.clone().keysOnly();
-		}
-		return datastoreService.prepare(q.getQuery()).countEntities();
+		return new SimpleQuery(this, ancestor, metadata);
 	}
 	
 	@Override
@@ -415,17 +356,6 @@ public class EntityManagerImpl implements EntityManager {
 		return metadata.javaToDatastore(null, javaObject);
 	}
 	
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> PagedList<T> findPaged(PagedQuery query) {
-		int totalResults = -1;
-		if (query.calculateTotalResults()) {
-			totalResults = count(query);
-		}
-		PagedList pagedList = new PagedList<T>(query, totalResults == 0? new ArrayList<T>() : (List<T>) find(query));
-		pagedList.setTotalResults(totalResults);
-		return pagedList;
-	}
 	
 	public void setDatastoreService(DatastoreService service) {
 		this.datastoreService = service;
@@ -448,4 +378,52 @@ public class EntityManagerImpl implements EntityManager {
 		return cacheManager;
 	}
 		
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> List<T> find(SimpleQuery simpleQuery) {
+		return simpleQuery.find();
+	}
+
+	@Override
+	public <T> T findSingle(SimpleQuery query) {
+		return query.findSingle();
+	}
+	
+	@Override
+	public <T> SimpleQueryResultIterable<T> asIterable(SimpleQuery query) {
+		return query.asIterable();
+	}
+	
+	@Override
+	public <T> SimpleQueryResultIterator<T> asIterator(SimpleQuery simpleQuery) {
+		return simpleQuery.asIterator();
+	}
+	
+	@Override
+	public <T> List<T> findChildren(Key parentKey, Class<T> childrenClass) {
+		return find(createQuery(parentKey, childrenClass));
+	}
+	
+	@Override
+	public List<Key> findChildrenKeys(Key parentKey, Class<?> childrenClass) {
+		return find(createQuery(parentKey, childrenClass).keysOnly());
+	}
+	
+	@Override
+	public int count(SimpleQuery query) {
+		return query.count();
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> PagedList<T> findPaged(PagedQuery query) {
+		return query.find();
+	}
+
+	@Override
+	public DatastoreService getDatastoreService() {
+		return datastoreService;
+	}
+	
+	
 }

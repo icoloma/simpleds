@@ -1,15 +1,21 @@
 package org.simpleds;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.simpleds.metadata.ClassMetadata;
 
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.ReadPolicy;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.Query.SortPredicate;
 
 /**
  * Paged query.
@@ -25,7 +31,7 @@ import com.google.appengine.api.datastore.Query.SortDirection;
  * @author icoloma
  *
  */
-public class PagedQuery extends SimpleQuery {
+public class PagedQuery implements ParameterQuery, Cloneable {
 
 	/** the default size of each page */
 	public static final int DEFAULT_PAGE_SIZE = 25;
@@ -39,13 +45,15 @@ public class PagedQuery extends SimpleQuery {
 	/** true to calculate the total size of the response, defaults to true */
 	private boolean calculateTotalResults = true;
 	
-	PagedQuery(Key ancestor, ClassMetadata metadata) {
-		super(ancestor, metadata);
+	private SimpleQuery query;
+	
+	PagedQuery(EntityManager entityManager, Key ancestor, ClassMetadata metadata) {
+		query = new SimpleQuery(entityManager, ancestor, metadata);
 	}
 	
 	@Override
 	public FetchOptions getFetchOptions() {
-		FetchOptions fo = super.getFetchOptions();
+		FetchOptions fo = query.getFetchOptions();
 		fo = fo == null? FetchOptions.Builder.withLimit(pageSize) : fo.limit(pageSize); 
 		return fo.offset(getFirstRecordIndex());
 	}
@@ -59,122 +67,152 @@ public class PagedQuery extends SimpleQuery {
 
 	@Override
 	public PagedQuery addFilter(String propertyName, FilterOperator operator, Object value) {
-		return (PagedQuery) super.addFilter(propertyName, operator, value);
+		query.addFilter(propertyName, operator, value);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery isNull(String propertyName) {
-		return (PagedQuery) super.isNull(propertyName);
+		query.isNull(propertyName);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery isNotNull(String propertyName) {
-		return (PagedQuery) super.isNotNull(propertyName);
+		query.isNotNull(propertyName);
+		return this;
 	}
 
 	@Override
 	public PagedQuery like(String propertyName, String value) {
-		return (PagedQuery) super.like(propertyName, value);
+		query.like(propertyName, value);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery notEqual(String propertyName, Object value) {
-		return (PagedQuery) super.notEqual(propertyName, value);
+		query.notEqual(propertyName, value);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery in(String propertyName, Collection<?> values) {
-		return (PagedQuery) super.in(propertyName, values);
+		query.in(propertyName, values);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery equal(String propertyName, Object value) {
-		return (PagedQuery) super.equal(propertyName, value);
+		query.equal(propertyName, value);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery lessThan(String propertyName, Object value) {
-		return (PagedQuery) super.lessThan(propertyName, value);
+		query.lessThan(propertyName, value);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery lessThanOrEqual(String propertyName, Object value) {
-		return (PagedQuery) super.lessThanOrEqual(propertyName, value);
+		query.lessThanOrEqual(propertyName, value);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery greaterThan(String propertyName, Object value) {
-		return (PagedQuery) super.greaterThan(propertyName, value);
+		query.greaterThan(propertyName, value);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery greaterThanOrEqual(String propertyName, Object value) {
-		return (PagedQuery) super.greaterThanOrEqual(propertyName, value);
+		query.greaterThanOrEqual(propertyName, value);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery keysOnly() {
-		return (PagedQuery) super.keysOnly();
+		query.keysOnly();
+		return this;
 	}
 	
 	@Override
 	public PagedQuery orderAsc(String propertyName) {
-		return (PagedQuery) super.sortAsc(propertyName);
+		query.sortAsc(propertyName);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery sortAsc(String propertyName) {
-		return (PagedQuery) super.sortAsc(propertyName);
+		query.sortAsc(propertyName);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery sort(String propertyName, SortDirection direction) {
-		return (PagedQuery) super.sort(propertyName, direction);
+		query.sort(propertyName, direction);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery sortDesc(String propertyName) {
-		return (PagedQuery) super.sortDesc(propertyName);
+		query.sortDesc(propertyName);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery orderDesc(String propertyName) {
-		return (PagedQuery) super.sortDesc(propertyName);
+		query.sortDesc(propertyName);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery withChunkSize(int size) {
-		return (PagedQuery) super.withChunkSize(size);
+		query.withChunkSize(size);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery withLimit(int limit) {
-		return (PagedQuery) super.withLimit(limit);
+		query.withLimit(limit);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery withOffset(int offset) {
-		return (PagedQuery) super.withOffset(offset);
+		query.withOffset(offset);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery withPrefetchSize(int size) {
-		return (PagedQuery) super.withPrefetchSize(size);
+		query.withPrefetchSize(size);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery withCursor(Cursor cursor) {
-		return (PagedQuery) super.withCursor(cursor);
+		query.withCursor(cursor);
+		return this;
 	}
 	
 	@Override
-	public SimpleQuery withCursor(String cursor) {
-		return super.withCursor(cursor);
+	public PagedQuery withCursor(String cursor) {
+		query.withCursor(cursor);
+		return this;
 	}
 	
 	@Override
 	public PagedQuery withFetchOptions(FetchOptions fetchOptions) {
-		return (PagedQuery) super.withFetchOptions(fetchOptions);
+		query.withFetchOptions(fetchOptions);
+		return this;
+	}
+	
+	@Override
+	public PagedQuery withTransaction(Transaction transaction) {
+		query.withTransaction(transaction);
+		return this;
 	}
 	
 	public PagedQuery setPageSize(int pageSize) {
@@ -201,6 +239,63 @@ public class PagedQuery extends SimpleQuery {
 
 	public PagedQuery setCalculateTotalResults(boolean calculateTotalResults) {
 		this.calculateTotalResults = calculateTotalResults;
+		return this;
+	}
+
+	@Override
+	public ClassMetadata getClassMetadata() {
+		return query.getClassMetadata();
+	}
+
+	@Override
+	public List<FilterPredicate> getFilterPredicates() {
+		return query.getFilterPredicates();
+	}
+
+	@Override
+	public String getKind() {
+		return query.getKind();
+	}
+
+	@Override
+	public List<SortPredicate> getSortPredicates() {
+		return query.getSortPredicates();
+	}
+
+	@Override
+	public Transaction getTransaction() {
+		return query.getTransaction();
+	}
+
+	@Override
+	public boolean isKeysOnly() {
+		return query.isKeysOnly();
+	}
+	
+	/**
+	 * Return a {@link PagedList} result after computing this query
+	 * @return the result of the query
+	 */
+	public <T> PagedList<T> find() {
+		int totalResults = -1;
+		if (calculateTotalResults) {
+			totalResults = query.count();
+		}
+		List<T> data = totalResults == 0? new ArrayList<T>() : (List<T>) query.find();
+		PagedList pagedList = new PagedList<T>(this, data);
+		pagedList.setTotalResults(totalResults);
+		return pagedList;
+	}
+
+	@Override
+	public ParameterQuery withDeadline(double deadline) {
+		query.withDeadline(deadline);
+		return this;
+	}
+
+	@Override
+	public ParameterQuery withReadPolicy(ReadPolicy readPolicy) {
+		query.withReadPolicy(readPolicy);
 		return this;
 	}
 }

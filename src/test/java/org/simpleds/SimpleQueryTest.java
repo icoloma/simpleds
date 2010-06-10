@@ -18,7 +18,7 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.common.collect.ImmutableList;
 
 public class SimpleQueryTest extends AbstractEntityManagerTest {
-
+add test withDeadline and withReadPolicy
 	@Test
 	public void testClone() throws Exception {
 		SimpleQuery query = entityManager.createQuery(Dummy1.class.getSimpleName());

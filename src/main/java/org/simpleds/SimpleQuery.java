@@ -3,13 +3,21 @@ package org.simpleds;
 import java.util.Collection;
 import java.util.List;
 
+import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PropertyMetadata;
 
 import com.google.appengine.api.datastore.Cursor;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceConfig;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.datastore.ReadPolicy;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
@@ -18,11 +26,10 @@ import com.google.appengine.api.datastore.Query.SortPredicate;
 import com.google.common.collect.Lists;
 
 /**
- * Provides an easy way to create a Datastore {@link Query} 
- * and its associated {@link FetchOptions} instance.
+ * Proxy class to handle a {@link Query} instance. 
  * @author icoloma
  */
-public class SimpleQuery implements Cloneable {
+public class SimpleQuery implements ParameterQuery, Cloneable {
 
 	/** the {@link ClassMetadata} that corresponds to this query */
 	private ClassMetadata classMetadata;
@@ -36,14 +43,21 @@ public class SimpleQuery implements Cloneable {
 	/** the transaction to use, null if none */
 	private Transaction transaction;
 	
-	SimpleQuery(Key ancestor, ClassMetadata metadata) {
+	/** the {@link EntityManager} that created this instance */
+	private EntityManager entityManager;
+	
+	/** the {@link DatastoreServiceConfig} instance to use, if any. If null, the value of entityManager.getDatastoreService() will be used */
+	private DatastoreServiceConfig datastoreServiceConfig;
+	
+	SimpleQuery(EntityManager entityManager, Key ancestor, ClassMetadata metadata) {
+		this.entityManager = entityManager;
 		this.classMetadata = metadata;
 		this.query = new Query(metadata.getKind(), ancestor);
 	}
 	
 	@Override
 	public SimpleQuery clone() {
-		SimpleQuery copy = new SimpleQuery(query.getAncestor(), classMetadata);
+		SimpleQuery copy = new SimpleQuery(entityManager, query.getAncestor(), classMetadata);
 		for (FilterPredicate fpredicate : query.getFilterPredicates()) {
 			copy.query.addFilter(fpredicate.getPropertyName(), fpredicate.getOperator(), fpredicate.getValue());
 		}
@@ -67,10 +81,12 @@ public class SimpleQuery implements Cloneable {
 		return copy;
 	}
 	
+	@Override
 	public String getKind() {
 		return classMetadata.getKind();
 	}
 	
+	@Override
 	public SimpleQuery addFilter(String propertyName, FilterOperator operator, Object value) {
 		if (value != null) {
 			PropertyMetadata propertyMetadata = getPropertyMetadata(propertyName);
@@ -90,10 +106,12 @@ public class SimpleQuery implements Cloneable {
 		return propertyMetadata;
 	}
 
+	@Override
 	public SimpleQuery equal(String propertyName, Object value) {
 		return addFilter(propertyName, FilterOperator.EQUAL, value);
 	}
 	
+	@Override
 	public SimpleQuery isNull(String propertyName) {
 		// check that the property exists
 		classMetadata.getProperty(propertyName);
@@ -101,6 +119,7 @@ public class SimpleQuery implements Cloneable {
 		return this;
 	}
 	
+	@Override
 	public SimpleQuery isNotNull(String propertyName) {
 		// check that the property exists
 		classMetadata.getProperty(propertyName);
@@ -108,26 +127,32 @@ public class SimpleQuery implements Cloneable {
 		return this;
 	}
 	
+	@Override
 	public SimpleQuery greaterThan(String propertyName, Object value) {
 		return addFilter(propertyName, FilterOperator.GREATER_THAN, value);
 	}
 	
+	@Override
 	public SimpleQuery greaterThanOrEqual(String propertyName, Object value) {
 		return addFilter(propertyName, FilterOperator.GREATER_THAN_OR_EQUAL, value);
 	}
 	
+	@Override
 	public SimpleQuery lessThan(String propertyName, Object value) {
 		return addFilter(propertyName, FilterOperator.LESS_THAN, value);
 	}
 	
+	@Override
 	public SimpleQuery lessThanOrEqual(String propertyName, Object value) {
 		return addFilter(propertyName, FilterOperator.LESS_THAN_OR_EQUAL, value);
 	}
 	
+	@Override
 	public SimpleQuery notEqual(String propertyName, Object value) {
 		return addFilter(propertyName, FilterOperator.NOT_EQUAL, value);
 	}
 	
+	@Override
 	public SimpleQuery in(String propertyName, Collection<?> values) {
 		if (values != null) {
 			PropertyMetadata propertyMetadata = getPropertyMetadata(propertyName);
@@ -140,13 +165,7 @@ public class SimpleQuery implements Cloneable {
 		return this;
 	}
 
-	/**
-	 * Adds a LIKE clause. This like clause will only match strings that START
-	 * with the provided argument. In other words, this clause will match "foo%" 
-	 * but not "%foo%"
-	 * @param propertyName the name of the property
-	 * @param value the value of the property, without any '%' character.
-	 */
+	@Override
 	public SimpleQuery like(String propertyName, String value) {
 		if (value != null) {
 			this.greaterThanOrEqual(propertyName, value);
@@ -155,6 +174,7 @@ public class SimpleQuery implements Cloneable {
 		return this;
 	}
 	
+	@Override
 	public SimpleQuery sortAsc(String propertyName) {
 		return sort(propertyName, SortDirection.ASCENDING);
 	}
@@ -163,10 +183,12 @@ public class SimpleQuery implements Cloneable {
 	 * @deprecated use sortAsc instead
 	 */
 	@Deprecated
+	@Override
 	public SimpleQuery orderAsc(String propertyName) {
 		return sortAsc(propertyName);
 	}
 	
+	@Override
 	public SimpleQuery sort(String propertyName, SortDirection direction) {
 		if (!"__key__".equals(propertyName)) {
 			// check that the sort property exists
@@ -181,73 +203,80 @@ public class SimpleQuery implements Cloneable {
 	 * @deprecated use sortDesc instead
 	 */
 	@Deprecated
+	@Override
 	public SimpleQuery orderDesc(String propertyName) {
 		return sortDesc(propertyName);
 	}
 	
+	@Override
 	public SimpleQuery sortDesc(String propertyName) {
 		return sort(propertyName, SortDirection.DESCENDING);
 	}
 	
+	@Override
 	public SimpleQuery keysOnly() {
 		query.setKeysOnly();
 		return this;
 	}
 	
+	@Override
 	public SimpleQuery withLimit(int limit) {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withLimit(limit) : fetchOptions.limit(limit);
 		return this;
 	}
 	
+	@Override
 	public SimpleQuery withPrefetchSize(int size) {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withPrefetchSize(size) : fetchOptions.prefetchSize(size);
 		return this;
 	}
 	
+	@Override
 	public SimpleQuery withChunkSize(int size) {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withChunkSize(size) : fetchOptions.chunkSize(size);
 		return this;
 	}
 	
+	@Override
 	public SimpleQuery withOffset(int offset) {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withOffset(offset) : fetchOptions.offset(offset);
 		return this;
 	}
 	
+	@Override
 	public SimpleQuery withCursor(Cursor cursor) {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withCursor(cursor) : fetchOptions.cursor(cursor);
 		return this;
 	}
 	
+	@Override
 	public SimpleQuery withFetchOptions(FetchOptions fetchOptions) {
 		this.fetchOptions = fetchOptions;
 		return this;
 	}
 	
-	/**
-	 * Convenience method that acts as withCursor(Cursor), but accepts a cursor serialized as String 
-	 */
+	@Override
 	public SimpleQuery withCursor(String cursor) {
 		return withCursor(Cursor.fromWebSafeString(cursor));
 	}
 	
-	/**
-	 * Specify the transaction to use when executing this query
-	 * @param transaction the transaction to use (can be null)
-	 */
+	@Override
 	public SimpleQuery withTransaction(Transaction transaction) {
 		this.transaction = transaction;
 		return this;
 	}
 
+	@Override
 	public List<FilterPredicate> getFilterPredicates() {
 		return query.getFilterPredicates();
 	}
 
+	@Override
 	public List<SortPredicate> getSortPredicates() {
 		return query.getSortPredicates();
 	}
 	
+	@Override
 	public boolean isKeysOnly() {
 		return query.isKeysOnly();
 	}
@@ -256,16 +285,100 @@ public class SimpleQuery implements Cloneable {
 		return query;
 	}
 
+	@Override
 	public FetchOptions getFetchOptions() {
 		return fetchOptions;
 	}
 
+	@Override
 	public ClassMetadata getClassMetadata() {
 		return classMetadata;
 	}
 
+	@Override
 	public Transaction getTransaction() {
 		return transaction;
 	}
 
+	/** 
+	 * Execute the provided query and returns the result as a List of java objects 
+	 * @param query the query to execute
+	 * @return the list of resulting java entities
+	 */
+	public <T> List<T> find() {
+		List result = Lists.newArrayList();
+		SimpleQueryResultIterable<T> iterable = asIterable();
+		for (T item : iterable) {
+			result.add(item);
+		}
+		return result;
+	}
+
+	/**
+	 * Execute the query and return a single result
+	 * @return the first result of the query
+	 * @throws EntityNotFoundException if the query did not return any result
+	 */
+	public <T> T findSingle() {
+		Entity entity = getDatastoreService().prepare(query).asSingleEntity();
+		if (entity == null) {
+			throw new org.simpleds.exception.EntityNotFoundException();
+		}
+		T javaObject = (T) entityManager.datastoreToJava(entity);
+		return javaObject;
+
+	}
+
+	/**
+	 * Counts the number of instances returned from this query. This method will only
+	 * retrieve the matching keys, not the entities themselves.
+	 */
+	public int count() {
+		SimpleQuery q = this.isKeysOnly()? this : this.clone().keysOnly();
+		return getDatastoreService().prepare(q.getQuery()).countEntities();
+	}
+
+	/** 
+	 * Execute this query and return the result as a {@link SimpleQueryResultIterable} of java objects.
+	 * This method does not check the cache.
+	 * @return the list of resulting java entities
+	 */
+	public <T> SimpleQueryResultIterable<T> asIterable() {
+		PreparedQuery preparedQuery = getDatastoreService().prepare(transaction, query);
+		QueryResultIterable<Entity> iterable = fetchOptions == null? preparedQuery.asQueryResultIterable() : preparedQuery.asQueryResultIterable(fetchOptions);
+		return new SimpleQueryResultIterableImpl<T>(classMetadata, iterable).setKeysOnly(isKeysOnly());
+	}
+	
+	/** 
+	 * Execute this query and returns the result as a {@link SimpleQueryResultIterator} of java objects
+	 * This method does not check the cache.
+	 * @return the list of resulting java entities
+	 */
+	public <T> SimpleQueryResultIterator<T> asIterator() {
+		SimpleQueryResultIterable<T> iterable = asIterable();
+		return iterable.iterator();
+	}
+
+	@Override
+	public SimpleQuery withDeadline(double deadline) {
+		if (datastoreServiceConfig == null) {
+			datastoreServiceConfig = DatastoreServiceConfig.Builder.withDefaults();
+		}
+		datastoreServiceConfig = datastoreServiceConfig.deadline(deadline);
+		return this;
+	}
+
+	@Override
+	public SimpleQuery withReadPolicy(ReadPolicy readPolicy) {
+		if (datastoreServiceConfig == null) {
+			datastoreServiceConfig = DatastoreServiceConfig.Builder.withDefaults();
+		}
+		datastoreServiceConfig = datastoreServiceConfig.readPolicy(readPolicy);
+		return this;
+	}
+	
+	private DatastoreService getDatastoreService() {
+		return datastoreServiceConfig == null? entityManager.getDatastoreService() : 
+			DatastoreServiceFactory.getDatastoreService(datastoreServiceConfig);
+	}
 }
