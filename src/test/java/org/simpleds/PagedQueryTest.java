@@ -46,23 +46,23 @@ public class PagedQueryTest extends AbstractDatastoreTest {
 		PagedQuery query = entityManager.createPagedQuery(Dummy1.class).setPageSize(PAGE_SIZE);
 		
 		// count 
-		assertEquals(29, entityManager.count(query));
+		PagedList<Dummy1> pagedList = query.asPagedList();
+		assertEquals(29, pagedList.getTotalResults());
 		
 		// first page
-		List<Dummy1> result = entityManager.find(query);
-		assertEquals(PAGE_SIZE, result.size());
-		assertEquals(dummies.get(0).getKey(), result.get(0).getKey());
+		assertEquals(PAGE_SIZE, pagedList.getData().size());
+		assertEquals(dummies.get(0).getKey(), pagedList.getData().get(0).getKey());
 		
 		// second page
 		query.setPageIndex(1);
-		result = entityManager.find(query);
-		assertEquals(dummies.get(PAGE_SIZE).getKey(), result.get(0).getKey());
+		pagedList = query.asPagedList();
+		assertEquals(dummies.get(PAGE_SIZE).getKey(), pagedList.getData().get(0).getKey());
 		
 		// last page
 		query.setPageIndex(9);
-		result = entityManager.find(query);
-		assertEquals(2, result.size());
-		assertEquals(dummies.get(dummies.size() - 1).getKey(), result.get(1).getKey());
+		pagedList = query.asPagedList();
+		assertEquals(2, pagedList.getData().size());
+		assertEquals(dummies.get(dummies.size() - 1).getKey(), pagedList.getData().get(1).getKey());
 	}
 	
 }

@@ -27,7 +27,7 @@ public class TransactionManagerImpl implements TransactionManager {
 	private void commitOrRollback(boolean commit) {
 		RuntimeException exception = null;
 		Collection<Transaction> activeTransactions = datastoreService.getActiveTransactions();
-		log.debug((commit? "Commit " : "Rollback ") + activeTransactions.size() + " transactions for thread " + Thread.currentThread().getName());
+		log.debug((commit? "Commit " : "Rollback ") + activeTransactions.size() + " transactions");
 		int count = 0;
 		for (Transaction transaction : activeTransactions) {
 			if (transaction.isActive()) {
@@ -47,7 +47,7 @@ public class TransactionManagerImpl implements TransactionManager {
 				}
 			}
 		}
-		log.debug((commit? "Commited " : "Rolled back ") + count + " transactions successfully for thread " + Thread.currentThread().getName());
+		log.debug((commit? "Commited " : "Rolled back ") + count + " transactions successfully");
 		
 		if (exception != null) {
 			throw exception;

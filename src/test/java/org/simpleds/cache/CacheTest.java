@@ -17,6 +17,7 @@ import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.testdb.CacheableEntity;
 import org.simpleds.testdb.Dummy1;
 
+import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.collect.ImmutableList;
@@ -65,6 +66,17 @@ public class CacheTest extends AbstractEntityManagerTest {
 		CacheableEntity nc2 = entityManager.get(noncachedEntity.getKey());
 		assertNotSame(noncachedEntity, nc2);
 		assertSame(nc2, entityManager.get(noncachedEntity.getKey()));
+	}
+	
+	@Test
+	public void testSingleGetWithTransaction() {
+		// shopuld ignore the cache settings
+		Transaction tx = entityManager.beginTransaction();
+		try {
+			assertNotSame(cachedEntity, entityManager.get(tx, cachedEntity.getKey()));
+		} finally {
+			tx.commit();
+		}
 	}
 	
 	@Test

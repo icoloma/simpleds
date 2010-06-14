@@ -271,16 +271,16 @@ public class EntityManagerImpl implements EntityManager {
 		try {
 			ClassMetadata metadata = repository.get(key.getKind());
 			T javaObject;
-			if (metadata.isCacheable()) {
+			if (metadata.isCacheable() && transaction == null) { // ignore cache if a transaction is active
 				javaObject = (T) cacheManager.get(key, metadata);
-				if (javaObject == null) {
-					Entity entity = datastoreService.get(transaction, key);
-					javaObject = (T) metadata.datastoreToJava(entity);
-					cacheManager.put(javaObject, entity, metadata);
+				if (javaObject != null) {
+					return javaObject;
 				}
-			} else {
-				Entity entity = datastoreService.get(transaction, key);
-				javaObject = (T) metadata.datastoreToJava(entity);
+			}
+			Entity entity = datastoreService.get(transaction, key);
+			javaObject = (T) metadata.datastoreToJava(entity);
+			if (metadata.isCacheable()) {
+				cacheManager.put(javaObject, entity, metadata);
 			}
 			return javaObject;
 		} catch (EntityNotFoundException e) {
@@ -303,7 +303,7 @@ public class EntityManagerImpl implements EntityManager {
 		
 		ClassMetadata metadata = repository.get(itKey.next().getKind());
 		List<T> result;
-		if (metadata.isCacheable()) { 
+		if (metadata.isCacheable() && transaction == null) { 
 			
 			// retrieve cached and non-cached data
 			Collection keysCollection = keys instanceof Collection? (Collection) keys : Lists.newArrayList(keys);
@@ -381,12 +381,12 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> List<T> find(SimpleQuery simpleQuery) {
-		return simpleQuery.find();
+		return simpleQuery.asList();
 	}
 
 	@Override
 	public <T> T findSingle(SimpleQuery query) {
-		return query.findSingle();
+		return (T) query.asSingleResult();
 	}
 	
 	@Override
@@ -417,7 +417,7 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> PagedList<T> findPaged(PagedQuery query) {
-		return query.find();
+		return query.asPagedList();
 	}
 
 	@Override

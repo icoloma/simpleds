@@ -130,13 +130,13 @@ public interface ParameterQuery {
 	public ParameterQuery sort(String propertyName, SortDirection direction);
 
 	/**
-	 * @deprecated use sortAsc instead
+	 * @deprecated use {@link ParameterQuery#sortAsc()} instead
 	 */
 	@Deprecated
 	public ParameterQuery orderAsc(String propertyName);
 
 	/**
-	 * @deprecated use sortDesc instead
+	 * @deprecated use {@link ParameterQuery#sortDesc()} instead
 	 */
 	@Deprecated
 	public ParameterQuery orderDesc(String propertyName);
@@ -154,13 +154,9 @@ public interface ParameterQuery {
 	 */
 	public boolean isKeysOnly();
 
-	public ParameterQuery withLimit(int limit);
-
 	public ParameterQuery withPrefetchSize(int size);
 
 	public ParameterQuery withChunkSize(int size);
-
-	public ParameterQuery withOffset(int offset);
 
 	public ParameterQuery withCursor(Cursor cursor);
 

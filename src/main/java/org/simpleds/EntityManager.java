@@ -3,6 +3,7 @@ package org.simpleds;
 import java.util.Collection;
 import java.util.List;
 
+import org.simpleds.annotations.Cacheable;
 import org.simpleds.cache.CacheManager;
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
@@ -111,9 +112,10 @@ public interface EntityManager {
 	<T> T get(Key key);
 	
 	/**
-	 * Return a persistent java instance by key
+	 * Return a persistent java instance by key. If transaction is not null any {@link Cacheable}
+	 * settings will be ignored. 
 	 * @param key the key of the persistent entity to retrieve
-	 * @param transaction the transaction instance to use.  May be null.
+	 * @param transaction the transaction instance to use. May be null.
 	 * @return the persistent java instance
 	 */
 	<T> T get(Transaction transaction, Key key);
@@ -126,7 +128,8 @@ public interface EntityManager {
 	<T> List<T> get(Iterable<Key> keys);
 	
 	/**
-	 * Return a set of persistent entities, by key
+	 * Return a collection of persistent entities. If transaction is not null any {@link Cacheable}
+	 * settings will be ignored. 
 	 * @param keys the keys of the persistent entities to retrieve
 	 * @param transaction the transaction instance to use.  May be null.
 	 * @return a Map of the retrieved entities, by Key
@@ -239,7 +242,7 @@ public interface EntityManager {
 	 * Execute the provided query and returns the result as a List of java objects 
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
-	 * @deprecated use SimpleQuery.find() instead
+	 * @deprecated use {@link SimpleQuery#asList()} instead
 	 */
 	@Deprecated
 	<T> List<T> find(SimpleQuery query);
@@ -248,7 +251,7 @@ public interface EntityManager {
 	 * Execute a query and return a single result
 	 * @return the first result of the query
 	 * @throws EntityNotFoundException if the query did not return any result
-	 * @deprecated use SimpleQuery.findSingle() instead
+	 * @deprecated use {@link SimpleQuery#asSingleResult()} instead
 	 */
 	@Deprecated
 	<T> T findSingle(SimpleQuery q);
@@ -256,7 +259,7 @@ public interface EntityManager {
 	/**
 	 * Counts the number of instances returned from the specified query. This method will only
 	 * retrieve the matching keys, not the entities themselves.
-	 * @deprecated use SimpleQuery.count() instead
+	 * @deprecated use {@link SimpleQuery#count()} instead
 	 */
 	@Deprecated
 	int count(SimpleQuery q);
@@ -265,7 +268,7 @@ public interface EntityManager {
 	 * Return the list of children that have a provided parent instance
 	 * @param parentKey the key of the parent instance
 	 * @param childrenClass the class of the children to return
-	 * @deprecated 	use entityManager.createQuery(parentKey, childrenClass).find() instead.
+	 * @deprecated 	use entityManager.createQuery(parentKey, childrenClass).asList() instead.
 	 */
 	@Deprecated
 	<T> List<T> findChildren(Key parentKey, Class<T> childrenClass);
@@ -275,7 +278,7 @@ public interface EntityManager {
 	 * @param parentKey the key of the parent instance
 	 * @param childrenClass the class of the children to return
 	 * @return the list of keys of the children
-	 * @deprecated 	use entityManager.createQuery(parentKey, childrenClass).keysOnly().find() instead.
+	 * @deprecated 	use entityManager.createQuery(parentKey, childrenClass).keysOnly().asList() instead.
 	 */
 	@Deprecated
 	List<Key> findChildrenKeys(Key parentKey, Class<?> childrenClass);
@@ -284,7 +287,7 @@ public interface EntityManager {
 	 * Return a {@link PagedList} result after computing a PagedQuery
 	 * @param query the query to execute
 	 * @return the result of the query
-	 * @deprecated use PagedQuery.find() instead
+	 * @deprecated use {@link PagedQuery#asPagedList()} instead
 	 */
 	@Deprecated
 	<T> PagedList<T> findPaged(PagedQuery query);
@@ -294,7 +297,7 @@ public interface EntityManager {
 	 * This method does not check the cache.
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
-	 * @deprecated use SimpleQuery.asIterable() instead
+	 * @deprecated use {@link SimpleQuery#asIterable()} instead
 	 */
 	@Deprecated
 	<T> SimpleQueryResultIterable<T> asIterable(SimpleQuery query);
@@ -304,7 +307,7 @@ public interface EntityManager {
 	 * This method does not check the cache.
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
-	 * @deprecated use SimpleQuery.asIterator() instead
+	 * @deprecated use {@link SimpleQuery#asIterator()} instead
 	 */
 	@Deprecated
 	<T> SimpleQueryResultIterator<T> asIterator(SimpleQuery query);

@@ -219,9 +219,13 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		return this;
 	}
 	
-	@Override
 	public SimpleQuery withLimit(int limit) {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withLimit(limit) : fetchOptions.limit(limit);
+		return this;
+	}
+	
+	public SimpleQuery withOffset(int offset) {
+		fetchOptions = fetchOptions == null? FetchOptions.Builder.withOffset(offset) : fetchOptions.offset(offset);
 		return this;
 	}
 	
@@ -234,12 +238,6 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	@Override
 	public SimpleQuery withChunkSize(int size) {
 		fetchOptions = fetchOptions == null? FetchOptions.Builder.withChunkSize(size) : fetchOptions.chunkSize(size);
-		return this;
-	}
-	
-	@Override
-	public SimpleQuery withOffset(int offset) {
-		fetchOptions = fetchOptions == null? FetchOptions.Builder.withOffset(offset) : fetchOptions.offset(offset);
 		return this;
 	}
 	
@@ -305,7 +303,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
 	 */
-	public <T> List<T> find() {
+	public <T> List<T> asList() {
 		List result = Lists.newArrayList();
 		SimpleQueryResultIterable<T> iterable = asIterable();
 		for (T item : iterable) {
@@ -319,7 +317,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * @return the first result of the query
 	 * @throws EntityNotFoundException if the query did not return any result
 	 */
-	public <T> T findSingle() {
+	public <T> T asSingleResult() {
 		Entity entity = getDatastoreService().prepare(query).asSingleEntity();
 		if (entity == null) {
 			throw new org.simpleds.exception.EntityNotFoundException();

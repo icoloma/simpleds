@@ -51,13 +51,6 @@ public class PagedQuery implements ParameterQuery, Cloneable {
 		query = new SimpleQuery(entityManager, ancestor, metadata);
 	}
 	
-	@Override
-	public FetchOptions getFetchOptions() {
-		FetchOptions fo = query.getFetchOptions();
-		fo = fo == null? FetchOptions.Builder.withLimit(pageSize) : fo.limit(pageSize); 
-		return fo.offset(getFirstRecordIndex());
-	}
-	
 	/**
 	 * @return the zero-based index of the first record that is returned. Internally, it multiplies the page index and the page size.
 	 */
@@ -174,18 +167,6 @@ public class PagedQuery implements ParameterQuery, Cloneable {
 	}
 	
 	@Override
-	public PagedQuery withLimit(int limit) {
-		query.withLimit(limit);
-		return this;
-	}
-	
-	@Override
-	public PagedQuery withOffset(int offset) {
-		query.withOffset(offset);
-		return this;
-	}
-	
-	@Override
 	public PagedQuery withPrefetchSize(int size) {
 		query.withPrefetchSize(size);
 		return this;
@@ -266,6 +247,11 @@ public class PagedQuery implements ParameterQuery, Cloneable {
 	public Transaction getTransaction() {
 		return query.getTransaction();
 	}
+	
+	@Override
+	public FetchOptions getFetchOptions() {
+		return query.getFetchOptions();
+	}
 
 	@Override
 	public boolean isKeysOnly() {
@@ -276,12 +262,15 @@ public class PagedQuery implements ParameterQuery, Cloneable {
 	 * Return a {@link PagedList} result after computing this query
 	 * @return the result of the query
 	 */
-	public <T> PagedList<T> find() {
+	public <T> PagedList<T> asPagedList() {
+		query.withLimit(pageSize); 
+		query.withOffset(getFirstRecordIndex());
+		
 		int totalResults = -1;
 		if (calculateTotalResults) {
 			totalResults = query.count();
 		}
-		List<T> data = totalResults == 0? new ArrayList<T>() : (List<T>) query.find();
+		List<T> data = totalResults == 0? new ArrayList<T>() : (List<T>) query.asList();
 		PagedList pagedList = new PagedList<T>(this, data);
 		pagedList.setTotalResults(totalResults);
 		return pagedList;
