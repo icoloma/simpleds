@@ -158,15 +158,20 @@ public interface ParameterQuery {
 
 	public ParameterQuery withChunkSize(int size);
 
-	public ParameterQuery withCursor(Cursor cursor);
-
 	public ParameterQuery withFetchOptions(FetchOptions fetchOptions);
 
+	/**
+	 * Set the {@link Cursor} to use with this query.
+	 * @param cursor the cursor to use with this query. If null, it will be ignored.
+	 * @return this instance
+	 */
+	public ParameterQuery withCursor(Cursor cursor);
+	
 	/**
 	 * Set the serialized {@link Cursor} to use with this query.
 	 * This method is equivalent to invoking 
 	 * withCursor(Cursor.fromWebsafeString(cursor))
-	 * @param cursor the web-safe serialized cursor value
+	 * @param cursor the web-safe serialized cursor value. If null, it will be ignored.
 	 * @return this instance
 	 */
 	public ParameterQuery withCursor(String cursor);

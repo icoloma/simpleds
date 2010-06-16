@@ -243,7 +243,9 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	@Override
 	public SimpleQuery withCursor(Cursor cursor) {
-		fetchOptions = fetchOptions == null? FetchOptions.Builder.withCursor(cursor) : fetchOptions.cursor(cursor);
+		if (cursor != null) {
+			fetchOptions = fetchOptions == null? FetchOptions.Builder.withCursor(cursor) : fetchOptions.cursor(cursor);
+		}
 		return this;
 	}
 	
@@ -255,7 +257,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	@Override
 	public SimpleQuery withCursor(String cursor) {
-		return withCursor(Cursor.fromWebSafeString(cursor));
+		return withCursor(cursor == null? null : Cursor.fromWebSafeString(cursor));
 	}
 	
 	@Override
