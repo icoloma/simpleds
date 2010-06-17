@@ -30,5 +30,5 @@ class SimpleQueryResultIterableImpl<T> implements SimpleQueryResultIterable<T> {
 		this.keysOnly = keysOnly;
 		return this;
 	}
-
+	
 }
