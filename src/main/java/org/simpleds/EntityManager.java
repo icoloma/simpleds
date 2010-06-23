@@ -108,6 +108,7 @@ public interface EntityManager {
 	 * Return a persistent java instance by key
 	 * @param key the key of the persistent entity to retrieve
 	 * @return the persistent java instance
+	 * @throws EntityNotFoundException if the entity could  not be found
 	 */
 	<T> T get(Key key);
 	
@@ -117,6 +118,7 @@ public interface EntityManager {
 	 * @param key the key of the persistent entity to retrieve
 	 * @param transaction the transaction instance to use. May be null.
 	 * @return the persistent java instance
+	 * @throws EntityNotFoundException if the entity could  not be found
 	 */
 	<T> T get(Transaction transaction, Key key);
 
@@ -124,6 +126,7 @@ public interface EntityManager {
 	 * Return a set of persistent entities, by key
 	 * @param keys the keys of the persistent entities to retrieve
 	 * @return a Map of the retrieved entities, by Key
+	 * @throws EntityNotFoundException if any entity could not be found
 	 */
 	<T> List<T> get(Iterable<Key> keys);
 	
@@ -133,6 +136,7 @@ public interface EntityManager {
 	 * @param keys the keys of the persistent entities to retrieve
 	 * @param transaction the transaction instance to use.  May be null.
 	 * @return a Map of the retrieved entities, by Key
+	 * @throws EntityNotFoundException if any entity could not be found
 	 */
 	<T> List<T> get(Transaction transaction, Iterable<Key> keys);
 	
