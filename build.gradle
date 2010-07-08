@@ -22,7 +22,7 @@ dependencies {
 					"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:1.1.1",
 					"org.zeroturnaround:jr-sdk:2.1.1"
 	
-	compile			"com.google.collections:google-collections:1.0",
+	compile				"com.google.guava:guava:r05",
 					"commons-logging:commons-logging:1.1.1",
 					"aopalliance:aopalliance:1.0",
 					"org.apache.geronimo.specs:geronimo-jpa_3.0_spec:1.1.1",
