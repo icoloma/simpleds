@@ -1,5 +1,6 @@
 package org.simpleds.cache;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -8,11 +9,11 @@ import java.util.WeakHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.appengine.api.datastore.Key;
 import com.google.common.collect.Maps;
 
 /** 
  * The thread-bound Level 1 cache container.
+ * This cache will store Key-entity pair values or String-Query data (be it a query count or a list of returning Key values).
  * @author Nacho
  *
  */
@@ -21,8 +22,8 @@ class Level1Cache {
 	/** the thread-bound instance */
 	private static ThreadLocal<Level1Cache> threadLocal = new ThreadLocal<Level1Cache>();
 
-	/** the cache contents */
-	private Map<Key, Object> contents = new WeakHashMap<Key, Object>();
+	/** the cache contents (the key can be a Key or a String) */
+	private Map<Serializable, Object> contents = new WeakHashMap<Serializable, Object>();
 	
 	private Log log = LogFactory.getLog(Level1Cache.class);
 	
@@ -51,7 +52,7 @@ class Level1Cache {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T get(Key key) {
+	public <T> T get(Serializable key) {
 		T value = (T) contents.get(key);
 		if (log.isDebugEnabled() && value != null) {
 			log.debug("Level 1 cache hit: " + key);
@@ -59,24 +60,24 @@ class Level1Cache {
 		return value;
 	}
 
-	public void put(Key key, Object instance) {
+	public void put(Serializable key, Object instance) {
 		contents.put(key, instance);
 	}
 
-	public void delete(Key key) {
+	public void delete(Serializable key) {
 		contents.remove(key);
 	}
 
-	public void delete(Collection<Key> keys) {
-		for (Key key : keys) {
+	public void delete(Collection<? extends Serializable> keys) {
+		for (Serializable key : keys) {
 			contents.remove(key);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> Map<Key, T> get(Collection<Key> keys) {
-		Map<Key, T> result = Maps.newHashMapWithExpectedSize(keys.size());
-		for (Key key : keys) {
+	public <T> Map<Serializable, T> get(Collection<? extends Serializable> keys) {
+		Map<Serializable, T> result = Maps.newHashMapWithExpectedSize(keys.size());
+		for (Serializable key : keys) {
 			T value = (T) contents.get(key);
 			if (value != null) {
 				result.put(key, value);
@@ -88,8 +89,8 @@ class Level1Cache {
 		return result;
 	}
 
-	public <T> void put(Collection<Key> keys, Collection<T> javaObjects) {
-		Iterator<Key> itKey = keys.iterator();
+	public <T> void put(Collection<? extends Serializable> keys, Collection<T> javaObjects) {
+		Iterator<? extends Serializable> itKey = keys.iterator();
 		Iterator<T> itJava = javaObjects.iterator();
 		while (itKey.hasNext()) {
 			contents.put(itKey.next(), itJava.next());

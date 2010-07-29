@@ -3,7 +3,9 @@ package org.simpleds;
 import java.util.Collection;
 import java.util.List;
 
+import org.simpleds.cache.CacheManager;
 import org.simpleds.exception.EntityNotFoundException;
+import org.simpleds.functions.EntityToKeyFunction;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PropertyMetadata;
 
@@ -23,6 +25,8 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.SortPredicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -48,6 +52,12 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	/** the {@link DatastoreServiceConfig} instance to use, if any. If null, the value of entityManager.getDatastoreService() will be used */
 	private DatastoreServiceConfig datastoreServiceConfig;
+	
+	/** the cache key to use. If null, the query results will not be cached */
+	private String cacheKey;
+	
+	/** the number of seconds to store data in the memcache. Default (0) will only use the Level 1 cache */
+	private int cacheSeconds;
 	
 	SimpleQuery(EntityManager entityManager, Key ancestor, ClassMetadata metadata) {
 		this.entityManager = entityManager;
@@ -78,6 +88,10 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 				copy.withPrefetchSize(fetchOptions.getPrefetchSize());
 			}
 		}
+		copy.withTransaction(transaction);
+		copy.datastoreServiceConfig = datastoreServiceConfig;
+		copy.cacheKey = cacheKey;
+		copy.cacheSeconds = cacheSeconds;
 		return copy;
 	}
 	
@@ -306,25 +320,57 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * @return the list of resulting java entities
 	 */
 	public <T> List<T> asList() {
-		List result = Lists.newArrayList();
+		if (cacheKey != null && transaction == null) {
+			List<Key> keys = getCacheManager().get(cacheKey);
+			if (keys != null) {
+				return isKeysOnly()? (List) keys : entityManager.get(keys);
+			}
+		}
+		
+		List<T> result = Lists.newArrayList();
 		SimpleQueryResultIterable<T> iterable = asIterable();
 		for (T item : iterable) {
 			result.add(item);
 		}
+		
+		if (cacheKey != null) {
+			Collection<Key> keys = isKeysOnly()? result : Collections2.transform(result, new EntityToKeyFunction(classMetadata.getPersistentClass()));
+			getCacheManager().put(cacheKey, Lists.newArrayList(keys), cacheSeconds);
+		}
 		return result;
 	}
-
+	
+	@Override
+	public void clearCache() {
+		if (cacheKey == null) {
+			throw new IllegalStateException();
+		}
+		getCacheManager().delete(ImmutableList.of(cacheKey, cacheKey + CacheManager.COUNT_SUFFIX));
+	}
+	
 	/**
 	 * Execute the query and return a single result
 	 * @return the first result of the query
 	 * @throws EntityNotFoundException if the query did not return any result
 	 */
 	public <T> T asSingleResult() {
-		Entity entity = getDatastoreService().prepare(query).asSingleEntity();
-		if (entity == null) {
-			throw new org.simpleds.exception.EntityNotFoundException();
+		T javaObject = null;
+		if (cacheKey != null && transaction == null) {
+			Collection<Key> keys = getCacheManager().get(cacheKey);
+			if (keys != null && keys.size() > 0) {
+				javaObject = entityManager.get(keys.iterator().next());
+			}
 		}
-		T javaObject = (T) entityManager.datastoreToJava(entity);
+		if (javaObject == null) {
+			Entity entity = getDatastoreService().prepare(query).asSingleEntity();
+			if (entity == null) {
+				throw new org.simpleds.exception.EntityNotFoundException();
+			}
+			javaObject = (T) entityManager.datastoreToJava(entity);
+			if (cacheKey != null) {
+				getCacheManager().put(cacheKey, ImmutableList.of(entity.getKey()), cacheSeconds);
+			}
+		}
 		return javaObject;
 
 	}
@@ -334,9 +380,20 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * retrieve the matching keys, not the entities themselves.
 	 */
 	public int count() {
-		SimpleQuery q = this.isKeysOnly()? this : this.clone().keysOnly();
-		return getDatastoreService().prepare(q.getQuery()).countEntities();
+		Integer result = null;
+		if (cacheKey != null && transaction == null) {
+			result = getCacheManager().get(cacheKey + CacheManager.COUNT_SUFFIX);
+		}
+		if (result == null) {
+			SimpleQuery q = this.isKeysOnly()? this : this.clone().keysOnly();
+			result = getDatastoreService().prepare(q.getQuery()).countEntities();
+			if (cacheKey != null) {
+				getCacheManager().put(cacheKey + CacheManager.COUNT_SUFFIX, result, cacheSeconds);
+			}
+		}
+		return result;
 	}
+
 
 	/** 
 	 * Execute this query and return the result as a {@link SimpleQueryResultIterable} of java objects.
@@ -381,4 +438,21 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		return datastoreServiceConfig == null? entityManager.getDatastoreService() : 
 			DatastoreServiceFactory.getDatastoreService(datastoreServiceConfig);
 	}
+
+	@Override
+	public SimpleQuery withCacheKey(String cacheKey) {
+		this.cacheKey = cacheKey;
+		return this;
+	}
+
+	@Override
+	public SimpleQuery withCacheSeconds(int cacheSeconds) {
+		this.cacheSeconds = cacheSeconds;
+		return this;
+	}
+	
+	private CacheManager getCacheManager() {
+		return entityManager.getCacheManager();
+	}
+	
 }

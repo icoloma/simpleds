@@ -62,6 +62,9 @@ public class ClassMetadata {
 	@SuppressWarnings("unchecked")
 	public <T> T datastoreToJava(Entity entity) {
 		try {
+			if (entity == null) {
+				return null;
+			}
 			T result = (T) persistentClass.newInstance();
 			for (Entry<String, Object> property : entity.getProperties().entrySet()) {
 				PropertyMetadata metadata = properties.get(property.getKey());

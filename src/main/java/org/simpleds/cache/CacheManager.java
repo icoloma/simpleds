@@ -1,5 +1,6 @@
 package org.simpleds.cache;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,9 @@ public interface CacheManager {
 
 	/** memcache namespace for SimpleDS cache */
 	public static final String MEMCACHE_NAMESPACE = "_sds_cache";
+	
+	/** the suffix appended to create the cahe key for SimpleQuery.count() */
+	public static final String COUNT_SUFFIX = ".count";
 
 	/**
 	 * Check the level 1 and level 2 cache for the required value.
@@ -53,7 +57,7 @@ public interface CacheManager {
 	 * @param key the key to remove
 	 */
 	public void delete(Key key);
-
+	
 	/**
 	 * Retrieve a set of entities from the cache
 	 * @param keys the keys to retrieve from the cache
@@ -62,18 +66,32 @@ public interface CacheManager {
 	public <T> Map<Key, T> get(Collection<Key> keys, ClassMetadata metadata);
 
 	/**
-	 * Delete a set of entities from the cache
-	 * @param keys
-	 */
-	public void delete(Collection<Key> keys);
-
-	/**
 	 * Put a collection of java objects in the cache
 	 * @param javaObjects the persistent objects to put into the Level 1 cache
 	 * @param entities the list of entities to put into the Level 2 cache
 	 * @param metadata the {@link ClassMetadata} instance for this entity
 	 */
 	public <T> void put(Collection<T> javaObjects, List<Entity> entities, ClassMetadata metadata);
-
 	
+	/**
+	 * Return the cached query data, if available
+	 * @param key the key to retrieve
+	 * @return the cached query data, null if not cached
+	 */
+	public <T> T get(String key);
+	
+	/**
+	 * Store query data into the cache
+	 * @param cacheKey the key of the query
+	 * @param value the value to store
+	 * @param seconds the number of seconds to store in the cache, 0 to use only the Level 1 cache
+	 */
+	void put(String cacheKey, Object value, int seconds);
+	
+	/**
+	 * Delete contents from the cache
+	 * @param keys the keys to remove
+	 */
+	void delete(Collection<? extends Serializable> keys);
+
 }

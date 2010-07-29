@@ -200,6 +200,21 @@ public interface ParameterQuery {
 	public ParameterQuery withDeadline(double deadline);
 	
 	/**
+	 * Set the cache key to use for this query. 
+	 * @param cacheKey the cache key to use
+	 * @return this instance
+	 */
+	public ParameterQuery withCacheKey(String cacheKey);
+	
+	/**
+	 * Set the number of seconds to store the query results into memcache. If set to 0 (the default), 
+	 * only the Level 1 cache will be used.
+	 * @param cacheSeconds the number of seconds to store the data in memcache 
+	 * @return this instance
+	 */
+	public ParameterQuery withCacheSeconds(int cacheSeconds);
+	
+	/**
 	 * @return the value of the transaction applied with this query, if any
 	 */
 	public Transaction getTransaction();
@@ -235,5 +250,10 @@ public interface ParameterQuery {
 	 * @return the {@link ClassMetadata} of the class returned by this query.
 	 */
 	public ClassMetadata getClassMetadata();
+
+	/**
+	 * Clears the cache of any data corresponding to this {@link ParameterQuery} instance, according to its cacheKey.
+	 */
+	void clearCache();
 
 }

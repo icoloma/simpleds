@@ -1,5 +1,6 @@
 package org.simpleds.cache;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +13,10 @@ import org.simpleds.metadata.ClassMetadata;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 /**
@@ -63,16 +66,12 @@ public class CacheManagerImpl implements CacheManager {
 
 	@Override
 	public void delete(Key key) {
-		Level1Cache level1 = Level1Cache.getCacheInstance();
-		if (level1 != null) {
-			level1.delete(key);
-		}
-		memcache.delete(key);
+		this.delete(ImmutableList.of(key));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void delete(Collection<Key> keys) {
+	public void delete(Collection<? extends Serializable> keys) {
 		Level1Cache level1 = Level1Cache.getCacheInstance();
 		if (level1 != null) {
 			level1.delete(keys);
@@ -86,7 +85,7 @@ public class CacheManagerImpl implements CacheManager {
 		Level1Cache level1 = Level1Cache.getCacheInstance();
 		Map<Key, T> result = null;
 		if (level1 != null) {
-			result = level1.get(keys);
+			result = (Map) level1.get(keys);
 		}
 		if (!metadata.useLevel2Cache()) {
 			return result;
@@ -122,6 +121,36 @@ public class CacheManagerImpl implements CacheManager {
 				map.put(entity.getKey(), entity);
 			}
 			memcache.putAll(map, metadata.createCacheExpiration());
+		}
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T get(String key) {
+		Level1Cache level1 = Level1Cache.getCacheInstance();
+		T result;
+		if (level1 != null) {
+			result = (T) level1.get(key);
+			if (result == null) {
+				result = (T) memcache.get(key);
+				if (result != null) {
+					level1.put(key, result);
+				}
+			}
+		} else {
+			result = (T) memcache.get(key);
+		}
+		return result;
+	}
+
+	@Override
+	public void put(String key, Object value, int seconds) {
+		Level1Cache level1 = Level1Cache.getCacheInstance();
+		if (level1 != null) {
+			level1.put(key, value);
+		}
+		if (seconds > 0) {
+			memcache.put(key, value, Expiration.byDeltaSeconds(seconds));
 		}
 	}
 

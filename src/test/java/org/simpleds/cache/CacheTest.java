@@ -6,20 +6,29 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.util.Date;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.AbstractEntityManagerTest;
+import org.simpleds.PagedList;
+import org.simpleds.PagedQuery;
+import org.simpleds.SimpleQuery;
+import org.simpleds.exception.EntityNotFoundException;
+import org.simpleds.functions.EntityToKeyFunction;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.testdb.CacheableEntity;
 import org.simpleds.testdb.Dummy1;
 
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 
 public class CacheTest extends AbstractEntityManagerTest {
@@ -125,6 +134,159 @@ public class CacheTest extends AbstractEntityManagerTest {
 		entityManager.get(dummy.getKey());
 		entityManager.get(ImmutableList.of(dummy.getKey(), dummy.getKey()));
 		assertEquals(0, memcache.getStatistics().getItemCount());
+	}
+	
+	@Test
+	public void testCacheQuerySingleResult() {
+		singleWithSeconds(0, true);
+		singleWithSeconds(10, true);
+		singleWithSeconds(10, false);
+	}
+	
+	private void singleWithSeconds(int cacheSeconds, boolean withLevel1) {
+		if (withLevel1) {
+			Level1Cache.setCacheInstance();
+		} else {
+			Level1Cache.clearCacheInstance();
+		}
+		
+		entityManager.put(ImmutableList.of(Dummy1.create()));
+		SimpleQuery query = entityManager.createQuery(Dummy1.class)
+			.greaterThan("date", new Date(1000))
+			.withCacheKey("single")
+			.withCacheSeconds(cacheSeconds);
+		
+		// cache failure
+		Dummy1 dummy1 = query.asSingleResult();
+		assertNotNull(dummy1);
+		dummy1.setOverridenNameDate(new Date(100));
+		entityManager.put(dummy1);
+		
+		// cache 1 hit
+		Dummy1 dummy2 = query.asSingleResult();
+		assertNotNull(dummy2);
+		assertEquals(dummy1.getKey(), dummy2.getKey());
+
+		// cache 2 hit
+		if (withLevel1) { 
+			// clear level 1
+			Level1Cache.setCacheInstance();
+		}
+		if (cacheSeconds != 0) { // found in level 2 cache
+			dummy2 = query.asSingleResult();
+			assertEquals(dummy1.getKey(), dummy2.getKey());
+		} else { // no level 2 cache
+			try {
+				query.asSingleResult();
+				fail("Found an out of date entity");
+			} catch (EntityNotFoundException e) {
+				// ok
+			}
+			
+		}
+
+		// cache delete
+		try {
+			query.clearCache();
+			query.asSingleResult();
+			fail("Found an out of date entity");
+		} catch (EntityNotFoundException e) {
+			// ok
+		}
+	}
+	
+	@Test
+	public void testCacheQueryMultipleResult() {
+		cacheSeconds(0, true);
+		cacheSeconds(10, true);
+		cacheSeconds(10, false);
+	}
+	
+	private void cacheSeconds(int cacheSeconds, boolean withLevel1) {
+		if (withLevel1) {
+			Level1Cache.setCacheInstance();
+		} else {
+			Level1Cache.clearCacheInstance();
+		}
+
+		entityManager.put(ImmutableList.of(Dummy1.create(), Dummy1.create()));
+		SimpleQuery query = entityManager.createQuery(Dummy1.class)
+			.withCacheKey("multi")
+			.withCacheSeconds(cacheSeconds);
+		List<Dummy1> list = query.asList();
+		assertEquals(2, query.count());
+		assertEquals(2, list.size());
+		
+		// insert new data (ignored)
+		entityManager.put(ImmutableList.of(Dummy1.create()));
+		List<Dummy1> list2 = query.asList();
+		assertEquals(2, query.count());
+		assertEquals(2, list2.size());
+		assertEquals(list.get(0).getKey(), list2.get(0).getKey());
+		
+		// clean the cache
+		query.clearCache();
+		List<Dummy1> list3 = query.asList();
+		assertEquals(3, query.count());
+		assertEquals(3, list3.size());
+		
+		// clean the database
+		List<Key> keys = query.keysOnly().asList();
+		entityManager.delete(keys);
+		query.clearCache();
+	}
+	
+	@Test
+	public void testCachePagedQueryTotal() {
+		initPagedData();
+		PagedQuery query = entityManager.createPagedQuery(Dummy1.class)
+			.withCacheKey("pagedTotal");
+		query.setPageIndex(0);
+		query.setPageSize(3);
+		PagedList<Dummy1> pagedList = query.asPagedList();
+		assertEquals(5, pagedList.getTotalResults());
+		entityManager.delete(Collections2.transform(pagedList.getData(), new EntityToKeyFunction(Dummy1.class)));
+
+		// total is out of date, but data is not
+		PagedList<Dummy1> pagedList2 = query.asPagedList();
+		assertEquals(5, pagedList2.getTotalResults());
+		assertEquals(2, pagedList2.getData().size());
+		
+		// refresh totals
+		query.clearCache();
+		PagedList<Dummy1> pagedList3 = query.asPagedList();
+		assertEquals(2, pagedList3.getTotalResults());
+	}
+	
+	@Test
+	public void testCachePagedQueryData() {
+		initPagedData();
+		PagedQuery query = entityManager.createPagedQuery(Dummy1.class)
+			.withCacheKey("pagedData")
+			.withCacheType(PagedCacheType.DATA)
+			;
+		query.setPageIndex(0);
+		query.setPageSize(3);
+		PagedList<Dummy1> pagedList = query.asPagedList();
+		assertEquals(3, pagedList.getData().size());
+		entityManager.delete(pagedList.getData().get(0).getKey());
+		
+		// data is out of date, but total is not
+		PagedList<Dummy1> pagedList2 = query.asPagedList();
+		assertEquals(4, pagedList2.getTotalResults());
+		assertEquals(3, pagedList2.getData().size());
+		assertNull(pagedList2.getData().get(0));
+		
+		// refresh totals
+		query.clearCache();
+		PagedList<Dummy1> pagedList3 = query.asPagedList();
+		assertEquals(4, pagedList3.getTotalResults());
+	}
+	
+	private void initPagedData() {
+		for (int i = 0; i < 5; i++) {
+			entityManager.put(Dummy1.create());
+		}
 	}
 
 	private void assertGet() {

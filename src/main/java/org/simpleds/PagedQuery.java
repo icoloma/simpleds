@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.simpleds.cache.CacheManager;
+import org.simpleds.cache.PagedCacheType;
 import org.simpleds.metadata.ClassMetadata;
 
 import com.google.appengine.api.datastore.Cursor;
@@ -16,6 +18,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.SortPredicate;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Paged query.
@@ -46,6 +49,12 @@ public class PagedQuery implements ParameterQuery, Cloneable {
 	private boolean calculateTotalResults = true;
 	
 	private SimpleQuery query;
+	
+	private PagedCacheType cacheType = PagedCacheType.TOTAL;
+	
+	private String cacheKey;
+	
+	private int cacheSeconds;
 	
 	PagedQuery(EntityManager entityManager, Key ancestor, ClassMetadata metadata) {
 		query = new SimpleQuery(entityManager, ancestor, metadata);
@@ -265,15 +274,30 @@ public class PagedQuery implements ParameterQuery, Cloneable {
 	public <T> PagedList<T> asPagedList() {
 		query.withLimit(pageSize); 
 		query.withOffset(getFirstRecordIndex());
+		query.withCacheSeconds(cacheSeconds);
 		
 		int totalResults = -1;
 		if (calculateTotalResults) {
+			query.withCacheKey(PagedCacheType.TOTAL == cacheType || PagedCacheType.BOTH == cacheType? cacheKey : null);
 			totalResults = query.count();
 		}
+		query.withCacheKey(PagedCacheType.DATA == cacheType || PagedCacheType.BOTH == cacheType? cookCacheKey() : null);
 		List<T> data = totalResults == 0? new ArrayList<T>() : (List<T>) query.asList();
 		PagedList pagedList = new PagedList<T>(this, data);
 		pagedList.setTotalResults(totalResults);
 		return pagedList;
+	}
+
+	/**
+	 * @return the cache key to apply for the current page
+	 */
+	private String cookCacheKey() {
+		String ck = cacheKey;
+		if (ck != null) {
+			int first = getFirstRecordIndex();
+			ck += "[" + first + "-" + first + getPageSize() + "]";
+		}
+		return ck;
 	}
 
 	@Override
@@ -287,4 +311,34 @@ public class PagedQuery implements ParameterQuery, Cloneable {
 		query.withReadPolicy(readPolicy);
 		return this;
 	}
+
+
+	@Override
+	public PagedQuery withCacheKey(String cacheKey) {
+		this.cacheKey = cacheKey;
+		return this;
+	}
+
+	@Override
+	public PagedQuery withCacheSeconds(int cacheSeconds) {
+		this.cacheSeconds = cacheSeconds;
+		return this;
+	}
+	
+	/** 
+	 * if cacheKey != null, indicates the kind of cache to apply. Defaults to {@link PagedCacheType#TOTAL} 
+	 */
+	public PagedQuery withCacheType(PagedCacheType caching) {
+		this.cacheType = caching;
+		return this;
+	}
+
+	@Override
+	public void clearCache() {
+		if (cacheKey == null) {
+			throw new IllegalStateException();
+		}
+		EntityManagerFactory.getEntityManager().getCacheManager().delete(ImmutableList.of(cacheKey + CacheManager.COUNT_SUFFIX, cookCacheKey()));		
+	}
+	
 }
