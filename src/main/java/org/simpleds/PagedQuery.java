@@ -295,7 +295,7 @@ public class PagedQuery implements ParameterQuery, Cloneable {
 		String ck = cacheKey;
 		if (ck != null) {
 			int first = getFirstRecordIndex();
-			ck += "[" + first + "-" + first + getPageSize() + "]";
+			ck += "[" + first + "-" + (first + getPageSize()) + "]";
 		}
 		return ck;
 	}

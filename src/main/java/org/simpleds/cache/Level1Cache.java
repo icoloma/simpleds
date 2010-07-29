@@ -72,6 +72,9 @@ class Level1Cache {
 		for (Serializable key : keys) {
 			contents.remove(key);
 		}
+		if (log.isDebugEnabled()) {
+			log.debug("Deleted from Level 2 cache: " + keys);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

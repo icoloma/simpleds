@@ -77,6 +77,9 @@ public class CacheManagerImpl implements CacheManager {
 			level1.delete(keys);
 		}
 		memcache.deleteAll((Collection) keys);
+		if (log.isDebugEnabled()) {
+			log.debug("Deleted from Level 2 cache: " + keys);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -134,11 +137,17 @@ public class CacheManagerImpl implements CacheManager {
 			if (result == null) {
 				result = (T) memcache.get(key);
 				if (result != null) {
+					if (log.isDebugEnabled()) {
+						log.debug("Level 2 cache hit: " + key);
+					}
 					level1.put(key, result);
 				}
 			}
 		} else {
 			result = (T) memcache.get(key);
+			if (log.isDebugEnabled() && result != null) {
+				log.debug("Level 2 cache hit: " + key);
+			}
 		}
 		return result;
 	}
