@@ -1,5 +1,6 @@
 package org.simpleds.cache;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +22,6 @@ public class NullCacheManagerImpl implements CacheManager {
 	}
 
 	@Override
-	public void delete(Collection<Key> keys) {
-	}
-
-	@Override
 	public <T> T get(Key key, ClassMetadata metadata) {
 		return null;
 	}
@@ -39,8 +36,21 @@ public class NullCacheManagerImpl implements CacheManager {
 	}
 
 	@Override
+	public void delete(Collection<? extends Serializable> keys) {
+		
+	}
+
+	@Override
+	public <T> T get(String key) {
+		return null;
+	}
+
+	@Override
 	public <T> void put(Collection<T> javaObjects, List<Entity> entities, ClassMetadata metadata) {
 	}
 
+	@Override
+	public void put(String cacheKey, Object value, int seconds) {
+	}
 
 }
