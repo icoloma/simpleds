@@ -166,6 +166,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		return addFilter(propertyName, FilterOperator.NOT_EQUAL, value);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public SimpleQuery in(String propertyName, Collection<?> values) {
 		if (values != null) {
@@ -316,9 +317,9 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 
 	/** 
 	 * Execute the provided query and returns the result as a List of java objects 
-	 * @param query the query to execute
 	 * @return the list of resulting java entities
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> List<T> asList() {
 		if (cacheKey != null && transaction == null) {
 			List<Key> keys = getCacheManager().get(cacheKey);
@@ -353,12 +354,13 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * @return the first result of the query
 	 * @throws EntityNotFoundException if the query did not return any result
 	 */
+	@SuppressWarnings("unchecked")
 	public <T> T asSingleResult() {
 		T javaObject = null;
 		if (cacheKey != null && transaction == null) {
 			Collection<Key> keys = getCacheManager().get(cacheKey);
 			if (keys != null && keys.size() > 0) {
-				javaObject = entityManager.get(keys.iterator().next());
+				javaObject = (T) entityManager.get(keys.iterator().next());
 			}
 		}
 		if (javaObject == null) {

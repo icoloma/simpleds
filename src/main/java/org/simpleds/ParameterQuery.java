@@ -130,13 +130,13 @@ public interface ParameterQuery {
 	public ParameterQuery sort(String propertyName, SortDirection direction);
 
 	/**
-	 * @deprecated use {@link ParameterQuery#sortAsc()} instead
+	 * @deprecated use {@link ParameterQuery#sortAsc(String)} instead
 	 */
 	@Deprecated
 	public ParameterQuery orderAsc(String propertyName);
 
 	/**
-	 * @deprecated use {@link ParameterQuery#sortDesc()} instead
+	 * @deprecated use {@link ParameterQuery#sortDesc(String)} instead
 	 */
 	@Deprecated
 	public ParameterQuery orderDesc(String propertyName);
@@ -187,7 +187,7 @@ public interface ParameterQuery {
 	 * Set the {@link ReadPolicy} instance to use with this query.
 	 * @param readPolicy the {@link ReadPolicy} to use.
 	 * @return this instance
-	 * @see DatastoreServiceConfig.Builder#withReadPolicy(ReadPolicy)
+	 * @see DatastoreServiceConfig#readPolicy(ReadPolicy)
 	 */
 	public ParameterQuery withReadPolicy(ReadPolicy readPolicy);
 
@@ -195,7 +195,7 @@ public interface ParameterQuery {
 	 * Set the deadline to use for this query. The default is 30 seconds.
 	 * @param deadline the deadline to apply
 	 * @return this instance
-	 * @see DatastoreServiceConfig.Builder#withDeadline(double)
+	 * @see DatastoreServiceConfig#deadline(double)
 	 */
 	public ParameterQuery withDeadline(double deadline);
 	
