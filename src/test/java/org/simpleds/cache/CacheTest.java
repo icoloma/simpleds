@@ -8,6 +8,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.testdb.CacheableEntity;
 import org.simpleds.testdb.Dummy1;
 
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
@@ -39,9 +41,18 @@ public class CacheTest extends AbstractEntityManagerTest {
 	private CacheManager cacheManager;
 	
 	private ClassMetadata metadata;
+
+	private Method simpleQueryCalculateDataCacheKey;
+	private Method simpleQueryCalculateCountCacheKey;
 	
 	@Before
-	public void initCachedData() {
+	public void initCachedData() throws Exception {
+		
+		simpleQueryCalculateDataCacheKey = SimpleQuery.class.getDeclaredMethod("calculateDataCacheKey");
+		simpleQueryCalculateDataCacheKey.setAccessible(true);
+		simpleQueryCalculateCountCacheKey = SimpleQuery.class.getDeclaredMethod("calculateCountCacheKey");
+		simpleQueryCalculateCountCacheKey.setAccessible(true);
+		
 		cacheManager = entityManager.getCacheManager();
 		Level1Cache.setCacheInstance();
 		cachedEntity = CacheableEntity.create();
@@ -137,6 +148,45 @@ public class CacheTest extends AbstractEntityManagerTest {
 	}
 	
 	@Test
+	public void testCalculateCacheKey() throws Exception {
+		// empty
+		assertCacheKeys(
+				"qcount{kind=Dummy1}", 
+				"qdata{kind=Dummy1}", 
+				entityManager.createQuery(Dummy1.class));
+		
+		// filter conditions
+		assertCacheKeys(
+				"qcount{kind=Dummy1,pred=[date = Thu Jan 01 01:00:00 CET 1970, evalue > NULL, name IN [foo, bar], name > bar]}",
+				"qdata{kind=Dummy1,pred=[date = Thu Jan 01 01:00:00 CET 1970, evalue > NULL, name IN [foo, bar], name > bar]}", 
+				entityManager.createQuery(Dummy1.class)
+					.equal("date", new Date(100))
+					.isNotNull("evalue")
+					.in("name", ImmutableList.of("foo", "bar"))
+					.greaterThan("name", "bar")
+		);
+		
+		// cursor
+		Cursor cursor = entityManager.createQuery(Dummy1.class).asIterator().getCursor();
+		assertCacheKeys(
+				"qcount{kind=Dummy1}",
+				"qdata{kind=Dummy1,start=ExQ,end=ExQ}", 
+				entityManager.createQuery(Dummy1.class)
+					.withStartCursor(cursor)
+					.withEndCursor(cursor)
+		);
+		
+		// fetchOptions
+		assertCacheKeys(
+				"qcount{kind=Dummy1}",
+				"qdata{kind=Dummy1,off=5,lim=100}", 
+				entityManager.createQuery(Dummy1.class)
+					.withOffset(5)
+					.withLimit(100)
+					);
+	}
+	
+	@Test
 	public void testCacheQuerySingleResult() {
 		singleWithSeconds(0, true);
 		singleWithSeconds(10, true);
@@ -153,7 +203,6 @@ public class CacheTest extends AbstractEntityManagerTest {
 		entityManager.put(ImmutableList.of(Dummy1.create()));
 		SimpleQuery query = entityManager.createQuery(Dummy1.class)
 			.greaterThan("date", new Date(1000))
-			.withCacheKey("single")
 			.withCacheSeconds(cacheSeconds);
 		
 		// cache failure
@@ -211,7 +260,6 @@ public class CacheTest extends AbstractEntityManagerTest {
 
 		entityManager.put(ImmutableList.of(Dummy1.create(), Dummy1.create()));
 		SimpleQuery query = entityManager.createQuery(Dummy1.class)
-			.withCacheKey("multi")
 			.withCacheSeconds(cacheSeconds);
 		List<Dummy1> list = query.asList();
 		assertEquals(2, query.count());
@@ -240,7 +288,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 	public void testCachePagedQueryTotal() {
 		initPagedData();
 		PagedQuery query = entityManager.createPagedQuery(Dummy1.class)
-			.withCacheKey("pagedTotal");
+			.withCacheSeconds(100);
 		query.setPageIndex(0);
 		query.setPageSize(3);
 		PagedList<Dummy1> pagedList = query.asPagedList();
@@ -262,7 +310,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 	public void testCachePagedQueryData() {
 		initPagedData();
 		PagedQuery query = entityManager.createPagedQuery(Dummy1.class)
-			.withCacheKey("pagedData")
+			.withCacheSeconds(100)
 			.withCacheType(PagedCacheType.DATA)
 			;
 		query.setPageIndex(0);
@@ -321,4 +369,9 @@ public class CacheTest extends AbstractEntityManagerTest {
 		assertNull(cacheManager.get(entity.getKey(), metadata));
 	}
 	
+	private void assertCacheKeys(String expectedCountKey, String expectedDataKey, SimpleQuery query) throws Exception {
+		assertEquals(expectedCountKey, simpleQueryCalculateCountCacheKey.invoke(query));
+		assertEquals(expectedDataKey, simpleQueryCalculateDataCacheKey.invoke(query));
+	}
+
 }

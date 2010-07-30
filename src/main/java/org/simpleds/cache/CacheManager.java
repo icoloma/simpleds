@@ -30,9 +30,6 @@ public interface CacheManager {
 	/** memcache namespace for SimpleDS cache */
 	public static final String MEMCACHE_NAMESPACE = "_sds_cache";
 	
-	/** the suffix appended to create the cahe key for SimpleQuery.count() */
-	public static final String COUNT_SUFFIX = ".count";
-
 	/**
 	 * Check the level 1 and level 2 cache for the required value.
 	 * If the value is found in Level 1 cache, it is returned as is.

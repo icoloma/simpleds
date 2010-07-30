@@ -4,7 +4,7 @@ apply plugin: 'maven'
 project.version=simpledsVersion
 
 repositories {
-    mavenRepo name: 'mvnsearch', urls: 'http://www.mvnsearch.org/maven2/'
+    mavenRepo name: 'gae-plugin', urls: 'http://maven-gae-plugin.googlecode.com/svn/repository/'
 }
 
 configurations {
@@ -14,10 +14,10 @@ configurations {
 
 dependencies {
 
-	providedCompile	"com.google.appengine:appengine-api-1.0-runtime:${appengineVersion}",
-					"com.google.appengine:appengine-api-1.0-labs:${appengineVersion}",
+	providedCompile	"com.google.appengine:appengine-local-runtime:${appengineVersion}",
+					"com.google.appengine:appengine-api-labs:${appengineVersion}",
 					"com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}",
-					"com.google.appengine:appengine-api-1.0-stubs:${appengineVersion}",
+					"com.google.appengine:appengine-api-stubs:${appengineVersion}",
 					"com.google.appengine:appengine-testing:${appengineVersion}",
 					"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:1.1.1",
 					"org.zeroturnaround:jr-sdk:2.1.1"

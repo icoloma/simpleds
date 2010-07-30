@@ -34,6 +34,9 @@ import com.google.common.collect.Lists;
  * @author icoloma
  */
 public class SimpleQuery implements ParameterQuery, Cloneable {
+	
+	/** the value of cacheSeconds to skip cache */
+	static final int NO_CACHE = -1;
 
 	/** the {@link ClassMetadata} that corresponds to this query */
 	private ClassMetadata classMetadata;
@@ -53,11 +56,8 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	/** the {@link DatastoreServiceConfig} instance to use, if any. If null, the value of entityManager.getDatastoreService() will be used */
 	private DatastoreServiceConfig datastoreServiceConfig;
 	
-	/** the cache key to use. If null, the query results will not be cached */
-	private String cacheKey;
-	
 	/** the number of seconds to store data in the memcache. Default (0) will only use the Level 1 cache */
-	private int cacheSeconds;
+	private int cacheSeconds = NO_CACHE;
 	
 	SimpleQuery(EntityManager entityManager, Key ancestor, ClassMetadata metadata) {
 		this.entityManager = entityManager;
@@ -87,10 +87,15 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 			if (fetchOptions.getPrefetchSize() != null) {
 				copy.withPrefetchSize(fetchOptions.getPrefetchSize());
 			}
+			if (fetchOptions.getStartCursor() != null) {
+				copy.withStartCursor(fetchOptions.getStartCursor());
+			}
+			if (fetchOptions.getEndCursor() != null) {
+				copy.withEndCursor(fetchOptions.getEndCursor());
+			}
 		}
 		copy.withTransaction(transaction);
 		copy.datastoreServiceConfig = datastoreServiceConfig;
-		copy.cacheKey = cacheKey;
 		copy.cacheSeconds = cacheSeconds;
 		return copy;
 	}
@@ -256,10 +261,37 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		return this;
 	}
 	
-	@Override
+	/**
+	 * Set the {@link Cursor} to use with this query.
+	 * @param cursor the cursor to use with this query. If null, it will be ignored.
+	 * @return this instance
+	 * @deprecated use withStartCursor instead
+	 */
+	@Deprecated
 	public SimpleQuery withCursor(Cursor cursor) {
+		return withStartCursor(cursor);
+	}
+	
+	/**
+	 * Set the {@link Cursor} at which to start this query.
+	 * @param cursor the cursor to use with this query. If null, it will be ignored.
+	 * @return this instance
+	 */
+	public SimpleQuery withStartCursor(Cursor cursor) {
 		if (cursor != null) {
-			fetchOptions = fetchOptions == null? FetchOptions.Builder.withCursor(cursor) : fetchOptions.cursor(cursor);
+			fetchOptions = fetchOptions == null? FetchOptions.Builder.withStartCursor(cursor) : fetchOptions.startCursor(cursor);
+		}
+		return this;
+	}
+	
+	/**
+	 * Set the {@link Cursor} at which to end this query.
+	 * @param cursor the cursor to use with this query. If null, it will be ignored.
+	 * @return this instance
+	 */
+	public SimpleQuery withEndCursor(Cursor cursor) {
+		if (cursor != null) {
+			fetchOptions = fetchOptions == null? FetchOptions.Builder.withEndCursor(cursor) : fetchOptions.endCursor(cursor);
 		}
 		return this;
 	}
@@ -270,9 +302,40 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		return this;
 	}
 	
-	@Override
+
+	/**
+	 * Set the serialized {@link Cursor} to use with this query.
+	 * This method is equivalent to invoking 
+	 * withCursor(Cursor.fromWebsafeString(cursor)), but it also accepts null values
+	 * @param cursor the web-safe serialized cursor value. If null, it will be ignored.
+	 * @return this instance
+	 * @deprecated use withStartCursor(String) instead
+	 */
+	@Deprecated
 	public SimpleQuery withCursor(String cursor) {
-		return withCursor(cursor == null? null : Cursor.fromWebSafeString(cursor));
+		return withStartCursor(cursor);
+	}
+	
+	/**
+	 * Set the serialized {@link Cursor} to use with this query.
+	 * This method is equivalent to invoking 
+	 * withStartCursor(Cursor.fromWebsafeString(cursor)), but it also accepts null values
+	 * @param cursor the web-safe serialized cursor value. If null, it will be ignored.
+	 * @return this instance
+	 */
+	public SimpleQuery withStartCursor(String cursor) {
+		return withStartCursor(cursor == null? null : Cursor.fromWebSafeString(cursor));
+	}
+	
+	/**
+	 * Set the serialized {@link Cursor} to use with this query.
+	 * This method is equivalent to invoking 
+	 * withEndCursor(Cursor.fromWebsafeString(cursor)), but it also accepts null values
+	 * @param cursor the web-safe serialized cursor value. If null, it will be ignored.
+	 * @return this instance
+	 */
+	public SimpleQuery withEndCursor(String cursor) {
+		return withEndCursor(cursor == null? null : Cursor.fromWebSafeString(cursor));
 	}
 	
 	@Override
@@ -321,7 +384,8 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> asList() {
-		if (cacheKey != null && transaction == null) {
+		String cacheKey = calculateDataCacheKey();
+		if (isCacheable() && transaction == null) {
 			List<Key> keys = getCacheManager().get(cacheKey);
 			if (keys != null) {
 				return isKeysOnly()? (List) keys : entityManager.get(keys);
@@ -334,7 +398,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 			result.add(item);
 		}
 		
-		if (cacheKey != null) {
+		if (isCacheable()) {
 			Collection<Key> keys = isKeysOnly()? result : Collections2.transform(result, new EntityToKeyFunction(classMetadata.getPersistentClass()));
 			getCacheManager().put(cacheKey, Lists.newArrayList(keys), cacheSeconds);
 		}
@@ -343,10 +407,14 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	@Override
 	public void clearCache() {
-		if (cacheKey == null) {
+		if (!isCacheable()) {
 			throw new IllegalStateException();
 		}
-		getCacheManager().delete(ImmutableList.of(cacheKey, cacheKey + CacheManager.COUNT_SUFFIX));
+		getCacheManager().delete(ImmutableList.of(calculateDataCacheKey(), calculateCountCacheKey()));
+	}
+	
+	private boolean isCacheable() {
+		return cacheSeconds != NO_CACHE;
 	}
 	
 	/**
@@ -357,7 +425,8 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	@SuppressWarnings("unchecked")
 	public <T> T asSingleResult() {
 		T javaObject = null;
-		if (cacheKey != null && transaction == null) {
+		String cacheKey = calculateDataCacheKey();
+		if (isCacheable() && transaction == null) {
 			Collection<Key> keys = getCacheManager().get(cacheKey);
 			if (keys != null && keys.size() > 0) {
 				javaObject = (T) entityManager.get(keys.iterator().next());
@@ -369,7 +438,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 				throw new org.simpleds.exception.EntityNotFoundException();
 			}
 			javaObject = (T) entityManager.datastoreToJava(entity);
-			if (cacheKey != null) {
+			if (isCacheable()) {
 				getCacheManager().put(cacheKey, ImmutableList.of(entity.getKey()), cacheSeconds);
 			}
 		}
@@ -382,15 +451,16 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * retrieve the matching keys, not the entities themselves.
 	 */
 	public int count() {
+		String cacheKey = calculateCountCacheKey();
 		Integer result = null;
-		if (cacheKey != null && transaction == null) {
-			result = getCacheManager().get(cacheKey + CacheManager.COUNT_SUFFIX);
+		if (isCacheable() && transaction == null) {
+			result = getCacheManager().get(cacheKey);
 		}
 		if (result == null) {
 			SimpleQuery q = this.isKeysOnly()? this : this.clone().keysOnly();
 			result = getDatastoreService().prepare(q.getQuery()).countEntities();
-			if (cacheKey != null) {
-				getCacheManager().put(cacheKey + CacheManager.COUNT_SUFFIX, result, cacheSeconds);
+			if (isCacheable()) {
+				getCacheManager().put(cacheKey, result, cacheSeconds);
 			}
 		}
 		return result;
@@ -441,12 +511,56 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 			DatastoreServiceFactory.getDatastoreService(datastoreServiceConfig);
 	}
 
-	@Override
-	public SimpleQuery withCacheKey(String cacheKey) {
-		this.cacheKey = cacheKey;
-		return this;
+	/** 
+	 * Calculate the cache key to use for query data. This method combines the query kind, any filter predicates,
+ 	 * the start/end cursors and limit / offset values to produce a cache key
+	 */
+	protected String calculateDataCacheKey() {
+		StringBuilder builder = new StringBuilder(100);
+		builder.append("qdata{");
+		addCommonCacheKeyParts(builder);
+		if (fetchOptions != null) {
+			if(fetchOptions.getOffset() != null) {
+				builder.append(",off=").append(fetchOptions.getOffset());
+			}
+			if(fetchOptions.getLimit() != null) {
+				builder.append(",lim=").append(fetchOptions.getLimit());
+			}
+			if (fetchOptions.getStartCursor() != null) {
+				builder.append(",start=").append(fetchOptions.getStartCursor().toWebSafeString());
+			}
+			if (fetchOptions.getEndCursor() != null) {
+				builder.append(",end=").append(fetchOptions.getEndCursor().toWebSafeString());
+			}
+		}
+		builder.append("}");
+		return builder.toString();
 	}
 
+	/**
+	 * Add cache key parts that are common to query data and query count.
+	 * @param builder
+	 */
+	private void addCommonCacheKeyParts(StringBuilder builder) {
+		builder.append("kind=").append(getKind());
+		List<FilterPredicate> predicates = query.getFilterPredicates();
+		if (predicates.size() > 0) {
+			builder.append(",pred=").append(predicates);
+		}
+	}
+
+	/** 
+	 * Calculate the cache key to use. This method combines the query kind, any filter predicates,
+ 	 * the start/end cursors and limit / offset values to produce a cache key
+	 */
+	protected String calculateCountCacheKey() {
+		StringBuilder builder = new StringBuilder(100);
+		builder.append("qcount{");
+		addCommonCacheKeyParts(builder);
+		builder.append("}");
+		return builder.toString();
+	}
+	
 	@Override
 	public SimpleQuery withCacheSeconds(int cacheSeconds) {
 		this.cacheSeconds = cacheSeconds;

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.simpleds.metadata.ClassMetadata;
 
-import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreServiceConfig;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
@@ -161,22 +160,6 @@ public interface ParameterQuery {
 	public ParameterQuery withFetchOptions(FetchOptions fetchOptions);
 
 	/**
-	 * Set the {@link Cursor} to use with this query.
-	 * @param cursor the cursor to use with this query. If null, it will be ignored.
-	 * @return this instance
-	 */
-	public ParameterQuery withCursor(Cursor cursor);
-	
-	/**
-	 * Set the serialized {@link Cursor} to use with this query.
-	 * This method is equivalent to invoking 
-	 * withCursor(Cursor.fromWebsafeString(cursor))
-	 * @param cursor the web-safe serialized cursor value. If null, it will be ignored.
-	 * @return this instance
-	 */
-	public ParameterQuery withCursor(String cursor);
-
-	/**
 	 * Set the transaction to use with this query
 	 * @param transaction the transaction to use (can be null)
 	 * @return this instance
@@ -200,15 +183,12 @@ public interface ParameterQuery {
 	public ParameterQuery withDeadline(double deadline);
 	
 	/**
-	 * Set the cache key to use for this query. 
-	 * @param cacheKey the cache key to use
-	 * @return this instance
-	 */
-	public ParameterQuery withCacheKey(String cacheKey);
-	
-	/**
-	 * Set the number of seconds to store the query results into memcache. If set to 0 (the default), 
-	 * only the Level 1 cache will be used.
+	 * Set the number of seconds to store the query results into memcache. Possible values are: 
+	 * <ul>
+	 * <li>-1 (the default): do not cache</li> 
+	 * <li>0: store only in the Level 1 cache</li> 
+	 * <li>any other value will be used as the memcache timeout</li>
+	 * </ul> 
 	 * @param cacheSeconds the number of seconds to store the data in memcache 
 	 * @return this instance
 	 */
