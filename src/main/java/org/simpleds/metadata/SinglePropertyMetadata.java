@@ -81,7 +81,7 @@ public class SinglePropertyMetadata<J, D> implements PropertyMetadata<J, D> {
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e);
 		} catch (InvocationTargetException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getTargetException());
 		} 
 	}
 	
