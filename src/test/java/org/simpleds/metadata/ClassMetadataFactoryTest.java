@@ -13,8 +13,10 @@ import javax.persistence.Transient;
 import org.junit.Test;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
+import org.simpleds.annotations.Property;
 import org.simpleds.converter.AbstractCollectionConverter;
 import org.simpleds.converter.NullConverter;
+import org.simpleds.converter.StringToTextConverter;
 import org.simpleds.exception.ConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +88,13 @@ public class ClassMetadataFactoryTest {
 		assertEquals(5, property.getValue(instance));
 	}
 	
+	@Test
+	public void testConverterAnnotation() throws Exception {
+		ClassMetadata metadata = factory.createMetadata(MyClass.class);
+		PropertyMetadata property = metadata.getProperty("overridenConverter");
+		assertTrue(property.getConverter() instanceof StringToTextConverter);
+	}
+	
 	public static class Parent {
 		private Integer foo;
 	}
@@ -105,6 +114,9 @@ public class ClassMetadataFactoryTest {
 		// left empty on purpose
 		@Column
 		private int intProperty;
+		
+		@Property(converter=StringToTextConverter.class)
+		private String overridenConverter;
 
 		public Key getBar() {
 			return null;

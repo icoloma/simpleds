@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import javax.persistence.Column;
 
 import org.simpleds.annotations.Property;
+import org.simpleds.converter.NullConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,7 @@ public class PropertyMetadataFactory {
 
 	private static Logger log = LoggerFactory.getLogger(PropertyMetadataFactory.class);
 	
+	@SuppressWarnings("unchecked")
 	public static <J, D> SinglePropertyMetadata<J, D> create(String name, Field field, Method getter, Method setter) {
 		try {
 			log.debug("Processing property " + name);
@@ -31,6 +33,9 @@ public class PropertyMetadataFactory {
 				if (propertyAnn.name().length() > 0) {
 					metadata.setName(propertyAnn.name());
 				}
+				if (propertyAnn.converter() != NullConverter.class) {
+					metadata.setConverter(propertyAnn.converter().newInstance());
+				} 				
 			}
 			
 			// @Column 
@@ -38,11 +43,10 @@ public class PropertyMetadataFactory {
 			if (column != null && column.name().length() > 0) {
 				name = column.name();
 			}
-
+			
 			metadata.setName(name);
 			
 			// calculate the property type
-			@SuppressWarnings("unchecked")
 			Class<J> propertyType = (Class<J>) (getter == null? field.getType() : getter.getReturnType());
 			metadata.setPropertyType(propertyType);
 			
@@ -53,6 +57,10 @@ public class PropertyMetadataFactory {
 			return metadata;
 		} catch (RuntimeException e) {
 			throw new RuntimeException("Cannot process property '" + name + "': " + e.getMessage(), e);
+		} catch (InstantiationException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

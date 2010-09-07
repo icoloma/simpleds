@@ -2,7 +2,7 @@ package org.simpleds.converter;
 
 import com.google.appengine.api.datastore.Text;
 
-public class TextConverter implements Converter<String, Text> {
+public class StringToTextConverter implements Converter<String, Text> {
 
 	@Override
 	public String getNullValue() {

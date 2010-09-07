@@ -128,8 +128,10 @@ public class ClassMetadataFactory {
 		if (propertyMetadata.getAnnotation(Embedded.class) != null || propertyMetadata.getAnnotation(org.simpleds.annotations.Embedded.class) != null) {
 			addEmbeddedProperties(classMetadata, propertyMetadata);
 		} else {
-			Converter<J, D> converter = ConverterFactory.getConverter(propertyMetadata);
-			propertyMetadata.setConverter(converter);
+			if (propertyMetadata.getConverter() == null) { // calculate default converter
+				Converter<J, D> converter = ConverterFactory.getConverter(propertyMetadata);
+				propertyMetadata.setConverter(converter);
+			}
 			classMetadata.add(propertyMetadata);
 		}
 	}
