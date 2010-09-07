@@ -18,13 +18,13 @@ import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.QueryResultIterable;
-import com.google.appengine.api.datastore.ReadPolicy;
-import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.SortPredicate;
+import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.datastore.ReadPolicy;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -435,7 +435,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		if (javaObject == null) {
 			Entity entity = getDatastoreService().prepare(query).asSingleEntity();
 			if (entity == null) {
-				throw new org.simpleds.exception.EntityNotFoundException();
+				throw new org.simpleds.exception.EntityNotFoundException("No " + getKind() + " found with " + getFilterPredicates());
 			}
 			javaObject = (T) entityManager.datastoreToJava(entity);
 			if (isCacheable()) {

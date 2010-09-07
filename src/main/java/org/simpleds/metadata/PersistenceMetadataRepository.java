@@ -3,8 +3,8 @@ package org.simpleds.metadata;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
@@ -22,7 +22,7 @@ public class PersistenceMetadataRepository {
 	
 	private ClassMetadataFactory classMetadataFactory = new ClassMetadataFactory();
 
-	private static Log log = LogFactory.getLog(PersistenceMetadataRepository.class);
+	private static Logger log = LoggerFactory.getLogger(PersistenceMetadataRepository.class);
 	
 	/**
 	 * Adds a persistent class to the repository

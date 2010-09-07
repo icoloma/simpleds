@@ -6,7 +6,7 @@ package org.simpleds.exception;
  */
 public class EntityNotFoundException extends PersistenceException {
 
-	public EntityNotFoundException() { /* */ }
+	//public EntityNotFoundException() { /* */ }
 	
 	public EntityNotFoundException(String message, Throwable cause) {
 		super(message, cause);

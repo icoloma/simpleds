@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
@@ -25,7 +25,7 @@ class Level1Cache {
 	/** the cache contents (the key can be a Key or a String) */
 	private Map<Serializable, Object> contents = new WeakHashMap<Serializable, Object>();
 	
-	private Log log = LogFactory.getLog(Level1Cache.class);
+	private static Logger log = LoggerFactory.getLogger(Level1Cache.class);
 	
 	/**
 	 * Initializes the Level 1 cache for this thread.

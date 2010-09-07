@@ -5,13 +5,13 @@ import java.lang.reflect.Method;
 
 import javax.persistence.Column;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.simpleds.annotations.Property;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PropertyMetadataFactory {
 
-	private static Log log = LogFactory.getLog(PropertyMetadataFactory.class);
+	private static Logger log = LoggerFactory.getLogger(PropertyMetadataFactory.class);
 	
 	public static <J, D> SinglePropertyMetadata<J, D> create(String name, Field field, Method getter, Method setter) {
 		try {

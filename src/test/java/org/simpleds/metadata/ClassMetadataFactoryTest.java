@@ -10,23 +10,23 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Transient;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
 import org.simpleds.converter.AbstractCollectionConverter;
 import org.simpleds.converter.NullConverter;
 import org.simpleds.exception.ConfigException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.Key;
 
 @SuppressWarnings("unused")
 public class ClassMetadataFactoryTest {
 	
-	private static Log log = LogFactory.getLog(ClassMetadataFactoryTest.class);
-	
 	private ClassMetadataFactory factory = new ClassMetadataFactory();
+	
+	private static Logger log = LoggerFactory.getLogger(ClassMetadataFactoryTest.class);
 	
 	@Test
 	public void testCreateMetadata() throws Exception {

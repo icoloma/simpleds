@@ -1,9 +1,10 @@
 package org.simpleds.test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -28,11 +29,12 @@ public abstract class AbstractDatastoreTest {
 	/** true to store saved changes, default to false */
 	protected boolean storeChanges = false;
 	
-	protected Log log = LogFactory.getLog(getClass());
+	protected Logger log = LoggerFactory.getLogger(getClass());
 	
 	public AbstractDatastoreTest() {
 		// to let Spring initialize Datastore-dependent classes
 		helper.setUp();
+		SLF4JBridgeHandler.install();
 	}
 	
 	@Before

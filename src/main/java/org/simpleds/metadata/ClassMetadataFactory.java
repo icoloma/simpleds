@@ -16,8 +16,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.simpleds.annotations.Cacheable;
 import org.simpleds.annotations.Id;
 import org.simpleds.annotations.MultivaluedIndex;
@@ -25,6 +23,8 @@ import org.simpleds.annotations.MultivaluedIndexes;
 import org.simpleds.converter.Converter;
 import org.simpleds.converter.ConverterFactory;
 import org.simpleds.exception.ConfigException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
@@ -32,7 +32,7 @@ public class ClassMetadataFactory {
 
 	private static final Class<?>[] ROOT_ANCESTORS = new Class<?>[] {};
 
-	private static Log log = LogFactory.getLog(ClassMetadataFactory.class);
+	private static Logger log = LoggerFactory.getLogger(ClassMetadataFactory.class);
 	
 	public ClassMetadata createMetadata(Class<?> clazz) {
 		ClassMetadata metadata = new ClassMetadata();

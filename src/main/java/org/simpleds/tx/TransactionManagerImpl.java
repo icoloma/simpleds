@@ -2,8 +2,8 @@ package org.simpleds.tx;
 
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Transaction;
@@ -12,7 +12,7 @@ public class TransactionManagerImpl implements TransactionManager {
 
 	private DatastoreService datastoreService;
 	
-	private static Log log = LogFactory.getLog(TransactionManagerImpl.class);
+	private static Logger log = LoggerFactory.getLogger(TransactionManagerImpl.class);
 	
 	@Override
 	public void commit() {
@@ -42,7 +42,7 @@ public class TransactionManagerImpl implements TransactionManager {
 					if (exception == null) {
 						exception = e;
 					} else { // log any other subsequent exceptions
-						log.debug(e, e);
+						log.debug(e.toString(), e);
 					}
 				}
 			}

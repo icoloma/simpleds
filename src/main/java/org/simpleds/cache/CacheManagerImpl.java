@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.simpleds.functions.DatastoreEntityToKeyFunction;
 import org.simpleds.metadata.ClassMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -28,7 +28,7 @@ public class CacheManagerImpl implements CacheManager {
 	/** the underlying memcache service */
 	private MemcacheService memcache;
 	
-	private Log log = LogFactory.getLog(CacheManagerImpl.class);
+	private static Logger log = LoggerFactory.getLogger(CacheManagerImpl.class);
 
 	@Override
 	@SuppressWarnings("unchecked")

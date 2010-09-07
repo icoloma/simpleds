@@ -10,6 +10,7 @@ repositories {
 configurations {
     sources.exclude group: 'com.google.appengine'
     sources.exclude group: 'asm'
+    all*.exclude module: 'commons-logging'
 }
 
 dependencies {
@@ -23,7 +24,7 @@ dependencies {
 					"org.zeroturnaround:jr-sdk:2.1.1"
 	
 	compile			"com.google.guava:guava:r05",
-					"commons-logging:commons-logging:1.1.1",
+					"org.slf4j:slf4j-api:1.6.1",
 					"aopalliance:aopalliance:1.0",
 					"org.apache.geronimo.specs:geronimo-jpa_3.0_spec:1.1.1",
 					"org.aspectj:aspectjrt:1.6.6",
@@ -35,8 +36,10 @@ dependencies {
 					
 	testCompile		"asm:asm:3.2",
 					"asm:asm-util:3.2",
+					"ch.qos.logback:logback-classic:0.9.24",
 					"junit:junit:4.5",
-					"log4j:log4j:1.2.14",
+					"org.slf4j:jcl-over-slf4j:1.6.1",
+					"org.slf4j:jul-to-slf4j:1.6.1",
 					"org.springframework:spring-context:3.0.0.RELEASE",
 					"org.springframework:spring-expression:3.0.0.RELEASE",
 					"org.springframework:spring-test:3.0.0.RELEASE"

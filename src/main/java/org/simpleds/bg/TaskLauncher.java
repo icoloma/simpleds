@@ -3,8 +3,8 @@ package org.simpleds.bg;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
@@ -21,7 +21,7 @@ public class TaskLauncher {
 	/** list of registered tasks */
 	private Map<String, BackgroundTask> tasks = Maps.newHashMap();
 	
-	private static Log log = LogFactory.getLog(TaskLauncher.class);
+	private static Logger log = LoggerFactory.getLogger(TaskLauncher.class);
 	
 	public TaskLauncher(BackgroundTask... tasks) {
 		if (tasks != null && tasks.length > 0) {

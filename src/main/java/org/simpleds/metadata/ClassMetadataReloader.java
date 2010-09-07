@@ -1,8 +1,8 @@
 package org.simpleds.metadata;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.simpleds.annotations.Entity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zeroturnaround.javarebel.ClassEventListener;
 import org.zeroturnaround.javarebel.Reloader;
 import org.zeroturnaround.javarebel.ReloaderFactory;
@@ -15,7 +15,7 @@ import org.zeroturnaround.javarebel.ReloaderFactory;
  */
 public class ClassMetadataReloader implements ClassEventListener {
 
-	private static Log log = LogFactory.getLog(ClassMetadataReloader.class);
+	private static Logger log = LoggerFactory.getLogger(ClassMetadataReloader.class);
 	
 	private ClassMetadataReloader() {}
 	

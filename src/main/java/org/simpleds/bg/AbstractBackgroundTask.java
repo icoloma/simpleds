@@ -1,7 +1,7 @@
 package org.simpleds.bg;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -29,7 +29,7 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 
 	protected DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
 
-	protected Log log = LogFactory.getLog(getClass());
+	protected Logger log = LoggerFactory.getLogger(getClass());
 	
 	protected AbstractBackgroundTask(String id) {
 		this.id = id;

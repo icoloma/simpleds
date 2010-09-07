@@ -6,12 +6,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.memcache.MemcacheService.SetPolicy;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
@@ -34,7 +34,7 @@ public class TaskStats {
 	/** total number of entities processed */
 	private static final String ENTITIES = "entities-";
 	
-	private static Log log = LogFactory.getLog(TaskStats.class);
+	private static Logger log = LoggerFactory.getLogger(TaskStats.class);
 
 	/** task id */
 	private String id;

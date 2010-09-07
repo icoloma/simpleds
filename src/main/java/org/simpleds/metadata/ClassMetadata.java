@@ -2,19 +2,19 @@ package org.simpleds.metadata;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.simpleds.annotations.Property;
 import org.simpleds.annotations.Transient;
 import org.simpleds.exception.RequiredFieldException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -53,7 +53,7 @@ public class ClassMetadata {
 	/** the number of seconds that this class can be cached in memcache */
 	private Integer cacheSeconds;
 	
-	private static final Log log = LogFactory.getLog(ClassMetadata.class);
+	private static Logger log = LoggerFactory.getLogger(ClassMetadata.class);
 	
 	/**
 	 * Convert a value from Google representation to a Java value
