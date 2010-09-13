@@ -479,7 +479,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	}
 	
 	/** 
-	 * Execute this query and returns the result as a {@link SimpleQueryResultIterator} of java objects
+	 * Execute this query and returns the result as a {@link SimpleQueryResultIterator} of java objects.
 	 * This method does not check the cache.
 	 * @return the list of resulting java entities
 	 */
