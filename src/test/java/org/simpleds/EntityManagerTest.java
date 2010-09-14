@@ -172,6 +172,19 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		findShouldFail(Dummy1.createDummyKey(), Child.class);
 	}
 	
+	@Test
+	public void testRefresh() {
+		Dummy1 dummy = Dummy1.create();
+		entityManager.put(dummy);
+		Dummy1 dummy2 = new Dummy1();
+		dummy2.setKey(dummy.getKey());
+		entityManager.refresh(dummy2);
+		assertEquals(dummy.getKey(), dummy2.getKey());
+		assertEquals(dummy.getName(), dummy2.getName());
+		assertEquals(dummy.getOverridenNameDate(), dummy2.getOverridenNameDate());
+		assertEquals(dummy.getBigString(), dummy2.getBigString());
+	}
+	
 	private void putShouldFail(Key parentKey, Object instance) {
 		try {
 			entityManager.put(parentKey, instance);

@@ -321,4 +321,20 @@ public interface EntityManager {
 	 */
 	DatastoreService getDatastoreService();
 
+	/**
+	 * Convenience method to allocate a single Key.
+	 * For key ranges, consider using datastoreService.allocateIds() instead.
+	 * @param clazz the persistent value
+	 * @return a key value generated automatically by the datastore
+	 */
+	Key allocateId(Class<?> clazz);
+
+	/**
+	 * Updates the persistent attributes of the instance with the latest data from the Datastore.
+	 * If this entity is marked as {@link Cacheable} the cache will be ignored for reading, but it will be populated with
+	 * the new value before exiting.
+	 * @param instance the persistent instance to be refreshed.
+	 */
+	void refresh(Object instance);
+
 }

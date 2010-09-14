@@ -66,24 +66,33 @@ public class ClassMetadata {
 				return null;
 			}
 			T result = (T) persistentClass.newInstance();
-			for (Entry<String, Object> property : entity.getProperties().entrySet()) {
-				PropertyMetadata metadata = properties.get(property.getKey());
-				if (metadata != null) {
-					Object value = metadata.getConverter().datastoreToJava(property.getValue());
-					metadata.setValue(result, value);
-				} else {
-					if (log.isDebugEnabled()) {
-						log.debug("Unmapped attribute found in DataStore entry. Ignoring: " + entity.getKind() + "." + property.getKey());
-					} 
-				}
-			}
-			keyProperty.setValue(result, entity.getKey());
+			populate(entity, result);
 			return result;
 		} catch (InstantiationException e) {
 			throw new RuntimeException(e);
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * Copy all properties from the datastore entity into the persistent class instance passed as an attribute.
+	 * @param from the entity read from the datastore
+	 * @param to the java object to populate. Cannot be null.
+	 */
+	public void populate(Entity from, Object to) {
+		for (Entry<String, Object> property : from.getProperties().entrySet()) {
+			PropertyMetadata metadata = properties.get(property.getKey());
+			if (metadata != null) {
+				Object value = metadata.getConverter().datastoreToJava(property.getValue());
+				metadata.setValue(to, value);
+			} else {
+				if (log.isDebugEnabled()) {
+					log.debug("Unmapped attribute found in DataStore entry. Ignoring: " + from.getKind() + "." + property.getKey());
+				} 
+			}
+		}
+		keyProperty.setValue(to, from.getKey());
 	}
 	
 	/**

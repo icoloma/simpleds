@@ -87,6 +87,11 @@ public class EntityManagerImpl implements EntityManager {
 		return createPagedQueryImpl(ancestor, repository.get(clazz));
 	}
 	
+	@Override
+	public Key allocateId(Class<?> clazz) {
+		return datastoreService.allocateIds(clazz.getSimpleName(), 1).getStart();
+	}
+	
 	private PagedQuery createPagedQueryImpl(Key ancestor, ClassMetadata metadata) {
 		if (enforceSchemaConstraints && ancestor != null) { 
 			metadata.validateParentKey(ancestor);
@@ -283,6 +288,21 @@ public class EntityManagerImpl implements EntityManager {
 				cacheManager.put(javaObject, entity, metadata);
 			}
 			return javaObject;
+		} catch (EntityNotFoundException e) {
+			throw new org.simpleds.exception.EntityNotFoundException(e);
+		}
+	}
+	
+	@Override
+	public void refresh(Object instance) {
+		try {
+			ClassMetadata metadata = repository.get(instance.getClass());
+			PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
+			Entity entity = datastoreService.get(keyProperty.getValue(instance));
+			metadata.populate(entity, instance);
+			if (metadata.isCacheable()) {
+				cacheManager.put(instance, entity, metadata);
+			}
 		} catch (EntityNotFoundException e) {
 			throw new org.simpleds.exception.EntityNotFoundException(e);
 		}
