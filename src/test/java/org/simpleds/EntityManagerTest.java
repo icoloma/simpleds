@@ -68,6 +68,11 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	}
 	
 	@Test
+	public void testMultipleGetFail() {
+		entityManager.get(ImmutableList.of(KeyFactory2.createKey(Dummy1.class, 1)));
+	}
+	
+	@Test
 	@SuppressWarnings("cast")
 	public void testMultiplePutWithKeysSuccess() {
 		// root entities

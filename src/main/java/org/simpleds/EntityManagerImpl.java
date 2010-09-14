@@ -339,9 +339,11 @@ public class EntityManagerImpl implements EntityManager {
 				T javaObject = cachedValues.get(key);
 				if (javaObject == null) {
 					Entity entity = noncachedEntitiesMap.get(key);
-					javaObject = (T) metadata.datastoreToJava(entity);
-					noncachedValues.add(javaObject);
-					noncachedEntities.add(entity);
+					if (entity != null) {
+						javaObject = (T) metadata.datastoreToJava(entity);
+						noncachedValues.add(javaObject);
+						noncachedEntities.add(entity);
+					}
 				}
 				result.add(javaObject);
 			}

@@ -16,6 +16,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.AbstractEntityManagerTest;
+import org.simpleds.KeyFactory2;
 import org.simpleds.PagedList;
 import org.simpleds.PagedQuery;
 import org.simpleds.SimpleQuery;
@@ -145,6 +146,12 @@ public class CacheTest extends AbstractEntityManagerTest {
 		entityManager.get(dummy.getKey());
 		entityManager.get(ImmutableList.of(dummy.getKey(), dummy.getKey()));
 		assertEquals(0, memcache.getStatistics().getItemCount());
+	}
+	
+	@Test
+	public void testMultipleGetFailure() {
+		List<CacheableEntity> result = entityManager.get(ImmutableList.of(KeyFactory2.createKey(CacheableEntity.class, 1234)));
+		assertNull(result.get(0));
 	}
 	
 	@Test
