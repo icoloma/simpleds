@@ -149,9 +149,14 @@ public class CacheTest extends AbstractEntityManagerTest {
 	}
 	
 	@Test
-	public void testMultipleGetFailure() {
+	public void testMultipleGetDoesNotExist() {
 		List<CacheableEntity> result = entityManager.get(ImmutableList.of(KeyFactory2.createKey(CacheableEntity.class, 1234)));
 		assertNull(result.get(0));
+	}
+	
+	@Test(expected=EntityNotFoundException.class)
+	public void testSingleGetDoesNotExist() {
+		CacheableEntity result = entityManager.get(KeyFactory2.createKey(CacheableEntity.class, 1234));
 	}
 	
 	@Test
