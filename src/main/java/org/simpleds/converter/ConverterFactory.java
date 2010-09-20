@@ -79,12 +79,7 @@ public class ConverterFactory {
 		if (Enum.class.isAssignableFrom(clazz)) {
 			return new EnumToStringConverter(clazz);
 		}
-		Converter converter = null;
-		if (clazz.isArray()) {
-			converter = new ArrayConverter(clazz, getConverter(clazz.getComponentType()));
-		} else {
-			converter = converters.get(clazz);
-		}
+		Converter converter = converters.get(clazz);
 		if (converter == null) {
 			throw new IllegalArgumentException("Cannot find configured converter for " + clazz.getName());
 		}
