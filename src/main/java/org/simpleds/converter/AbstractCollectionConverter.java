@@ -17,6 +17,12 @@ public abstract class AbstractCollectionConverter<C extends Collection> implemen
 	/** the expected type of the collection items */
 	private Class<?> itemType;
 	
+	private Class<C> collectionType; 
+	
+	protected AbstractCollectionConverter(Class<C> collectionType) {
+		this.collectionType = collectionType;
+	}
+
 	@Override
 	public C datastoreToJava(C dsValue) {
 		if (dsValue == null) { // null values are translated to empty collection
@@ -76,4 +82,15 @@ public abstract class AbstractCollectionConverter<C extends Collection> implemen
 		this.itemType = itemType;
 	}
 
+
+	@Override
+	public Class<C> getJavaType() {
+		return collectionType;
+	}
+
+	@Override
+	public Class<C> getDatastoreType() {
+		return collectionType;
+	}
+	
 }

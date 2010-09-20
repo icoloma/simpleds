@@ -16,4 +16,14 @@ public class ShortConverter extends AbstractConverter<Short, Long> {
 	public ShortConverter setNullValue(Short nullValue) {
 		return (ShortConverter) super.setNullValue(nullValue);
 	}
+
+	@Override
+	public Class<Short> getJavaType() {
+		return Short.class;
+	}
+
+	@Override
+	public Class<Long> getDatastoreType() {
+		return Long.class;
+	}
 }

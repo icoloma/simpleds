@@ -30,34 +30,34 @@ public class ConverterFactory {
 	private static Map<Class, Converter> converters = Maps.newHashMap();
 	
 	static {
-		addConverter(Boolean.TYPE, new NullConverter<Boolean>());
-		addConverter(Boolean.class, new NullConverter<Boolean>());
+		addConverter(Boolean.TYPE, new NullConverter<Boolean>(Boolean.class));
+		addConverter(Boolean.class, new NullConverter<Boolean>(Boolean.class));
 		addConverter(Short.TYPE, new ShortConverter().setNullValue((short)0));
 		addConverter(Short.class, new ShortConverter());
 		addConverter(Integer.TYPE, new IntegerConverter().setNullValue(0));
 		addConverter(Integer.class, new IntegerConverter());
-		addConverter(Long.TYPE, new NullConverter<Long>().setNullValue(0l));
-		addConverter(Long.class, new NullConverter<Long>());
-		addConverter(Float.TYPE, new NullConverter<Float>().setNullValue(0f));
-		addConverter(Float.class, new NullConverter<Float>());
-		addConverter(Double.TYPE, new NullConverter<Double>());
-		addConverter(Double.class, new NullConverter<Double>().setNullValue(0d));
-		addConverter(Date.class, new NullConverter<Date>());
-		addConverter(String.class, new NullConverter<Date>());
+		addConverter(Long.TYPE, new NullConverter<Long>(Long.class).setNullValue(0l));
+		addConverter(Long.class, new NullConverter<Long>(Long.class));
+		addConverter(Float.TYPE, new NullConverter<Float>(Float.class).setNullValue(0f));
+		addConverter(Float.class, new NullConverter<Float>(Float.class));
+		addConverter(Double.TYPE, new NullConverter<Double>(Double.class));
+		addConverter(Double.class, new NullConverter<Double>(Double.class).setNullValue(0d));
+		addConverter(Date.class, new NullConverter<Date>(Date.class));
+		addConverter(String.class, new NullConverter<String>(String.class));
 		addConverter(BigDecimal.class, new BigDecimalConverter());
 		
 		// native Google classes
-		addConverter(Key.class, new NullConverter<Key>());
-		addConverter(GeoPt.class, new NullConverter<GeoPt>());
-		addConverter(Link.class, new NullConverter<Link>());
-		addConverter(PostalAddress.class, new NullConverter<PostalAddress>());
-		addConverter(Email.class, new NullConverter<Email>());
-		addConverter(IMHandle.class, new NullConverter<IMHandle>());
-		addConverter(PhoneNumber.class, new NullConverter<PhoneNumber>());
-		addConverter(Rating.class, new NullConverter<Rating>());
-		addConverter(Blob.class, new NullConverter<Blob>());
-		addConverter(Text.class, new NullConverter<Text>());
-		addConverter(User.class, new NullConverter<User>());
+		addConverter(Key.class, new NullConverter<Key>(Key.class));
+		addConverter(GeoPt.class, new NullConverter<GeoPt>(GeoPt.class));
+		addConverter(Link.class, new NullConverter<Link>(Link.class));
+		addConverter(PostalAddress.class, new NullConverter<PostalAddress>(PostalAddress.class));
+		addConverter(Email.class, new NullConverter<Email>(Email.class));
+		addConverter(IMHandle.class, new NullConverter<IMHandle>(IMHandle.class));
+		addConverter(PhoneNumber.class, new NullConverter<PhoneNumber>(PhoneNumber.class));
+		addConverter(Rating.class, new NullConverter<Rating>(Rating.class));
+		addConverter(Blob.class, new NullConverter<Blob>(Blob.class));
+		addConverter(Text.class, new NullConverter<Text>(Text.class));
+		addConverter(User.class, new NullConverter<User>(User.class));
 	}
 	
 	/**
@@ -79,7 +79,12 @@ public class ConverterFactory {
 		if (Enum.class.isAssignableFrom(clazz)) {
 			return new EnumToStringConverter(clazz);
 		}
-		Converter converter = converters.get(clazz);
+		Converter converter = null;
+		if (clazz.isArray()) {
+			converter = new ArrayConverter(clazz, getConverter(clazz.getComponentType()));
+		} else {
+			converter = converters.get(clazz);
+		}
 		if (converter == null) {
 			throw new IllegalArgumentException("Cannot find configured converter for " + clazz.getName());
 		}

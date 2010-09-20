@@ -26,4 +26,14 @@ public interface Converter<J, D> {
 	 */
 	public J getNullValue();
 	
+	/**
+	 * @return the java type handled by this converter
+	 */
+	public Class<J> getJavaType();
+	
+	/**
+	 * @return the datastore type handled by this converter
+	 */
+	public Class<D> getDatastoreType();
+	
 }

@@ -14,4 +14,14 @@ public class BigDecimalConverter extends AbstractConverter<BigDecimal, String> {
 		return javaValue == null? null : javaValue.toString();
 	}
 
+	@Override
+	public Class<BigDecimal> getJavaType() {
+		return BigDecimal.class;
+	}
+
+	@Override
+	public Class<String> getDatastoreType() {
+		return String.class;
+	}
+
 }

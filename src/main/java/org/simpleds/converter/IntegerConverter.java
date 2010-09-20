@@ -17,4 +17,14 @@ public class IntegerConverter extends AbstractConverter<Integer, Long> {
 		return (IntegerConverter) super.setNullValue(nullValue);
 	}
 
+	@Override
+	public Class<Integer> getJavaType() {
+		return Integer.class;
+	}
+
+	@Override
+	public Class<Long> getDatastoreType() {
+		return Long.class;
+	}
+
 }

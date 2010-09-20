@@ -20,5 +20,15 @@ public class EnumToStringConverter<J extends Enum> extends AbstractConverter<J, 
 		return value == null? null : value.toString();
 	}
 
+	@Override
+	public Class<J> getJavaType() {
+		return enumClass;
+	}
+
+	@Override
+	public Class<String> getDatastoreType() {
+		return String.class;
+	}
+
 
 }

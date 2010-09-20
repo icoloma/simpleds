@@ -19,4 +19,14 @@ public class StringToTextConverter implements Converter<String, Text> {
 		return value == null? null : new Text(value);
 	}
 
+	@Override
+	public Class<String> getJavaType() {
+		return String.class;
+	}
+
+	@Override
+	public Class<Text> getDatastoreType() {
+		return Text.class;
+	}
+
 }
