@@ -1,6 +1,7 @@
 package org.simpleds;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -11,13 +12,14 @@ import org.simpleds.cache.NonCachedPredicate;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PropertyMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -28,6 +30,8 @@ public class EntityManagerImpl implements EntityManager {
 	private PersistenceMetadataRepository repository; 
 	
 	private CacheManager cacheManager;
+	
+	private static Logger log = LoggerFactory.getLogger(EntityManagerImpl.class);
 	
 	/** true to check the schema constraints before persisting changes to the database, default true */
 	private boolean enforceSchemaConstraints = true;
@@ -234,13 +238,27 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
+	public void deleteQuietly(Key... keys) {
+		deleteQuietly(Arrays.asList(keys));
+	}
+	
+	@Override
+	public void deleteQuietly(Iterable<Key> keys) {
+		try {
+			delete(null, keys);
+		} catch (Exception e) {
+			log.debug("Ignored: " + e.getMessage(), e);
+		}
+	}
+	
+	@Override
 	public void delete(Key... keys) {
 		delete(null, keys);
 	}
 	
 	@Override
 	public void delete(Transaction transaction, Key... keys) {
-		delete(transaction, ImmutableList.of(keys));
+		delete(transaction, Arrays.asList(keys));
 	}
 	
 	@Override
@@ -249,7 +267,6 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public void delete(Transaction transaction, Iterable<Key> keys) {
 		List<Key> cacheableKeys = Lists.newArrayListWithCapacity(keys instanceof Collection? ((Collection<Key>) keys).size() : 10);
 		for (Key key : keys) {

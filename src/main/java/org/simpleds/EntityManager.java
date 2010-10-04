@@ -337,4 +337,18 @@ public interface EntityManager {
 	 */
 	void refresh(Object instance);
 
+	/**
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * This method will not throw any exception from the datastore.
+	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
+	 */
+	void deleteQuietly(Iterable<Key> keys);
+
+	/**
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * This method will not throw any exception from the datastore.
+	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
+	 */
+	void deleteQuietly(Key[] keys);
+
 }
