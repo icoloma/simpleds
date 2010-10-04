@@ -349,6 +349,6 @@ public interface EntityManager {
 	 * This method will not throw any exception from the datastore.
 	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 */
-	void deleteQuietly(Key[] keys);
+	void deleteQuietly(Key... keys);
 
 }
