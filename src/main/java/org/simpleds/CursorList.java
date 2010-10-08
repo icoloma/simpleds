@@ -18,9 +18,14 @@ import com.google.common.collect.Lists;
  */
 public class CursorList<J> {
 
+	/** the data corresponding to the current page of results */
 	private List<J> data;
 	
+	/** the cursor to resume the current query */
 	private Cursor cursor;
+	
+	/** the provided SimpleQuery object */
+	private SimpleQuery query;
 	
 	private CursorList() {
 		// empty 
@@ -32,6 +37,18 @@ public class CursorList<J> {
 	}
 	
 	/**
+	 * Load the list of related entities.
+	 * @param propertyName the name of the property to be used as Key
+	 * @return the list of retrieved entities
+	 */
+	public CursorList<J> loadRelatedEntities(String propertyName) {
+		EntityManager entityManager = EntityManagerFactory.getEntityManager();
+		Class<J> persistentClass = (Class<J>) query.getClassMetadata().getPersistentClass();
+		entityManager.get(Collections2.transform(data, new EntityToPropertyFunction(persistentClass, propertyName)));
+		return this;
+	}
+
+	/**
 	 * Create a new CursorList instance. 
 	 * @param query the query to execute
 	 * @param size the size of the CursorList data. To retrieve more data, use query.withStartCursor()
@@ -40,6 +57,7 @@ public class CursorList<J> {
 	public static <J> CursorList<J> create(SimpleQuery query, int size) {
 		query.withPrefetchSize(size);
 		CursorList<J> result = new CursorList<J>();
+		result.query = query;
 		result.data = Lists.newArrayListWithCapacity(size);
 		SimpleQueryResultIterator<J> it = query.asIterator();
 		for (int i = 0; it.hasNext() && i < size; i++) {
@@ -49,12 +67,6 @@ public class CursorList<J> {
 			result.cursor = it.getCursor();
 		}
 		return result;
-	}
-	
-	public CursorList<J> loadRelations(Class<J> clazz, String propertyName) {
-		EntityManager entityManager = EntityManagerFactory.getEntityManager();
-		entityManager.get(Collections2.transform(data, new EntityToPropertyFunction(clazz, propertyName)));
-		return this;
 	}
 
 	/**
