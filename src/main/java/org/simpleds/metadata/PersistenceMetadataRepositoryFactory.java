@@ -36,6 +36,9 @@ public class PersistenceMetadataRepositoryFactory {
 				Resource[] resources = resolver.getResources(location);
 				for (Resource resource : resources) {
 					if (resource.isReadable()) {
+						if (!resource.getFilename().endsWith(".class")) {
+							throw new IllegalArgumentException("The resource " + resource.getDescription() + " is not a valid class file");
+						}
 						MetadataReader metadataReader = readerFactory.getMetadataReader(resource);
 						AnnotationMetadata am = metadataReader.getAnnotationMetadata();
 						if (am.hasAnnotation(Entity.class.getName()) || 

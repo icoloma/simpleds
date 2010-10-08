@@ -141,26 +141,26 @@ public interface EntityManager {
 	<T> List<T> get(Transaction transaction, Iterable<Key> keys);
 	
 	/**
-	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from memcache.
 	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 */
 	void delete(Key... keys);
 	
 	/**
-	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from memcache.
 	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 * @param transaction the transaction instance to use.  May be null.
 	 */
 	void delete(Transaction transaction, Key... keys);
 	
 	/**
-	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from memcache.
 	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 */
 	void delete(Iterable<Key> keys);
 	
 	/**
-	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from memcache.
 	 * @param transaction the transaction instance to use.  May be null.
 	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 */
@@ -338,14 +338,14 @@ public interface EntityManager {
 	void refresh(Object instance);
 
 	/**
-	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from memcache.
 	 * This method will not throw any exception from the datastore.
 	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 */
 	void deleteQuietly(Iterable<Key> keys);
 
 	/**
-	 * Delete multiple instances from the Datastore. Cached keys will also be removed from the datastore.
+	 * Delete multiple instances from the Datastore. Cached keys will also be removed from memcache.
 	 * This method will not throw any exception from the datastore.
 	 * @param keys the keys to delete. Notice that they can reference different entity kinds.
 	 */
