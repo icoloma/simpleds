@@ -418,6 +418,15 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	}
 	
 	/**
+	 * Execute the query and return a CursorList
+	 * @return the CursorList according to the provided startCursor and limit values
+	 */
+	public <T> CursorList<T> asCursorList() {
+		CursorList<T> result = CursorList.create(this);
+		return result;
+	}
+	
+	/**
 	 * Execute the query and return a single result
 	 * @return the first result of the query
 	 * @throws EntityNotFoundException if the query did not return any result
