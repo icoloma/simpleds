@@ -25,15 +25,14 @@ public class CursorListTest extends AbstractEntityManagerTest {
 
 		// test first page of results
 		SimpleQuery query = entityManager.createQuery(Dummy1.class)
-			.sortAsc("name")
-			.withChunkSize(3);
-		CursorList<Dummy1> list = query.asCursorList();
+			.sortAsc("name");
+		CursorList<Dummy1> list = query.asCursorList(3);
 		assertNotNull(list.getCursor());
 		assertEquals(3, list.getData().size());
 		assertEquals("2", list.getData().get(2).getName());
 		
 		// test second page of results
-		list = query.withStartCursor(list.getCursor()).asCursorList();
+		list = query.withStartCursor(list.getCursor()).asCursorList(3);
 		assertNull(list.getCursor());
 		assertEquals(3, list.getData().size());
 		assertEquals("5", list.getData().get(2).getName());

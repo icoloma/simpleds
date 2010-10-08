@@ -18,9 +18,6 @@ import com.google.common.collect.Lists;
  */
 public class CursorList<J> {
 
-	/** the default size of CursorList, if none is specified using SimpleQuery.withLimit() */
-	private static final int DEFAULT_SIZE = 10;
-	
 	private List<J> data;
 	
 	private Cursor cursor;
@@ -40,16 +37,9 @@ public class CursorList<J> {
 	 * @param size the size of the CursorList data. To retrieve more data, use query.withStartCursor()
 	 * @return the created {@link CursorList} instance
 	 */
-	public static <J> CursorList<J> create(SimpleQuery query) {
+	public static <J> CursorList<J> create(SimpleQuery query, int size) {
+		query.withPrefetchSize(size);
 		CursorList<J> result = new CursorList<J>();
-		Integer chunkSize = query.getFetchOptions().getChunkSize();
-		int size;
-		if (chunkSize == null) {
-			size = DEFAULT_SIZE;
-			query.withChunkSize(size);
-		} else {
-			size = chunkSize;
-		}
 		result.data = Lists.newArrayListWithCapacity(size);
 		SimpleQueryResultIterator<J> it = query.asIterator();
 		for (int i = 0; it.hasNext() && i < size; i++) {

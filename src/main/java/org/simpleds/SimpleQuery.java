@@ -421,8 +421,8 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * Execute the query and return a CursorList
 	 * @return the CursorList according to the provided startCursor and limit values
 	 */
-	public <T> CursorList<T> asCursorList() {
-		CursorList<T> result = CursorList.create(this);
+	public <T> CursorList<T> asCursorList(int size) {
+		CursorList<T> result = CursorList.create(this, size);
 		return result;
 	}
 	
