@@ -6,29 +6,19 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
-import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.common.collect.Lists;
 
-public class PagedQueryTest extends AbstractDatastoreTest {
+public class PagedQueryTest extends AbstractEntityManagerTest {
 
-	private EntityManager entityManager;
-	
 	List<Dummy1> dummies; 
 	
 	public static int PAGE_SIZE = 3;
 	
 	@Before
 	public void setup() {
-		EntityManagerFactory factory = new EntityManagerFactory();
-		PersistenceMetadataRepositoryFactory pmrFactory = new PersistenceMetadataRepositoryFactory();
-		pmrFactory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		factory.setPersistenceMetadataRepository(pmrFactory.initialize());
-		entityManager = factory.initialize();
-		
 		// clear the database
 		List<Key> keys = entityManager.find(entityManager.createQuery(Dummy1.class).keysOnly());
 		entityManager.delete(keys);

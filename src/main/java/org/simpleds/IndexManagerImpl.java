@@ -3,10 +3,11 @@ package org.simpleds;
 import java.util.Collection;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.MultivaluedIndexMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -20,15 +21,19 @@ import com.google.common.collect.Lists;
 @SuppressWarnings("unchecked")
 public class IndexManagerImpl implements IndexManager {
 
-	@Autowired 
+	@Inject
 	private DatastoreService datastoreService;
 	
-	@Autowired 
-	private PersistenceMetadataRepository repository; 
+	@Inject
+	private PersistenceMetadataRepository persistenceMetadataRepository; 
 	
 	/** true to validate schema constraints, default true */
 	private boolean enforceSchemaConstraints = true;
 
+	public IndexManagerImpl() {
+		IndexManagerFactory.setIndexManager(this);
+	}
+	
 	@Override
 	public <T extends Collection> T get(Key entityKey, String indexName) {
 		MultivaluedIndexMetadata indexMetadata = getIndexMetadata(entityKey.getKind(), indexName);
@@ -81,12 +86,12 @@ public class IndexManagerImpl implements IndexManager {
 	}
 	
 	public MultivaluedIndexMetadata getIndexMetadata(Class clazz, String indexName) {
-		ClassMetadata metadata = repository.get(clazz);
+		ClassMetadata metadata = persistenceMetadataRepository.get(clazz);
 		return metadata.getMultivaluedIndex(indexName);
 	}
 
 	public MultivaluedIndexMetadata getIndexMetadata(String kind, String indexName) {
-		ClassMetadata metadata = repository.get(kind);
+		ClassMetadata metadata = persistenceMetadataRepository.get(kind);
 		return metadata.getMultivaluedIndex(indexName);
 	}
 	
@@ -123,8 +128,8 @@ public class IndexManagerImpl implements IndexManager {
 		this.datastoreService = datastoreService;
 	}
 
-	public void setRepository(PersistenceMetadataRepository repository) {
-		this.repository = repository;
+	public void setPersistenceMetadataRepository(PersistenceMetadataRepository repository) {
+		this.persistenceMetadataRepository = repository;
 	}
 
 	public void setEnforceSchemaConstraints(boolean validateSchemaConstraints) {

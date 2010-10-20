@@ -15,23 +15,25 @@ configurations {
 
 dependencies {
 
-	providedCompile	"com.google.appengine:appengine-local-runtime:${appengineVersion}",
+	providedCompile	":guice:2010.10.10-snapshot",
+					"com.google.appengine:appengine-local-runtime:${appengineVersion}",
 					"com.google.appengine:appengine-api-labs:${appengineVersion}",
 					"com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}",
 					"com.google.appengine:appengine-api-stubs:${appengineVersion}",
 					"com.google.appengine:appengine-testing:${appengineVersion}",
-					"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:1.1.1",
-					"org.zeroturnaround:jr-sdk:2.1.1"
-	
-	compile			"com.google.guava:guava:r05",
-					"org.slf4j:slf4j-api:1.6.1",
 					"aopalliance:aopalliance:1.0",
 					"org.apache.geronimo.specs:geronimo-jpa_3.0_spec:1.1.1",
+					"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:1.1.1",
 					"org.aspectj:aspectjrt:1.6.6",
 					"org.aspectj:aspectjweaver:1.6.6",
 					"org.springframework:spring-aop:3.0.0.RELEASE",
 					"org.springframework:spring-asm:3.0.0.RELEASE",
 					"org.springframework:spring-beans:3.0.0.RELEASE",
+					"org.zeroturnaround:jr-sdk:2.1.1"
+	
+	compile			"com.google.guava:guava:r05",
+					"org.slf4j:slf4j-api:1.6.1",
+					"javax.inject:javax.inject:1",
 					"org.springframework:spring-core:3.0.0.RELEASE"
 					
 	testCompile		"asm:asm:3.2",

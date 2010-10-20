@@ -11,25 +11,20 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.simpleds.AbstractEntityManagerTest;
 import org.simpleds.converter.IntegerConverter;
-import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
-public class ClassMetadataTest extends AbstractDatastoreTest {
+public class ClassMetadataTest extends AbstractEntityManagerTest {
 
 	private ClassMetadata metadata;
 	
-	private PersistenceMetadataRepository repository;
-	
 	@Before
-	public void setup() {
-		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
-		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		repository = factory.initialize();
+	public void setupMetadata() {
 		metadata = repository.get(Dummy1.class);
 	}
 	

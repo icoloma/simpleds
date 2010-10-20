@@ -8,13 +8,14 @@ import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
 import org.simpleds.testdb.Excluded;
 
-public class PersistenceMetadataFactoryTest {
+public class SpringPersistenceMetadataRepositoryTest {
 
 	@Test
 	public void testRetrieveClasses() throws Exception {
-		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
+		SpringPersistenceMetadataRepositoryFactory factory = new SpringPersistenceMetadataRepositoryFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		PersistenceMetadataRepository repository = factory.initialize();
+		factory.initialize();
+		PersistenceMetadataRepository repository = factory.getObject();
 		assertNotNull(repository.get(Dummy1.class));
 		assertNotNull(repository.get(Dummy2.class));
 		try {

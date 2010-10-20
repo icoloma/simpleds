@@ -3,8 +3,8 @@ package org.simpleds.tx;
 
 public interface TransactionalService {
 
-	public void saveSuccess(boolean shouldRollback);
+	public void saveSuccess();
 	
-	public void saveFailure(boolean shouldRollback);
+	public void saveFailure();
 	
 }

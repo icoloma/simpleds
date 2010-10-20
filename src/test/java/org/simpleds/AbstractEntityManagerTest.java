@@ -4,11 +4,21 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
+import org.simpleds.cache.CacheManager;
+import org.simpleds.cache.CacheManagerImpl;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
-import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
 import org.simpleds.test.AbstractDatastoreTest;
+import org.simpleds.testdb.CacheableEntity;
+import org.simpleds.testdb.Child;
+import org.simpleds.testdb.Dummy1;
+import org.simpleds.testdb.Dummy2;
+import org.simpleds.testdb.Dummy3;
+import org.simpleds.testdb.Root;
 import org.simpleds.tx.TransactionManagerImpl;
+
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 	
@@ -25,16 +35,26 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 
 	@Before
 	public void setupEntityManager() {
-		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
-		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		repository = factory.initialize();
+		repository = new PersistenceMetadataRepository();
+		repository.add(CacheableEntity.class);
+		repository.add(Child.class);
+		repository.add(Dummy1.class);
+		repository.add(Dummy2.class);
+		repository.add(Dummy3.class);
+		repository.add(Root.class);
+		
 		transactionManager = new TransactionManagerImpl();
 		transactionManager.setDatastoreService(datastoreService);
 		
-		EntityManagerFactory emFactory = new EntityManagerFactory();
-		emFactory.setPersistenceMetadataRepository(repository);
-		emFactory.setDatastoreService(datastoreService);
-		entityManager = (EntityManagerImpl) emFactory.initialize();
+		CacheManagerImpl cmi = new CacheManagerImpl();
+		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService(CacheManager.MEMCACHE_NAMESPACE);
+		cmi.setMemcache(memcache);
+
+		entityManager = new EntityManagerImpl();
+		entityManager.setCacheManager(cmi);
+		entityManager.setPersistenceMetadataRepository(repository);
+		entityManager.setDatastoreService(datastoreService);
+		EntityManagerFactory.setEntityManager(entityManager);
 	}
 	
 	/**

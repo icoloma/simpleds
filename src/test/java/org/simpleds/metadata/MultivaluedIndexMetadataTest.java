@@ -2,7 +2,6 @@ package org.simpleds.metadata;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.IndexManagerFactory;
 import org.simpleds.IndexManagerImpl;
 import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
@@ -15,14 +14,13 @@ public class MultivaluedIndexMetadataTest extends AbstractDatastoreTest {
 	
 	@Before
 	public void setup() {
-		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
+		SpringPersistenceMetadataRepositoryFactory factory = new SpringPersistenceMetadataRepositoryFactory();
 		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		repository = factory.initialize();
-		IndexManagerFactory indexManagerFactory = new IndexManagerFactory();
-		indexManagerFactory.setDatastoreService(datastoreService);
-		indexManagerFactory.setPersistenceMetadataRepository(factory.initialize());
-		indexManagerFactory.initialize();
-		IndexManagerImpl indexManager = (IndexManagerImpl) indexManagerFactory.getIndexManager();
+		factory.initialize();
+		repository = factory.getObject();
+		IndexManagerImpl indexManager = new IndexManagerImpl();
+		indexManager.setDatastoreService(datastoreService);
+		indexManager.setPersistenceMetadataRepository(repository);
 		metadata = indexManager.getIndexMetadata(Dummy1.class, "friends");
 	}
 	

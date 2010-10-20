@@ -27,7 +27,7 @@
 	
 	<bean class="org.simpleds.tx.TransactionInterceptor" />
 	
-	<context:component-scan base-package="org.simpleds.tx" />
+	<bean class="org.simpleds.tx.TransactionalServiceImpl" />
 	
 	<aop:aspectj-autoproxy />
     

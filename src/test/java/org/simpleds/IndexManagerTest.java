@@ -9,39 +9,25 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.metadata.PersistenceMetadataRepository;
-import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
-import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
 import org.simpleds.testdb.Dummy3;
 
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.collect.Sets;
 
-public class IndexManagerTest extends AbstractDatastoreTest {
+public class IndexManagerTest extends AbstractEntityManagerTest {
 
-	private PersistenceMetadataRepository repository;
-	
 	private IndexManagerImpl indexManager;
-	private EntityManagerImpl entityManager;
 
 	private Dummy1 dummy;
 	private Dummy1 friend1;
 	
 	@Before
 	public void setup() {
-		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
-		factory.setLocations(new String[] { "classpath*:org/simpleds/testdb/**" });
-		repository = factory.initialize();
 		indexManager = new IndexManagerImpl();
-		indexManager.setRepository(repository);
-		indexManager.setDatastoreService(DatastoreServiceFactory.getDatastoreService());
-		
-		entityManager = new EntityManagerImpl();
-		entityManager.setRepository(repository);
-		entityManager.setDatastoreService(DatastoreServiceFactory.getDatastoreService());
+		indexManager.setPersistenceMetadataRepository(repository);
+		indexManager.setDatastoreService(datastoreService);
 		
 		dummy = createDummy();
 		entityManager.put(dummy);

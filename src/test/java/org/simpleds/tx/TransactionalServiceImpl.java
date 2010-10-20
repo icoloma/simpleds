@@ -1,26 +1,25 @@
 package org.simpleds.tx;
 
+import javax.inject.Inject;
+
 import org.simpleds.EntityManager;
 import org.simpleds.annotations.Transactional;
 import org.simpleds.testdb.Dummy1;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-@Service
 public class TransactionalServiceImpl implements TransactionalService {
 
-	@Autowired
+	@Inject
 	private EntityManager entityManager;
 	
 	@Override
 	@Transactional
-	public void saveSuccess(boolean shouldRollback) {
+	public void saveSuccess() {
 		saveWithTwoTx();
 	}
 
 	@Override
 	@Transactional
-	public void saveFailure(boolean shouldRollback) {
+	public void saveFailure() {
 		saveWithTwoTx();
 		throw new SecurityException();
 	}

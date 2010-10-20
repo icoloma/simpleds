@@ -1,5 +1,8 @@
 package org.simpleds.metadata;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.simpleds.annotations.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +16,12 @@ import org.zeroturnaround.javarebel.ReloaderFactory;
  * To register, invoke ClassMetadataReloader.register() once on application deployment.
  * @author icoloma
  */
+@Singleton
 public class ClassMetadataReloader implements ClassEventListener {
 
+	@Inject
+	private PersistenceMetadataRepository persistenceMetadataRepository;
+	
 	private static Logger log = LoggerFactory.getLogger(ClassMetadataReloader.class);
 	
 	private ClassMetadataReloader() {}
@@ -24,7 +31,7 @@ public class ClassMetadataReloader implements ClassEventListener {
 	public void onClassEvent(int eventType, Class klass) {
 		if (klass.getAnnotation(Entity.class) != null || klass.getAnnotation(javax.persistence.Entity.class) != null) {
 			log.info("Reloading SimpleDS metadata for " + klass.getName());
-			PersistenceMetadataRepositoryFactory.getPersistenceMetadataRepository().add(klass);
+			persistenceMetadataRepository.add(klass);
 		}
 	}
 

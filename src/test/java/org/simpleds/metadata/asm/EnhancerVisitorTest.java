@@ -12,7 +12,6 @@ import org.objectweb.asm.util.ASMifierClassVisitor;
 import org.objectweb.asm.util.TraceClassVisitor;
 import org.simpleds.EntityManagerFactory;
 import org.simpleds.metadata.PersistenceMetadataRepository;
-import org.simpleds.metadata.PersistenceMetadataRepositoryFactory;
 import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
@@ -25,14 +24,14 @@ public class EnhancerVisitorTest extends AbstractDatastoreTest {
 	
 	@Before
 	public void setupEntityManager() {
-		PersistenceMetadataRepositoryFactory factory = new PersistenceMetadataRepositoryFactory();
-		factory.setLocations(new String[0]);
-		PersistenceMetadataRepository repository = factory.initialize();
+		PersistenceMetadataRepository repository = new PersistenceMetadataRepository();
 		repository.add(Dummy1.class);
-		EntityManagerFactory emFactory = new EntityManagerFactory();
+		/*
+		EntityManagerImpl entiytyManager = new EntityManagerFactory();
 		emFactory.setPersistenceMetadataRepository(repository);
 		emFactory.setDatastoreService(datastoreService);
 		emFactory.initialize();
+		*/
 	}
 	
 	//@Test

@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.simpleds.cache.CacheManager;
 import org.simpleds.cache.NonCachedPredicate;
 import org.simpleds.metadata.ClassMetadata;
@@ -23,18 +26,26 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+@Singleton
 public class EntityManagerImpl implements EntityManager {
 
+	@Inject
 	private DatastoreService datastoreService;
 	
-	private PersistenceMetadataRepository repository; 
+	@Inject
+	private PersistenceMetadataRepository persistenceMetadataRepository; 
 	
+	@Inject
 	private CacheManager cacheManager;
 	
 	private static Logger log = LoggerFactory.getLogger(EntityManagerImpl.class);
 	
 	/** true to check the schema constraints before persisting changes to the database, default true */
 	private boolean enforceSchemaConstraints = true;
+	
+	public EntityManagerImpl() {
+		EntityManagerFactory.setEntityManager(this);
+	}
 	
 	@Override
 	public Transaction beginTransaction() {
@@ -43,52 +54,52 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public ClassMetadata getClassMetadata(Class<?> clazz) {
-		return repository.get(clazz);
+		return persistenceMetadataRepository.get(clazz);
 	}
 	
 	@Override
 	public ClassMetadata getClassMetadata(String kind) {
-		return repository.get(kind);
+		return persistenceMetadataRepository.get(kind);
 	}
 	
 	@Override
 	public SimpleQuery createQuery(String kind) {
-		return createQueryImpl(null, repository.get(kind));
+		return createQueryImpl(null, persistenceMetadataRepository.get(kind));
 	}
 	
 	@Override
 	public SimpleQuery createQuery(Class<?> clazz) {
-		return createQueryImpl(null, repository.get(clazz));
+		return createQueryImpl(null, persistenceMetadataRepository.get(clazz));
 	}
 	
 	@Override
 	public SimpleQuery createQuery(Key ancestor, String kind) {
-		return createQueryImpl(ancestor, repository.get(kind));
+		return createQueryImpl(ancestor, persistenceMetadataRepository.get(kind));
 	}
 	
 	@Override
 	public SimpleQuery createQuery(Key ancestor, Class<?> clazz) {
-		return createQueryImpl(ancestor, repository.get(clazz));
+		return createQueryImpl(ancestor, persistenceMetadataRepository.get(clazz));
 	}
 	
 	@Override
 	public PagedQuery createPagedQuery(String kind) {
-		return createPagedQueryImpl(null, repository.get(kind));
+		return createPagedQueryImpl(null, persistenceMetadataRepository.get(kind));
 	}
 	
 	@Override
 	public PagedQuery createPagedQuery(Class<?> clazz) {
-		return createPagedQueryImpl(null, repository.get(clazz));
+		return createPagedQueryImpl(null, persistenceMetadataRepository.get(clazz));
 	}
 	
 	@Override
 	public PagedQuery createPagedQuery(Key ancestor, String kind) {
-		return createPagedQueryImpl(ancestor, repository.get(kind));
+		return createPagedQueryImpl(ancestor, persistenceMetadataRepository.get(kind));
 	}
 	
 	@Override
 	public PagedQuery createPagedQuery(Key ancestor, Class<?> clazz) {
-		return createPagedQueryImpl(ancestor, repository.get(clazz));
+		return createPagedQueryImpl(ancestor, persistenceMetadataRepository.get(clazz));
 	}
 	
 	@Override
@@ -127,7 +138,7 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public Key put(Transaction transaction, Key parentKey, Object javaObject) {
-		ClassMetadata metadata = repository.get(javaObject.getClass());
+		ClassMetadata metadata = persistenceMetadataRepository.get(javaObject.getClass());
 		
 		// generate primary key if missing
 		PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
@@ -186,7 +197,7 @@ public class EntityManagerImpl implements EntityManager {
 		
 		// allocate and set missing primary keys (in bulk)
 		List<T> transientInstances = Lists.newArrayListWithCapacity(javaObjects.size());
-		ClassMetadata metadata = repository.get(javaObjects.iterator().next().getClass());
+		ClassMetadata metadata = persistenceMetadataRepository.get(javaObjects.iterator().next().getClass());
 		PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
 		for (T javaObject : javaObjects) {
 			Key key = keyProperty.getValue(javaObject);
@@ -270,7 +281,7 @@ public class EntityManagerImpl implements EntityManager {
 	public void delete(Transaction transaction, Iterable<Key> keys) {
 		List<Key> cacheableKeys = Lists.newArrayListWithCapacity(keys instanceof Collection? ((Collection<Key>) keys).size() : 10);
 		for (Key key : keys) {
-			ClassMetadata metadata = repository.get(key.getKind());
+			ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
 			if (metadata.isCacheable()) {
 				cacheableKeys.add(key);
 			}
@@ -291,7 +302,7 @@ public class EntityManagerImpl implements EntityManager {
 	@SuppressWarnings("unchecked")
 	public <T> T get(Transaction transaction, Key key) {
 		try {
-			ClassMetadata metadata = repository.get(key.getKind());
+			ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
 			T javaObject;
 			if (metadata.isCacheable() && transaction == null) { // ignore cache if a transaction is active
 				javaObject = (T) cacheManager.get(key, metadata);
@@ -313,7 +324,7 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	public void refresh(Object instance) {
 		try {
-			ClassMetadata metadata = repository.get(instance.getClass());
+			ClassMetadata metadata = persistenceMetadataRepository.get(instance.getClass());
 			PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
 			Entity entity = datastoreService.get(keyProperty.getValue(instance));
 			metadata.populate(entity, instance);
@@ -338,7 +349,7 @@ public class EntityManagerImpl implements EntityManager {
 			return (List<T>) Lists.newArrayList();
 		}
 		
-		ClassMetadata metadata = repository.get(itKey.next().getKind());
+		ClassMetadata metadata = persistenceMetadataRepository.get(itKey.next().getKind());
 		List<T> result;
 		if (metadata.isCacheable() && transaction == null) { 
 			
@@ -385,13 +396,13 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T datastoreToJava(Entity entity) {
-		ClassMetadata metadata = repository.get(entity.getKind());
+		ClassMetadata metadata = persistenceMetadataRepository.get(entity.getKind());
 		return (T)metadata.datastoreToJava(entity);
 	}
 	
 	@Override
 	public Entity javaToDatastore(Object javaObject) {
-		ClassMetadata metadata = repository.get(javaObject.getClass());
+		ClassMetadata metadata = persistenceMetadataRepository.get(javaObject.getClass());
 		return metadata.javaToDatastore(null, javaObject);
 	}
 	
@@ -400,8 +411,8 @@ public class EntityManagerImpl implements EntityManager {
 		this.datastoreService = service;
 	}
 	
-	public void setRepository(PersistenceMetadataRepository repository) {
-		this.repository = repository;
+	public void setPersistenceMetadataRepository(PersistenceMetadataRepository repository) {
+		this.persistenceMetadataRepository = repository;
 	}
 	
 	public void setEnforceSchemaConstraints(boolean enforceSchemaConstraints) {

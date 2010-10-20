@@ -8,13 +8,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.simpleds.EntityManager;
 import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -24,10 +25,10 @@ import com.google.appengine.api.datastore.Key;
 @ContextConfiguration(locations = { "classpath:org/simpleds/tx/tx-test.xml" })
 public class TransactionInterceptorTest extends AbstractDatastoreTest {
 
-	@Autowired
+	@Inject
 	private TransactionalService transactionalService;
 	
-	@Autowired
+	@Inject
 	private EntityManager entityManager;
 	
 	@After
@@ -49,7 +50,7 @@ public class TransactionInterceptorTest extends AbstractDatastoreTest {
 	private void assertCommit(String methodName) throws Exception {
 		try {
 			clean();
-			getMethod(methodName).invoke(transactionalService, false);
+			getMethod(methodName).invoke(transactionalService);
 		} catch (InvocationTargetException e) {
 			// expected noRollback exception
 			Throwable exc = e.getTargetException();
@@ -58,28 +59,28 @@ public class TransactionInterceptorTest extends AbstractDatastoreTest {
 				fail(exc.toString());
 			}
 		}
-		assertEquals(2, entityManager.count(entityManager.createQuery(Dummy1.class)));
+		assertEquals(2, entityManager.createQuery(Dummy1.class).count());
 	}
 	
 	private void assertRollback(String methodName) throws Exception {
 		try {
 			clean();
-			getMethod(methodName).invoke(transactionalService, true);
+			getMethod(methodName).invoke(transactionalService);
 			fail("No exception was thrown from method");
 		} catch (InvocationTargetException e) {
 			// expected rollback exception
 			assertTrue(e.getTargetException() instanceof SecurityException);
 		}
-		assertEquals(0, entityManager.count(entityManager.createQuery(Dummy1.class)));
+		assertEquals(0, entityManager.createQuery(Dummy1.class).count());
 	}
 
 	public void clean() {
-		List<Key> keys = entityManager.find(entityManager.createQuery(Dummy1.class).keysOnly());
+		List<Key> keys = entityManager.createQuery(Dummy1.class).keysOnly().asList();
 		entityManager.delete(keys);
 	}
 
 	private Method getMethod(String methodName) throws Exception {
-		return transactionalService.getClass().getDeclaredMethod(methodName, new Class[] { Boolean.TYPE });
+		return transactionalService.getClass().getDeclaredMethod(methodName);
 	}
 
 }
