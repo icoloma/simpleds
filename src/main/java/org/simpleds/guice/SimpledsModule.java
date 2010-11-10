@@ -9,6 +9,7 @@ import org.simpleds.IndexManagerImpl;
 import org.simpleds.annotations.Transactional;
 import org.simpleds.cache.CacheManager;
 import org.simpleds.cache.CacheManagerImpl;
+import org.simpleds.metadata.ClassMetadataReloader;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.tx.TransactionManager;
 import org.simpleds.tx.TransactionManagerImpl;
@@ -53,6 +54,14 @@ public class SimpledsModule extends AbstractModule {
 	 */
 	public SimpledsModule withTransactionsFor(Matcher<? super Class<?>> matcher) {
 		this.transactionClassMatcher = matcher;
+		return this;
+	}
+	
+	/**
+	 * Register listeners to enable class reloading using JRebel
+	 */
+	public SimpledsModule withJRebel() {
+		bind(ClassMetadataReloader.class).asEagerSingleton();
 		return this;
 	}
 

@@ -13,7 +13,7 @@ import org.zeroturnaround.javarebel.ReloaderFactory;
 /**
  * Reloads the persistence metadata when a class change is triggered by JRebel.
  * This class will load/reload any class annotated as {@link Entity}.
- * To register, invoke ClassMetadataReloader.register() once on application deployment.
+ * To register, bind ClassMetadataReloader as an eager singleton.
  * @author icoloma
  */
 @Singleton
@@ -23,8 +23,6 @@ public class ClassMetadataReloader implements ClassEventListener {
 	private PersistenceMetadataRepository persistenceMetadataRepository;
 	
 	private static Logger log = LoggerFactory.getLogger(ClassMetadataReloader.class);
-	
-	private ClassMetadataReloader() {}
 	
 	@Override
 	@SuppressWarnings("unchecked")
@@ -40,9 +38,10 @@ public class ClassMetadataReloader implements ClassEventListener {
 		return PRIORITY_DEFAULT;
 	}
 
-	public static final void register() {
+	public void setPersistenceMetadataRepository(PersistenceMetadataRepository persistenceMetadataRepository) {
+		this.persistenceMetadataRepository = persistenceMetadataRepository;
 		Reloader reloaderFactory = ReloaderFactory.getInstance();
-		reloaderFactory.addClassReloadListener(new ClassMetadataReloader());
+		reloaderFactory.addClassReloadListener(this);
 		log.info("Class reloading for SimpleDS is enabled");
 	}
 	
