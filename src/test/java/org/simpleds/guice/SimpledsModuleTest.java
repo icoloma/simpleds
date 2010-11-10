@@ -29,7 +29,9 @@ public class SimpledsModuleTest {
 		Injector injector = Guice.createInjector(
 			new SimpledsModule()
 				.withPersistentClasses(Dummy1.class, CacheableEntity.class)
-				.withTransactionsFor(Matchers.subclassesOf(TransactionalServiceImpl.class)),
+				.withTransactionsFor(Matchers.subclassesOf(TransactionalServiceImpl.class))
+				.withJRebel()
+			,
 			new TestModule()
 		);
 		

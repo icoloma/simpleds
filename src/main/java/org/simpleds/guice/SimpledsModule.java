@@ -32,6 +32,9 @@ public class SimpledsModule extends AbstractModule {
 	/** the class matcher to apply transactional interceptor */
 	private Matcher<? super Class<?>> transactionClassMatcher;
 	
+	/** enable JRebel reloading */
+	private boolean jrebel;
+	
 	@Override
 	protected void configure() {
 		initDatastoreService();
@@ -40,6 +43,7 @@ public class SimpledsModule extends AbstractModule {
 		initTransactionManager();
 		initEntityManager();
 		initIndexManager();
+		initJRebel();
 	}
 
 	public SimpledsModule withPersistentClasses(Class<?>... persistentClasses) {
@@ -61,7 +65,7 @@ public class SimpledsModule extends AbstractModule {
 	 * Register listeners to enable class reloading using JRebel
 	 */
 	public SimpledsModule withJRebel() {
-		bind(ClassMetadataReloader.class).asEagerSingleton();
+		jrebel = true;
 		return this;
 	}
 
@@ -99,6 +103,12 @@ public class SimpledsModule extends AbstractModule {
 
 	protected void initIndexManager() {
 		bind(IndexManager.class).to(IndexManagerImpl.class);
+	}
+
+	protected void initJRebel() {
+		if (jrebel) {
+			bind(ClassMetadataReloader.class).asEagerSingleton();
+		}
 	}
 
 }
