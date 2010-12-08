@@ -384,8 +384,9 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> asList() {
-		String cacheKey = calculateDataCacheKey();
+		String cacheKey = null;
 		if (isCacheable() && transaction == null) {
+			cacheKey = calculateDataCacheKey();
 			List<Key> keys = getCacheManager().get(cacheKey);
 			if (keys != null) {
 				return isKeysOnly()? (List) keys : entityManager.get(keys);
