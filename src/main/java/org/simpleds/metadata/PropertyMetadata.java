@@ -4,6 +4,8 @@ import java.lang.annotation.Annotation;
 
 import org.simpleds.converter.Converter;
 
+import com.google.appengine.api.datastore.Entity;
+
 /**
  * A handler for a simple or nested persistent property
  * @author icoloma
@@ -52,5 +54,11 @@ public interface PropertyMetadata<J, D> {
 	 * Convert a SimpleQuery parameter into something that the datastore can handle
 	 */
 	public Object convertQueryParam(Object value);
+
+	/**
+	 * Converts and sets the provided java value into the entity
+	 */
+	public void setEntityValue(Entity entity, J javaValue);
+
 
 }

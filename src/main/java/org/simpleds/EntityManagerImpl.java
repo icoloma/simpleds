@@ -15,6 +15,7 @@ import org.simpleds.cache.NonCachedPredicate;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PropertyMetadata;
+import org.simpleds.metadata.VersionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,6 +140,9 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	public Key put(Transaction transaction, Key parentKey, Object javaObject) {
 		ClassMetadata metadata = persistenceMetadataRepository.get(javaObject.getClass());
+		VersionManager versionManager = metadata.getVersionManager();
+		PropertyMetadata versionProperty = versionManager == null? null : versionManager.getPropertyMetadata();
+		Object newVersionValue = null;
 		
 		// generate primary key if missing
 		PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
@@ -159,10 +163,33 @@ public class EntityManagerImpl implements EntityManager {
 			metadata.validateConstraints(entity);
 		}
 		
-		// persist and set the returned primary key value
+		// retrieve and check the @Version attribute, if any
+		if (versionManager != null) {
+			if (providedKey != null) {
+				try {
+					Entity currentEntity = datastoreService.get(transaction, providedKey);
+					newVersionValue = versionManager.validateVersion(currentEntity, javaObject);
+				} catch (EntityNotFoundException e) {
+					// safely ignore this, the entity does not yet exist
+				}
+			}
+			if (newVersionValue == null) {
+				newVersionValue = versionManager.getStartValue();
+			}
+			versionProperty.setEntityValue(entity, newVersionValue);
+		}
+		
+		// persist 
 		Key newKey = datastoreService.put(transaction, entity);
+		
+		// set the returned primary key value
 		if (providedKey == null) {
 			keyProperty.setValue(javaObject, newKey);
+		}
+		
+		// set the new version value
+		if (versionManager != null) {
+			versionProperty.setValue(javaObject, newVersionValue);
 		}
 		
 		// cache the stored value

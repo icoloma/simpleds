@@ -3,6 +3,7 @@ package org.simpleds;
 import static java.lang.System.out;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -10,8 +11,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+import org.simpleds.LongVersionManagerTest.VersionedClass;
 import org.simpleds.exception.RequiredFieldException;
 import org.simpleds.functions.EntityToKeyFunction;
+import org.simpleds.functions.HeterogeneousEntityToKeyFunction;
+import org.simpleds.testdb.CacheableEntity;
 import org.simpleds.testdb.Child;
 import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
@@ -65,6 +69,33 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		retrieved = entityManager.get(Collections2.transform(dummies, new EntityToKeyFunction<Dummy1>(Dummy1.class)));
 		assertEquals(dummies.get(0).getKey(), retrieved.get(0).getKey());
 		assertEquals(dummies.get(1).getKey(), retrieved.get(1).getKey());
+	}
+	
+	@Test
+	public void testHeterogeneousGetAndPut() {
+		Dummy1 dummy1 = Dummy1.create();
+		Dummy2 dummy2 = new Dummy2();
+		Dummy3 dummy3 = new Dummy3();
+		CacheableEntity cacheableEntity = CacheableEntity.create();
+		VersionedClass vc = new VersionedClass();
+		
+		List l = ImmutableList.of(dummy2, dummy3, dummy1, cacheableEntity, vc);
+		entityManager.put(l);
+		
+		List retrieved = entityManager.get(Collections2.transform(l, new HeterogeneousEntityToKeyFunction()));
+		Dummy2 retrievedDummy2 = (Dummy2) retrieved.get(0);
+		Dummy3 retrievedDummy3 = (Dummy3) retrieved.get(1);
+		Dummy1 retrievedDummy1 = (Dummy1) retrieved.get(2);
+		CacheableEntity retrievedCacheableEntity = (CacheableEntity) retrieved.get(3);
+		VersionedClass retrievedVersionedClass = (VersionedClass) retrieved.get(4);
+		
+		assertEquals(dummy2.getKey(), retrievedDummy2.getKey());
+		assertEquals(dummy3.getKey(), retrievedDummy3.getKey());
+		assertEquals(dummy1.getKey(), retrievedDummy1.getKey());
+		assertSame(cacheableEntity, retrievedCacheableEntity);
+		assertEquals(vc.getKey(), retrievedVersionedClass.getKey());
+		
+		
 	}
 	
 	@Test

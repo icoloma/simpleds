@@ -12,6 +12,7 @@ import javax.persistence.Id;
 
 import org.simpleds.annotations.Property;
 import org.simpleds.annotations.Transient;
+import org.simpleds.exception.ConfigException;
 import org.simpleds.exception.RequiredFieldException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,9 @@ public class ClassMetadata {
 	
 	/** the number of seconds that this class can be cached in memcache */
 	private Integer cacheSeconds;
+	
+	/** manages a ny Version attribute. May be null */
+	private VersionManager versionManager;
 	
 	private static Logger log = LoggerFactory.getLogger(ClassMetadata.class);
 	
@@ -112,20 +116,15 @@ public class ClassMetadata {
 	 * @param javaObject the Java property value
 	 * @param parentKey the parent {@link Key} (may be null)
 	 */
-	@SuppressWarnings("unchecked")
 	public Entity javaToDatastore(Key parentKey, Object javaObject) {
 		String kind = javaObject.getClass().getSimpleName();
 		Key key = keyProperty.getValue(javaObject);
 		Entity entity = key == null? new Entity(kind, parentKey) : new Entity(key); 
-		for (Entry<String, PropertyMetadata<?, ?>> property : properties.entrySet()) {
-			String name = property.getKey();
-			PropertyMetadata metadata = property.getValue();
-			Object value = metadata.getConverter().javaToDatastore(metadata.getValue(javaObject));
-			if (metadata.isIndexed()) {
-				entity.setProperty(name, value);
-			} else {
-				entity.setUnindexedProperty(name, value);
-			}
+		for (Entry<String, PropertyMetadata<?, ?>> entry : properties.entrySet()) {
+			PropertyMetadata property = entry.getValue();
+			String name = entry.getKey();
+			Object javaValue = property.getValue(javaObject);
+			property.setEntityValue(entity, javaValue);
 		}
 		return entity;
 	}
@@ -287,6 +286,17 @@ public class ClassMetadata {
 
 	public boolean useLevel2Cache() {
 		return cacheSeconds > 0;
+	}
+
+	public void setVersionManager(VersionManager versionManager) {
+		if (this.versionManager != null) {
+			throw new ConfigException("@Version specified twice for " + persistentClass.getName());
+		}
+		this.versionManager = versionManager;
+	}
+
+	public VersionManager getVersionManager() {
+		return versionManager;
 	}
 
 }

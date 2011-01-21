@@ -13,7 +13,7 @@ import org.springframework.util.ClassUtils;
  * A single property
  * @author icoloma
  */
-public class SinglePropertyMetadata<J, D> implements PropertyMetadata<J, D> {
+public class SinglePropertyMetadata<J, D> extends AbstractPropertyMetadata<J, D> {
 
 	/** property name */
 	private String name;

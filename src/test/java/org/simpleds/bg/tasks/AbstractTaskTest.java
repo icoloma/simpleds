@@ -9,8 +9,8 @@ import org.junit.Before;
 import org.simpleds.AbstractEntityManagerTest;
 import org.simpleds.bg.TaskRequest;
 
-import com.google.appengine.api.labs.taskqueue.dev.QueueStateInfo;
-import com.google.appengine.api.labs.taskqueue.dev.QueueStateInfo.TaskStateInfo;
+import com.google.appengine.api.taskqueue.dev.QueueStateInfo;
+import com.google.appengine.api.taskqueue.dev.QueueStateInfo.TaskStateInfo;
 
 public abstract class AbstractTaskTest extends AbstractEntityManagerTest {
 

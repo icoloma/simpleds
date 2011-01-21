@@ -16,7 +16,7 @@ configurations {
 dependencies {
 
 	providedCompile	":guice:2010.10.10-snapshot",
-					"com.google.appengine:appengine-local-runtime:${appengineVersion}",
+					//"com.google.appengine:appengine-local-runtime:${appengineVersion}",
 					"com.google.appengine:appengine-api-labs:${appengineVersion}",
 					"com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}",
 					"com.google.appengine:appengine-api-stubs:${appengineVersion}",

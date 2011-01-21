@@ -5,6 +5,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.simpleds.annotations.Cacheable;
 import org.simpleds.annotations.Id;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
+import org.simpleds.annotations.Version;
 import org.simpleds.converter.Converter;
 import org.simpleds.converter.ConverterFactory;
 import org.simpleds.exception.ConfigException;
@@ -131,6 +133,19 @@ public class ClassMetadataFactory {
 			if (propertyMetadata.getConverter() == null) { // calculate default converter
 				Converter<J, D> converter = ConverterFactory.getConverter(propertyMetadata);
 				propertyMetadata.setConverter(converter);
+			}
+			if (propertyMetadata.getAnnotation(Version.class) != null) {
+				AbstractVersionManager versionManager = null;
+				Class<J> propertyType = propertyMetadata.getPropertyType();
+				if (propertyType == Long.class || propertyType == Long.TYPE) {
+					versionManager = new LongVersionManager();
+				} else if (propertyType == Date.class) {
+					versionManager = new DateVersionManager();
+				} else {
+					throw new IllegalArgumentException("@Version attribute " + classMetadata.getPersistentClass().getSimpleName() + "." + propertyMetadata.getName() + " is of unrecognized type " + propertyType.getName() + "; valid values are Long, long or Date");
+				}
+				versionManager.setPropertyMetadata(propertyMetadata);
+				classMetadata.setVersionManager(versionManager);
 			}
 			classMetadata.add(propertyMetadata);
 		}

@@ -16,7 +16,7 @@ import com.google.common.collect.Lists;
  * @author icoloma
  */
 @SuppressWarnings("unchecked")
-public class EmbeddedPropertyMetadata<J, D> implements PropertyMetadata<J, D> {
+public class EmbeddedPropertyMetadata<J, D> extends AbstractPropertyMetadata<J, D> {
 
 	private List<SinglePropertyMetadata> nodes = Lists.newArrayList();
 	
