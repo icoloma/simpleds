@@ -2,6 +2,7 @@ package org.simpleds;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.SortPredicate;
@@ -59,7 +60,15 @@ public class PagedList<T> implements Cloneable {
 	 */
 	@SuppressWarnings("unchecked")
 	public <O> PagedList<O> transformToEntities() {
-		List<O> entities = EntityManagerFactory.getEntityManager().get((List<Key>)data);
+		final Map<Key, O> valuesMap = EntityManagerFactory.getEntityManager().get((List<Key>)data);
+		List<O> entities = Lists.transform((List<Key>)data, new Function<Key, O>() {
+
+			@Override
+			public O apply(Key key) {
+				return valuesMap.get(key);
+			}
+			
+		});
 		PagedList<O> copy = new PagedList<O>(query, entities);
 		copy.setTotalResults(totalResults);
 		return copy;

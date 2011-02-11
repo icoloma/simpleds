@@ -11,6 +11,7 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -150,8 +151,8 @@ public class CacheTest extends AbstractEntityManagerTest {
 	
 	@Test
 	public void testMultipleGetDoesNotExist() {
-		List<CacheableEntity> result = entityManager.get(ImmutableList.of(KeyFactory2.createKey(CacheableEntity.class, 1234)));
-		assertNull(result.get(0));
+		Map<Key, CacheableEntity> result = entityManager.get(ImmutableList.of(KeyFactory2.createKey(CacheableEntity.class, 1234)));
+		assertTrue(result.isEmpty());
 	}
 	
 	@Test(expected=EntityNotFoundException.class)
@@ -355,22 +356,22 @@ public class CacheTest extends AbstractEntityManagerTest {
 		assertNotInCache(noncachedEntity);
 		
 		// retrieve data
-		List<CacheableEntity> readData = entityManager.get(ImmutableList.of(cachedEntity.getKey(), noncachedEntity.getKey()));
+		Map<Key, CacheableEntity> readData = entityManager.get(ImmutableList.of(cachedEntity.getKey(), noncachedEntity.getKey()));
 		assertEquals(2, readData.size());
 		assertInCache(cachedEntity);
 		assertInCache(noncachedEntity);
-		assertNotSame(noncachedEntity, readData.get(1));
+		assertNotSame(noncachedEntity, noncachedEntity.getKey());
 		if (Level1Cache.getCacheInstance() != null) {
-			assertSame(cachedEntity, readData.get(0));
+			assertSame(cachedEntity, readData.get(cachedEntity.getKey()));
 		} else {
-			assertNotSame(cachedEntity, readData.get(0));
+			assertNotSame(cachedEntity, readData.get(cachedEntity.getKey()));
 		}
 		
 		// repeat read if Level1 is set
 		if (Level1Cache.getCacheInstance() != null) { // there is a level 1 cache, check level1 vs level2
-			List<CacheableEntity> readData2 = entityManager.get(ImmutableList.of(cachedEntity.getKey(), noncachedEntity.getKey()));
-			assertSame(readData.get(0), readData2.get(0));
-			assertSame(readData.get(1), readData2.get(1));
+			Map<Key, CacheableEntity> readData2 = entityManager.get(ImmutableList.of(cachedEntity.getKey(), noncachedEntity.getKey()));
+			assertSame(readData.get(noncachedEntity.getKey()), readData2.get(noncachedEntity.getKey()));
+			assertSame(readData.get(cachedEntity.getKey()), readData2.get(cachedEntity.getKey()));
 		} 
 	}
 	

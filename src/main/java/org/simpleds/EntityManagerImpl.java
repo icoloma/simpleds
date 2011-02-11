@@ -1,6 +1,5 @@
 package org.simpleds;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -12,6 +11,7 @@ import javax.inject.Singleton;
 
 import org.simpleds.cache.CacheManager;
 import org.simpleds.cache.NonCachedPredicate;
+import org.simpleds.functions.EntityToKeyFunction;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PropertyMetadata;
@@ -24,8 +24,14 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 @Singleton
 public class EntityManagerImpl implements EntityManager {
@@ -144,7 +150,7 @@ public class EntityManagerImpl implements EntityManager {
 		PropertyMetadata versionProperty = versionManager == null? null : versionManager.getPropertyMetadata();
 		Object newVersionValue = null;
 		
-		// generate primary key if missing
+		// check if the key is missing
 		PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
 		Key providedKey = keyProperty.getValue(javaObject);
 		if (providedKey == null && !metadata.isGenerateKeyValue()) {
@@ -167,6 +173,9 @@ public class EntityManagerImpl implements EntityManager {
 		if (versionManager != null) {
 			if (providedKey != null) {
 				try {
+					if (transaction == null) {
+						log.warn("Storing versioned instance " + providedKey + " without a transaction. Be aware that optimistic locking may not be accurate unless you provide with a transaction");
+					}
 					Entity currentEntity = datastoreService.get(transaction, providedKey);
 					newVersionValue = versionManager.validateVersion(currentEntity, javaObject);
 				} catch (EntityNotFoundException e) {
@@ -200,57 +209,97 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	public <T> void put(Collection<T> javaObjects) {
+	public void put(Collection<?> javaObjects) {
 		put(null, null, javaObjects);
 	}
 	
 	@Override
-	public <T> void put(Transaction transaction, Collection<T> javaObjects) {
+	public void put(Transaction transaction, Collection<?> javaObjects) {
 		put(transaction, null, javaObjects);
 	}
 	
 	@Override
-	public <T> void put(Key parentKey, Collection<T> javaObjects) {
+	public void put(Key parentKey, Collection<?> javaObjects) {
 		put(null, parentKey, javaObjects);
 	}
 	
 	@Override
-	public <T> void put(Transaction transaction, Key parentKey, Collection<T> javaObjects) {
+	public void put(Transaction transaction, Key parentKey, Collection<?> javaObjects) {
 		
-		Iterator<T> it = javaObjects.iterator();
+		Iterator<?> it = javaObjects.iterator();
 		if (!it.hasNext()) {
 			return;
 		}
 		
-		// allocate and set missing primary keys (in bulk)
-		List<T> transientInstances = Lists.newArrayListWithCapacity(javaObjects.size());
-		ClassMetadata metadata = persistenceMetadataRepository.get(javaObjects.iterator().next().getClass());
-		PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
-		for (T javaObject : javaObjects) {
+		// separate instances by ClassMetadata
+		ListMultimap<ClassMetadata, Object> transientInstances = ArrayListMultimap.create(16, javaObjects.size());
+		ListMultimap<ClassMetadata, Object> versionedInstances = ArrayListMultimap.create();
+		for (Object javaObject : javaObjects) {
+			Class<? extends Object> clazz = javaObject.getClass();
+			ClassMetadata metadata = persistenceMetadataRepository.get(clazz);
+			PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
 			Key key = keyProperty.getValue(javaObject);
 			if (key == null) {
 				if (!metadata.isGenerateKeyValue()) {
 					throw new IllegalArgumentException("No key value provided for " + javaObject + ", but key generation is not enabled for " + metadata.getKind() + " (missing @GeneratedValue?)");
 				}
-				transientInstances.add(javaObject);
+				transientInstances.put(metadata, javaObject);
+			}
+			VersionManager versionManager = metadata.getVersionManager();
+			if (versionManager != null) {
+				versionedInstances.put(metadata, javaObject);
 			}
 		}
 
-		if (!transientInstances.isEmpty()) {
+		// retrieve current @Version values
+		Map<Key, Object> newVersionValues = Maps.newHashMap();
+		for (ClassMetadata metadata : versionedInstances.keySet()) {
+			VersionManager versionManager = metadata.getVersionManager();
+			Collection<Object> javaObjects = versionedInstances.get(metadata);
+			for (Object javaObject : javaObjects) {
+				PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
+				Key key = keyProperty.getValue(javaObject);
+				if (key != null) {
+					try {
+						Map<Key, Entity> currentEntities = datastoreService.get(transaction, Collections2.transform(javaObjects, new EntityToKeyFunction(metadata.getClass())));
+						for (Map.Entry<Key, Entity> versionedEntityEntry : currentEntities.entrySet()) {
+							Object newVersionValue = versionManager.validateVersion(versionedEntityEntry.getValue(), javaObject);
+							newVersionValues.put(versionedEntityEntry.getKey(), newVersionValue);
+						}
+					} catch (EntityNotFoundException e) {
+						// safely ignore this, the entity does not yet exist
+					}
+				}
+				if (newVersionValue == null) {
+					newVersionValue = versionManager.getStartValue();
+				}
+				versionProperty.setEntityValue(entity, newVersionValue);
+			}
+			if (transaction == null && !newVersionValues.isEmpty()) {
+				log.warn("Storing ", newVersionValues.size(), " instances of versioned ", metadata.getKind(), " without a transaction. Be aware that optimistic locking may not be accurate unless you provide with a transaction");
+			}
+		}
+		
+		// assign generated keys
+		for (ClassMetadata metadata : transientInstances.keySet()) {
+			PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
 			if (enforceSchemaConstraints) {
 				metadata.validateParentKey(parentKey);
 			}
-			Iterator<Key> allocatedKeys = datastoreService.allocateIds(parentKey, metadata.getKind(), transientInstances.size()).iterator();
-			for (T javaObject : transientInstances) {
+			List<Object> instances = transientInstances.get(metadata);
+			Iterator<Key> allocatedKeys = datastoreService.allocateIds( parentKey, metadata.getKind(), instances.size()).iterator();
+			for (Object javaObject : instances) {
 				keyProperty.setValue(javaObject, allocatedKeys.next());
 			}
 		}
 		
-		// transform to entity instances and persist
-		List<T> cacheableInstances = Lists.newArrayListWithCapacity(javaObjects.size());
-		List<Entity> cacheableEntities = Lists.newArrayListWithCapacity(javaObjects.size());
-		List<Entity> entities = new ArrayList<Entity>(javaObjects.size());
-		for (T javaObject : javaObjects) {
+		// transform to entity instances 
+		ListMultimap<ClassMetadata, Object> cacheableInstances = ArrayListMultimap.create(16, javaObjects.size());
+		ListMultimap<ClassMetadata, Entity> cacheableEntities = ArrayListMultimap.create(16, javaObjects.size());
+		List<Entity> entities = Lists.newArrayListWithCapacity(javaObjects.size());
+		for (Object javaObject : javaObjects) {
+			Class<? extends Object> clazz = javaObject.getClass();
+			ClassMetadata metadata = persistenceMetadataRepository.get(clazz);
 			Entity entity = metadata.javaToDatastore(parentKey, javaObject);
 			
 			// check required fields
@@ -260,8 +309,8 @@ public class EntityManagerImpl implements EntityManager {
 			
 			entities.add(entity);
 			if (metadata.isCacheable()) {
-				cacheableInstances.add(javaObject);
-				cacheableEntities.add(entity);
+				cacheableInstances.put(metadata, javaObject);
+				cacheableEntities.put(metadata, entity);
 			}
 		}
 		
@@ -270,9 +319,7 @@ public class EntityManagerImpl implements EntityManager {
 		datastoreService.put(transaction, entities);
 		
 		// store in cache
-		if (!cacheableInstances.isEmpty()) {
-			cacheManager.put(cacheableInstances, cacheableEntities, metadata);
-		}
+		cacheManager.put(cacheableInstances, cacheableEntities);
 	}
 	
 	@Override
@@ -364,60 +411,50 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	public <T> List<T> get(Iterable<Key> keys) {
+	public <T> Map<Key, T> get(Iterable<Key> keys) {
 		return get(null, keys);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> List<T> get(Transaction transaction, Iterable<Key> keys) {
-		Iterator<Key> itKey = keys.iterator();
-		if (!itKey.hasNext()) {
-			return (List<T>) Lists.newArrayList();
+	public <T> Map<Key, T> get(Transaction transaction, Iterable<Key> unsortedKeys) {
+		Multimap<ClassMetadata, Key> sortedKeys = ArrayListMultimap.create();
+		for (Key key : unsortedKeys) {
+			ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
+			sortedKeys.put(metadata, key);
 		}
 		
-		ClassMetadata metadata = persistenceMetadataRepository.get(itKey.next().getKind());
-		List<T> result;
-		if (metadata.isCacheable() && transaction == null) { 
-			
-			// retrieve cached and non-cached data
-			Collection keysCollection = keys instanceof Collection? (Collection) keys : Lists.newArrayList(keys);
-			Map<Key, T> cachedValues = cacheManager.get(keysCollection, metadata);
-			Iterable<Key> noncachedKeys = Iterables.filter(keys, new NonCachedPredicate(cachedValues.keySet()));
-			Map<Key, Entity> noncachedEntitiesMap = datastoreService.get(transaction, noncachedKeys);
-			List<T> noncachedValues = Lists.newArrayListWithCapacity(noncachedEntitiesMap.size());
-			List<Entity> noncachedEntities = Lists.newArrayListWithCapacity(noncachedEntitiesMap.size());
-			
-			// merge both
-			result = Lists.newArrayListWithCapacity(keysCollection.size());
-			for (Key key : keys) {
-				T javaObject = cachedValues.get(key);
-				if (javaObject == null) {
-					Entity entity = noncachedEntitiesMap.get(key);
-					if (entity != null) {
-						javaObject = (T) metadata.datastoreToJava(entity);
-						noncachedValues.add(javaObject);
-						noncachedEntities.add(entity);
-					}
+		// retrieve values from cache only if tx != null
+		Map<Key, Object> cachedValues = transaction != null? (Map)ImmutableMap.of() : cacheManager.get(sortedKeys);
+		
+		// retrieve values from database
+		Iterable<Key> cacheMissKeys = Iterables.filter(unsortedKeys, new NonCachedPredicate(cachedValues.keySet()));
+		Map<Key, Entity> cacheMissEntities = datastoreService.get(transaction, cacheMissKeys);
+		
+		// transform into java objects
+		ListMultimap<ClassMetadata, Object> populateCacheValues = ArrayListMultimap.create();
+		ListMultimap<ClassMetadata, Entity> populateCacheEntities = ArrayListMultimap.create();
+		
+		Map<Key, Object> result = Maps.newHashMapWithExpectedSize(cachedValues.size() + cacheMissEntities.size());
+		result.putAll(cachedValues);
+		for (Entity entity : cacheMissEntities.values()) {
+			if (entity != null) {
+				Key key = entity.getKey();
+				ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
+				Object javaObject = metadata.datastoreToJava(entity);
+				result.put(key, javaObject);
+				if (metadata.isCacheable()) {
+					populateCacheValues.put(metadata, javaObject);
+					populateCacheEntities.put(metadata, entity);
 				}
-				result.add(javaObject);
 			}
-			if (!noncachedValues.isEmpty()) {
-				cacheManager.put(noncachedValues, noncachedEntities, metadata);
-			}
-			
-		} else { // not cacheable
-			
-			Map<Key, Entity> entities = datastoreService.get(transaction, keys);
-			result = Lists.newArrayListWithCapacity(keys instanceof Collection? ((Collection) keys).size() : 10);
-			for (Key key : keys) {
-				Entity entity = entities.get(key);
-				T javaObject = (T) metadata.datastoreToJava(entity);
-				result.add(javaObject);
-			}
-			
 		}
-		return result;
+		
+		if (!populateCacheValues.isEmpty()) {
+			cacheManager.put(populateCacheValues, populateCacheEntities);
+		}
+				
+		return (Map) result;
 	}
 
 	@Override

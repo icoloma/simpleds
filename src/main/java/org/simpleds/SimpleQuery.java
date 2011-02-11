@@ -2,6 +2,7 @@ package org.simpleds;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.simpleds.cache.CacheManager;
 import org.simpleds.exception.EntityNotFoundException;
@@ -25,6 +26,7 @@ import com.google.appengine.api.datastore.Query.SortPredicate;
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.ReadPolicy;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -385,14 +387,30 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	@SuppressWarnings("unchecked")
 	public <T> List<T> asList() {
 		String cacheKey = null;
+		
+		// is the result of the query cached?
 		if (isCacheable() && transaction == null) {
 			cacheKey = calculateDataCacheKey();
 			List<Key> keys = getCacheManager().get(cacheKey);
 			if (keys != null) {
-				return isKeysOnly()? (List) keys : entityManager.get(keys);
+				if (isKeysOnly()) {
+					return (List) keys;
+				} else {
+					final Map<Key, T> values = entityManager.get(keys);
+					return Lists.transform(keys, new Function<Key, T>() {
+
+						@Override
+						public T apply(Key key) {
+							// TODO Auto-generated method stub
+							return values.get(key);
+						}
+						
+					});
+				}
 			}
 		}
 		
+		// execute the query
 		List<T> result = Lists.newArrayList();
 		SimpleQueryResultIterable<T> iterable = asIterable();
 		for (T item : iterable) {

@@ -11,15 +11,18 @@ import com.google.appengine.api.datastore.Key;
 public class EntityToKeyFunction<T> extends AbstractPropertyFunction<T, Key> {
 	
 	/**
+	 * Iterate over a consistent collection where all items share the same class.
 	 * @param clazz the entity class type
 	 */
 	public EntityToKeyFunction(Class<T> clazz) {
-		super(clazz, null);
+		super(null);
 	}
 	
-	@Override
-	public Key apply(T instance) {
-		return propertyMetadata.getValue(instance);
+	/**
+	 * Iterate a mixed collection where items can be of different types
+	 */
+	public EntityToKeyFunction() {
+		super(null);
 	}
 	
 }

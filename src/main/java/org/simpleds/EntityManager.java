@@ -2,6 +2,7 @@ package org.simpleds;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.simpleds.annotations.Cacheable;
 import org.simpleds.cache.CacheManager;
@@ -72,7 +73,7 @@ public interface EntityManager {
 	 * 
 	 * @param javaObjects the Collection of java objects to store
 	 */
-	<T> void put(Collection<T> javaObjects);
+	void put(Collection<?> javaObjects);
 	
 	/**
 	 * Store a collection of persistent objects into the datastore.
@@ -81,7 +82,7 @@ public interface EntityManager {
 	 * @param javaObjects the Collection of java objects to store
 	 * @param transaction the transaction instance to use.  May be null.
 	 */
-	<T> void put(Transaction transaction, Collection<T> javaObjects);
+	void put(Transaction transaction, Collection<?> javaObjects);
 
 	/**
 	 * Store a collection of persistent objects into the datastore.
@@ -91,7 +92,7 @@ public interface EntityManager {
 	 * of the generated entity Keys
 	 * @param javaObjects the Collection of java objects to store
 	 */
-	<T> void put(Key parentKey, Collection<T> javaObjects);
+	void put(Key parentKey, Collection<?> javaObjects);
 	
 	/**
 	 * Store a collection of persistent objects into the datastore.
@@ -102,7 +103,7 @@ public interface EntityManager {
 	 * @param transaction the transaction instance to use.  May be null.
 	 * @param javaObjects the Collection of java objects to store
 	 */
-	<T> void put(Transaction transaction, Key parentKey, Collection<T> javaObjects);
+	void put(Transaction transaction, Key parentKey, Collection<?> javaObjects);
 
 	/**
 	 * Return a persistent java instance by key
@@ -123,22 +124,22 @@ public interface EntityManager {
 	<T> T get(Transaction transaction, Key key);
 
 	/**
-	 * Return a set of persistent entities, by key
+	 * Return a collection of persistent entities, by key
 	 * @param keys the keys of the persistent entities to retrieve
-	 * @return a Map of the retrieved entities, by Key
+	 * @return a Map of retrieved entities. If any entity was not fund, its value would be null.
 	 * @throws EntityNotFoundException if any entity could not be found
 	 */
-	<T> List<T> get(Iterable<Key> keys);
+	<T> Map<Key, T> get(Iterable<Key> keys);
 	
 	/**
 	 * Return a collection of persistent entities. If transaction is not null any {@link Cacheable}
 	 * settings will be ignored. 
 	 * @param keys the keys of the persistent entities to retrieve
 	 * @param transaction the transaction instance to use.  May be null.
-	 * @return a Map of the retrieved entities, by Key
+	 * @return a Map of retrieved entities. If any entity was not fund, its value would be null.
 	 * @throws EntityNotFoundException if any entity could not be found
 	 */
-	<T> List<T> get(Transaction transaction, Iterable<Key> keys);
+	<T> Map<Key, T> get(Transaction transaction, Iterable<Key> keys);
 	
 	/**
 	 * Delete multiple instances from the Datastore. Cached keys will also be removed from memcache.

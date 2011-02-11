@@ -285,7 +285,7 @@ public class ClassMetadata {
 	}
 
 	public boolean useLevel2Cache() {
-		return cacheSeconds > 0;
+		return cacheSeconds != null && cacheSeconds > 0;
 	}
 
 	public void setVersionManager(VersionManager versionManager) {

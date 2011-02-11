@@ -1,6 +1,7 @@
 package org.simpleds.functions;
 
 
+
 /**
  * Converts a persistent instance into a property value
  * 
@@ -12,16 +13,21 @@ package org.simpleds.functions;
 public class EntityToPropertyFunction<T, P> extends AbstractPropertyFunction<T, P> {
 	
 	/**
+	 * Iterate over a consistent collection where all items share the same class.
 	 * @param clazz the entity class type
 	 * @param propertyName the property name
 	 */
 	public EntityToPropertyFunction(Class<T> clazz, String propertyName) {
-		super(clazz, propertyName);
+		super(propertyName);
+		consistent();
 	}
 	
-	@Override
-	public P apply(T instance) {
-		return propertyMetadata.getValue(instance);
+	/**
+	 * Iterate over a mixed collection where items can be of different types
+	 * @param propertyName the property name
+	 */
+	public EntityToPropertyFunction(String propertyName) {
+		super(propertyName);
 	}
 	
 }

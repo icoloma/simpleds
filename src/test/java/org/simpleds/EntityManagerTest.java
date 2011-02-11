@@ -3,29 +3,31 @@ package org.simpleds;
 import static java.lang.System.out;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
-import org.simpleds.LongVersionManagerTest.VersionedClass;
 import org.simpleds.exception.RequiredFieldException;
 import org.simpleds.functions.EntityToKeyFunction;
-import org.simpleds.functions.HeterogeneousEntityToKeyFunction;
 import org.simpleds.testdb.CacheableEntity;
 import org.simpleds.testdb.Child;
 import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
 import org.simpleds.testdb.Dummy3;
 import org.simpleds.testdb.Root;
+import org.simpleds.testdb.VersionedClass;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public class EntityManagerTest extends AbstractEntityManagerTest {
 
@@ -53,49 +55,64 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	}
 	
 	@Test
-	public void testMultipleGet() {
-		Dummy1 dummy1 = Dummy1.create();
-		Dummy1 dummy2 = Dummy1.create();
-		ImmutableList<Dummy1> dummies = ImmutableList.of(dummy1, dummy2);
-		entityManager.put(dummies);
-		
-		// same order
-		List<Dummy1> retrieved = entityManager.get(Collections2.transform(dummies, new EntityToKeyFunction<Dummy1>(Dummy1.class)));
-		assertEquals(dummies.get(0).getKey(), retrieved.get(0).getKey());
-		assertEquals(dummies.get(1).getKey(), retrieved.get(1).getKey());
-		
-		// reverse order
-		dummies = ImmutableList.of(dummy2, dummy1);
-		retrieved = entityManager.get(Collections2.transform(dummies, new EntityToKeyFunction<Dummy1>(Dummy1.class)));
-		assertEquals(dummies.get(0).getKey(), retrieved.get(0).getKey());
-		assertEquals(dummies.get(1).getKey(), retrieved.get(1).getKey());
+	public void testEmptyGet() {
+		assertEquals(ImmutableMap.of(), entityManager.get(Collections.EMPTY_LIST));
 	}
 	
 	@Test
-	public void testHeterogeneousGetAndPut() {
+	public void testEmptyPut() {
+		entityManager.put(Collections.EMPTY_LIST);
+	}
+	
+	@Test
+	public void testMultipleGet() {
 		Dummy1 dummy1 = Dummy1.create();
-		Dummy2 dummy2 = new Dummy2();
+		dummy1.setName("dummy1");
+		Dummy1 dummy2 = Dummy1.create();
+		dummy2.setName("dummy2");
+		ImmutableList<Dummy1> dummies = ImmutableList.of(dummy1, dummy2);
+		entityManager.put(dummies);
+		
+		Map<Key, Dummy1> retrieved = entityManager.get(Collections2.transform(dummies, new EntityToKeyFunction<Dummy1>(Dummy1.class)));
+		assertEquals("dummy1", retrieved.get(dummy1.getKey()).getName());
+		assertEquals("dummy2", retrieved.get(dummy2.getKey()).getName());
+	}
+	
+	@Test
+	public void testMixedGetAndPut() {
+		Dummy1 dummy1 = Dummy1.create();
 		Dummy3 dummy3 = new Dummy3();
+		dummy3.setKey(KeyFactory2.createKey(Dummy3.class, 1));
 		CacheableEntity cacheableEntity = CacheableEntity.create();
 		VersionedClass vc = new VersionedClass();
 		
-		List l = ImmutableList.of(dummy2, dummy3, dummy1, cacheableEntity, vc);
+		List l = ImmutableList.of(dummy3, dummy1, cacheableEntity, vc);
 		entityManager.put(l);
 		
-		List retrieved = entityManager.get(Collections2.transform(l, new HeterogeneousEntityToKeyFunction()));
-		Dummy2 retrievedDummy2 = (Dummy2) retrieved.get(0);
-		Dummy3 retrievedDummy3 = (Dummy3) retrieved.get(1);
-		Dummy1 retrievedDummy1 = (Dummy1) retrieved.get(2);
-		CacheableEntity retrievedCacheableEntity = (CacheableEntity) retrieved.get(3);
-		VersionedClass retrievedVersionedClass = (VersionedClass) retrieved.get(4);
+		// modify the datastore value to check it is using the cached version
+		cacheableEntity.setName("xxx");
+		datastoreService.put(entityManager.javaToDatastore(cacheableEntity));
 		
-		assertEquals(dummy2.getKey(), retrievedDummy2.getKey());
+		Collection keys = Collections2.transform(l, new EntityToKeyFunction());
+		Map<Key, ?> retrieved = entityManager.get(keys);
+		Dummy3 retrievedDummy3 = (Dummy3) retrieved.get(dummy3.getKey());
+		Dummy1 retrievedDummy1 = (Dummy1) retrieved.get(dummy1.getKey());
+		CacheableEntity retrievedCacheableEntity = (CacheableEntity) retrieved.get(cacheableEntity.getKey());
+		VersionedClass retrievedVersionedClass = (VersionedClass) retrieved.get(vc.getKey());
+		
 		assertEquals(dummy3.getKey(), retrievedDummy3.getKey());
 		assertEquals(dummy1.getKey(), retrievedDummy1.getKey());
-		assertSame(cacheableEntity, retrievedCacheableEntity);
+		assertEquals(dummy1.getName(), retrievedDummy1.getName());
+		assertEquals(dummy1.getBigString(), retrievedDummy1.getBigString());
+		assertEquals("foo", retrievedCacheableEntity.getName());
 		assertEquals(vc.getKey(), retrievedVersionedClass.getKey());
+		Long version = vc.getVersion();
+		assertEquals(version, retrievedVersionedClass.getVersion());
 		
-		
+		entityManager.put(l);
+		retrieved = entityManager.get(keys);
+		retrievedVersionedClass = (VersionedClass) retrieved.get(vc.getKey());
+		assertEquals(version + 1L, retrievedVersionedClass.getVersion().longValue());
 	}
 	
 	@Test
@@ -138,18 +155,36 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		assertNotNull(children.get(0).getKey());
 	}
 	
-	@Test(expected=IllegalArgumentException.class)
-	public void testSinglePutMissingRequiredKey() {
-		// dummy3 has not especified @GeneratedValue
-		Dummy3 dummy3 = createDummy3();
-		entityManager.put(dummy3);
+	@Test
+	public void testPutParentFail() throws Exception {
+		// root entity with a parent
+		putShouldFail(Dummy1.createDummyKey(), new Root());
+		
+		// child entity with wrong parent
+		putShouldFail(Dummy1.createDummyKey(), new Child());
+		
+		// child entity without parent
+		putShouldFail(null, new Child());
+	}
+		
+	@Test
+	public void testGetParentFail() throws Exception {
+		// same for searches
+		findShouldFail(Dummy1.createDummyKey(), Root.class);
+		findShouldFail(Dummy1.createDummyKey(), Child.class);
 	}
 	
-	@Test(expected=RequiredFieldException.class)
-	public void testSinglePutMissingRequiredField() {
+	@Test
+	public void testPutMissingRequiredKey() {
+		// dummy3 has not especified @GeneratedValue
+		Dummy3 dummy3 = createDummy3();
+		putShouldFail(null, dummy3);
+	}
+	
+	@Test
+	public void testPutMissingRequiredFields() {
 		Dummy1 dummy = new Dummy1();
-		entityManager.put(dummy);
-		fail("Persisted entity with missing required fields");
+		putShouldFail(null, dummy);
 	}
 	
 	@Test
@@ -193,22 +228,6 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	}
 	
 	@Test
-	public void testValidateParentFail() throws Exception {
-		// root entity with a parent
-		putShouldFail(Dummy1.createDummyKey(), new Root());
-		
-		// child entity with wrong parent
-		putShouldFail(Dummy1.createDummyKey(), new Child());
-		
-		// child entity without parent
-		putShouldFail(null, new Child());
-		
-		// same for searches
-		findShouldFail(Dummy1.createDummyKey(), Root.class);
-		findShouldFail(Dummy1.createDummyKey(), Child.class);
-	}
-	
-	@Test
 	public void testRefresh() {
 		Dummy1 dummy = Dummy1.create();
 		entityManager.put(dummy);
@@ -225,12 +244,16 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		try {
 			entityManager.put(parentKey, instance);
 			fail("Put operation should fail");
+		} catch (RequiredFieldException e) {
+			out.println(e);
 		} catch (IllegalArgumentException e) {
 			out.println(e);
 		}
 		try {
 			entityManager.put(parentKey, Arrays.asList(instance));
 			fail("Put operation should fail");
+		} catch (RequiredFieldException e) {
+			out.println(e);
 		} catch (IllegalArgumentException e) {
 			out.println(e);
 		}

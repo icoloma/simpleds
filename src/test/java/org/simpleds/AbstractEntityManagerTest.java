@@ -15,6 +15,7 @@ import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
 import org.simpleds.testdb.Dummy3;
 import org.simpleds.testdb.Root;
+import org.simpleds.testdb.VersionedClass;
 import org.simpleds.tx.TransactionManagerImpl;
 
 import com.google.appengine.api.memcache.MemcacheService;
@@ -42,6 +43,7 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 		repository.add(Dummy2.class);
 		repository.add(Dummy3.class);
 		repository.add(Root.class);
+		repository.add(VersionedClass.class);
 		
 		transactionManager = new TransactionManagerImpl();
 		transactionManager.setDatastoreService(datastoreService);
@@ -49,6 +51,7 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 		CacheManagerImpl cmi = new CacheManagerImpl();
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService(CacheManager.MEMCACHE_NAMESPACE);
 		cmi.setMemcache(memcache);
+		cmi.setPersistenceMetadataRepository(repository);
 
 		entityManager = new EntityManagerImpl();
 		entityManager.setCacheManager(cmi);

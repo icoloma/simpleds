@@ -2,6 +2,7 @@ package org.simpleds;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.simpleds.functions.EntityToPropertyFunction;
 
@@ -92,7 +93,15 @@ public class CursorList<J> {
 	 */
 	@SuppressWarnings("unchecked")
 	public <O> CursorList<O> transformToEntities() {
-		List<O> entities = EntityManagerFactory.getEntityManager().get((List<Key>)data);
+		final Map<Key, O> valuesMap = EntityManagerFactory.getEntityManager().get((List<Key>)data);
+		List<O> entities = Lists.transform((List<Key>)data, new Function<Key, O>() {
+
+			@Override
+			public O apply(Key key) {
+				return valuesMap.get(key);
+			}
+			
+		});
 		CursorList<O> copy = new CursorList<O>(entities, this.cursor);
 		return copy;
 	}

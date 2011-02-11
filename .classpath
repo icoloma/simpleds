@@ -21,7 +21,7 @@
 	<classpathentry kind="lib" path="src/test/genlib/asm-util-3.2.jar" sourcepath="src/main/lib/asm-3.2-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/asm-tree-3.2.jar" sourcepath="src/main/lib/asm-3.2-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/jr-sdk-2.1.1.jar" sourcepath="src/test/genlib/jr-sdk-2.1.1-sources.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/guava-r05.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/guava-r05.jar" sourcepath="src/test/genlib/guava-r05-sources.jar"/>
 	<classpathentry kind="lib" path="src/main/lib/guice-2010.10.10-snapshot.jar" sourcepath="src/main/lib/guice-2010.10.10-snapshot-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/javax.inject-1.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>

@@ -2,13 +2,14 @@ package org.simpleds.cache;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.simpleds.metadata.ClassMetadata;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Manages the caching of entities using a two level cache:
@@ -28,7 +29,7 @@ import com.google.appengine.api.datastore.Key;
 public interface CacheManager {
 
 	/** memcache namespace for SimpleDS cache */
-	public static final String MEMCACHE_NAMESPACE = "_sds_cache";
+	static final String MEMCACHE_NAMESPACE = "_sds_cache";
 	
 	/**
 	 * Check the level 1 and level 2 cache for the required value.
@@ -39,7 +40,7 @@ public interface CacheManager {
 	 * @param key the key of the persistent entity to return
 	 * @return the cached value, or null if not found.
 	 */
-	public <T> T get(Key key, ClassMetadata metadata);
+	<T> T get(Key key, ClassMetadata metadata);
 	
 	/**
 	 * Put an instance in the cache
@@ -47,35 +48,34 @@ public interface CacheManager {
 	 * @param entity the datastore-equivalent Entity instance
 	 * @param metadata the {@link ClassMetadata} instance for this entity
 	 */
-	public void put(Object instance, Entity entity, ClassMetadata metadata);
+	void put(Object instance, Entity entity, ClassMetadata metadata);
 	
 	/**
 	 * Remove an entity from the cache
 	 * @param key the key to remove
 	 */
-	public void delete(Key key);
+	void delete(Key key);
 	
 	/**
 	 * Retrieve a set of entities from the cache
 	 * @param keys the keys to retrieve from the cache
 	 * @return a Map of retrieved persistent entities.
 	 */
-	public <T> Map<Key, T> get(Collection<Key> keys, ClassMetadata metadata);
-
-	/**
-	 * Put a collection of java objects in the cache
-	 * @param javaObjects the persistent objects to put into the Level 1 cache
-	 * @param entities the list of entities to put into the Level 2 cache
-	 * @param metadata the {@link ClassMetadata} instance for this entity
-	 */
-	public <T> void put(Collection<T> javaObjects, List<Entity> entities, ClassMetadata metadata);
+	Map<Key, Object> get(Multimap<ClassMetadata, Key> keys);
 	
 	/**
 	 * Return the cached query data, if available
 	 * @param key the key to retrieve
 	 * @return the cached query data, null if not cached
 	 */
-	public <T> T get(String key);
+	<T> T get(String key);
+
+	/**
+	 * Put a collection of java objects in the cache
+	 * @param javaObjects the persistent objects to put into the Level 1 cache
+	 * @param dsEntities the list of entities to put into the Level 2 cache
+	 */
+	void put(ListMultimap<ClassMetadata, Object> javaObjects, ListMultimap<ClassMetadata, Entity> dsEntities);
 	
 	/**
 	 * Store query data into the cache
