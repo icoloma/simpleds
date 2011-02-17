@@ -92,27 +92,42 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		// modify the datastore value to check it is using the cached version
 		cacheableEntity.setName("xxx");
 		datastoreService.put(entityManager.javaToDatastore(cacheableEntity));
+		assertEquals((Long) 0L, vc.getVersion());
 		
 		Collection keys = Collections2.transform(l, new EntityToKeyFunction());
 		Map<Key, ?> retrieved = entityManager.get(keys);
 		Dummy3 retrievedDummy3 = (Dummy3) retrieved.get(dummy3.getKey());
 		Dummy1 retrievedDummy1 = (Dummy1) retrieved.get(dummy1.getKey());
 		CacheableEntity retrievedCacheableEntity = (CacheableEntity) retrieved.get(cacheableEntity.getKey());
-		VersionedClass retrievedVersionedClass = (VersionedClass) retrieved.get(vc.getKey());
+		VersionedClass retrievedVC = (VersionedClass) retrieved.get(vc.getKey());
 		
 		assertEquals(dummy3.getKey(), retrievedDummy3.getKey());
 		assertEquals(dummy1.getKey(), retrievedDummy1.getKey());
 		assertEquals(dummy1.getName(), retrievedDummy1.getName());
 		assertEquals(dummy1.getBigString(), retrievedDummy1.getBigString());
 		assertEquals("foo", retrievedCacheableEntity.getName());
-		assertEquals(vc.getKey(), retrievedVersionedClass.getKey());
-		Long version = vc.getVersion();
-		assertEquals(version, retrievedVersionedClass.getVersion());
+		assertEquals(vc.getKey(), retrievedVC.getKey());
+		assertEquals((Long) 0L, retrievedVC.getVersion());
 		
 		entityManager.put(l);
 		retrieved = entityManager.get(keys);
-		retrievedVersionedClass = (VersionedClass) retrieved.get(vc.getKey());
-		assertEquals(version + 1L, retrievedVersionedClass.getVersion().longValue());
+		retrievedVC = (VersionedClass) retrieved.get(vc.getKey());
+		assertEquals((Long) 1L, retrievedVC.getVersion());
+	}
+	
+	@Test
+	public void testVersionedWithPK() {
+		VersionedClass vc = new VersionedClass();
+		vc.setKey(KeyFactory2.createKey(VersionedClass.class, 10));
+		List l = ImmutableList.of(vc);
+		entityManager.put(l);
+		assertEquals((Long) 0L, vc.getVersion());
+		
+		VersionedClass vc2 = new VersionedClass();
+		vc.setKey(KeyFactory2.createKey(VersionedClass.class, 11));
+		entityManager.put(vc2);
+		assertEquals((Long) 0L, vc2.getVersion());
+
 	}
 	
 	@Test

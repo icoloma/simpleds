@@ -155,7 +155,7 @@ public abstract class AbstractVersionManagerTest<T> extends AbstractEntityManage
 	
 	@Test
 	public void testMultiplePutTransaction() {
-		List entities = createEntities();
+		List entities = ImmutableList.of(createEntity());
 		entityManager.put(entities);
 		Object versionValue = versionProperty.getValue(entities.get(0));
 		

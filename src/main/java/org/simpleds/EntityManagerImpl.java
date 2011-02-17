@@ -5,13 +5,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.simpleds.cache.CacheManager;
 import org.simpleds.cache.NonCachedPredicate;
-import org.simpleds.functions.EntityToKeyFunction;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.metadata.PropertyMetadata;
@@ -25,13 +25,13 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 @Singleton
 public class EntityManagerImpl implements EntityManager {
@@ -231,9 +231,16 @@ public class EntityManagerImpl implements EntityManager {
 			return;
 		}
 		
-		// separate instances by ClassMetadata
-		ListMultimap<ClassMetadata, Object> transientInstances = ArrayListMultimap.create(16, javaObjects.size());
+		// instances without provided primary key
+		ListMultimap<ClassMetadata, Object> transientInstances = ArrayListMultimap.create();
+		
+		// versioned instances
 		ListMultimap<ClassMetadata, Object> versionedInstances = ArrayListMultimap.create();
+		
+		// provided (not null) keys for versioned instances
+		Set<Key> versionedProvidedKeys = Sets.newHashSet(); 
+		
+		// separate instances
 		for (Object javaObject : javaObjects) {
 			Class<? extends Object> clazz = javaObject.getClass();
 			ClassMetadata metadata = persistenceMetadataRepository.get(clazz);
@@ -248,48 +255,50 @@ public class EntityManagerImpl implements EntityManager {
 			VersionManager versionManager = metadata.getVersionManager();
 			if (versionManager != null) {
 				versionedInstances.put(metadata, javaObject);
+				if (key != null) {
+					versionedProvidedKeys.add(key);
+				}
 			}
 		}
 
-		// retrieve current @Version values
+		// retrieve current @Version values for existing entities
+		Map<Key, Entity> currentVersionedEntities = versionedInstances.isEmpty()? null : datastoreService.get(transaction, versionedProvidedKeys);
 		Map<Key, Object> newVersionValues = Maps.newHashMap();
 		for (ClassMetadata metadata : versionedInstances.keySet()) {
 			VersionManager versionManager = metadata.getVersionManager();
-			Collection<Object> javaObjects = versionedInstances.get(metadata);
-			for (Object javaObject : javaObjects) {
-				PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
+			PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
+			List<Object> vjo = versionedInstances.get(metadata);
+			for (Object javaObject : vjo) {
 				Key key = keyProperty.getValue(javaObject);
 				if (key != null) {
-					try {
-						Map<Key, Entity> currentEntities = datastoreService.get(transaction, Collections2.transform(javaObjects, new EntityToKeyFunction(metadata.getClass())));
-						for (Map.Entry<Key, Entity> versionedEntityEntry : currentEntities.entrySet()) {
-							Object newVersionValue = versionManager.validateVersion(versionedEntityEntry.getValue(), javaObject);
-							newVersionValues.put(versionedEntityEntry.getKey(), newVersionValue);
-						}
-					} catch (EntityNotFoundException e) {
-						// safely ignore this, the entity does not yet exist
-					}
+					Entity currentEntity = currentVersionedEntities.get(key);
+					Object newVersionValue = currentEntity == null? 
+							versionManager.getStartValue() : // it does not exist
+							versionManager.validateVersion(currentEntity, javaObject); // it does exist, retrieve next value
+					newVersionValues.put(key, newVersionValue);
 				}
-				if (newVersionValue == null) {
-					newVersionValue = versionManager.getStartValue();
-				}
-				versionProperty.setEntityValue(entity, newVersionValue);
 			}
-			if (transaction == null && !newVersionValues.isEmpty()) {
-				log.warn("Storing ", newVersionValues.size(), " instances of versioned ", metadata.getKind(), " without a transaction. Be aware that optimistic locking may not be accurate unless you provide with a transaction");
+			if (transaction == null && !vjo.isEmpty()) {
+				log.warn("Storing " + vjo.size() + " instances of versioned " + metadata.getKind() + " without a transaction. Be aware that optimistic locking may not be accurate unless you provide with a transaction");
 			}
 		}
 		
-		// assign generated keys
+		// assign generated keys and start version values to transient entities
 		for (ClassMetadata metadata : transientInstances.keySet()) {
 			PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
+			VersionManager versionManager = metadata.getVersionManager();
+			Object startVersion = versionManager == null? null : versionManager.getStartValue();
 			if (enforceSchemaConstraints) {
 				metadata.validateParentKey(parentKey);
 			}
 			List<Object> instances = transientInstances.get(metadata);
 			Iterator<Key> allocatedKeys = datastoreService.allocateIds( parentKey, metadata.getKind(), instances.size()).iterator();
 			for (Object javaObject : instances) {
-				keyProperty.setValue(javaObject, allocatedKeys.next());
+				Key key = allocatedKeys.next();
+				keyProperty.setValue(javaObject, key);
+				if (versionManager != null) {
+					newVersionValues.put(key, startVersion);
+				}
 			}
 		}
 		
@@ -300,7 +309,14 @@ public class EntityManagerImpl implements EntityManager {
 		for (Object javaObject : javaObjects) {
 			Class<? extends Object> clazz = javaObject.getClass();
 			ClassMetadata metadata = persistenceMetadataRepository.get(clazz);
+			VersionManager versionManager = metadata.getVersionManager();
 			Entity entity = metadata.javaToDatastore(parentKey, javaObject);
+			
+			// inject version value
+			if (versionManager != null) {
+				Object newVersionValue = newVersionValues.get(entity.getKey());
+				versionManager.getPropertyMetadata().setEntityValue(entity, newVersionValue);
+			}
 			
 			// check required fields
 			if (enforceSchemaConstraints) {
@@ -317,6 +333,17 @@ public class EntityManagerImpl implements EntityManager {
 		
 		// persist 
 		datastoreService.put(transaction, entities);
+		
+		// set new version values into java objects
+		for (ClassMetadata metadata : versionedInstances.keySet()) {
+			VersionManager versionManager = metadata.getVersionManager();
+			PropertyMetadata<Key, Key> keyProperty = metadata.getKeyProperty();
+			for (Object javaObject : versionedInstances.get(metadata)) {
+				Key key = keyProperty.getValue(javaObject);
+				Object newVersionValue = newVersionValues.get(key);
+				versionManager.getPropertyMetadata().setValue(javaObject, newVersionValue);
+			}
+		}
 		
 		// store in cache
 		cacheManager.put(cacheableInstances, cacheableEntities);
