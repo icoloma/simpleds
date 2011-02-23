@@ -1,12 +1,15 @@
 package org.simpleds;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query.SortPredicate;
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 /**
@@ -41,12 +44,35 @@ public class PagedList<T> implements Cloneable {
 	/**
 	 * Transform this PagedList instance by applying the transformation function to each data list item.
 	 * @param <O> the type of the resulting PagedList, after applying the transformation
-	 * @param function the function to apply to each data item
+	 * @param function the {@link Function} to apply to each data item
 	 * @return a new PagedList instance. The original instance is not modified.
 	 */
 	public <O> PagedList<O> transform(Function<? super T, ? extends O> function) {
+		return transform(function, null);
+	}
+	
+	/**
+	 * Transform this PagedList instance by applying the transformation function and filtering predicate 
+	 * to each data list item. 
+	 * 
+	 * @param <O> the type of the resulting PagedList, after applying the transformation
+	 * @param function the {@link Function} to apply to each data item. May be null.
+	 * @param predicate the {@link Predicate} to filter returned data. Not-matching entities will not be returned. May be null.
+	 * @return a new PagedList instance. The original instance is not modified.
+	 */
+	public <O> PagedList<O> transform(Function<? super T, ? extends O> function, Predicate<? super O> predicate) {
+		Collection<O> result = null;
+		if (function != null) {
+			result = Lists.transform(this.data, function);
+		} else {
+			result = (List) this.data;
+		}
+		if (predicate != null) {
+			result = Collections2.filter(result, predicate);
+		}
+		
 		// copy the source data, since "live" collections are incompatible with paged results.
-		ArrayList<O> dataCopy = Lists.newArrayList(Lists.transform(this.data, function));
+		ArrayList<O> dataCopy = Lists.newArrayList(result);
 		PagedList<O> copy = new PagedList<O>(query, dataCopy);
 		copy.setTotalResults(totalResults);
 		return copy;

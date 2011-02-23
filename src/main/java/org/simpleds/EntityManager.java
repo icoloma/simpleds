@@ -126,7 +126,7 @@ public interface EntityManager {
 	/**
 	 * Return a collection of persistent entities, by key
 	 * @param keys the keys of the persistent entities to retrieve
-	 * @return a Map of retrieved entities. If any entity was not fund, its value would be null.
+	 * @return a Map of retrieved entities. If any entity was not found, its value would be null.
 	 * @throws EntityNotFoundException if any entity could not be found
 	 */
 	<T> Map<Key, T> get(Iterable<Key> keys);
@@ -136,7 +136,7 @@ public interface EntityManager {
 	 * settings will be ignored. 
 	 * @param keys the keys of the persistent entities to retrieve
 	 * @param transaction the transaction instance to use.  May be null.
-	 * @return a Map of retrieved entities. If any entity was not fund, its value would be null.
+	 * @return a Map of retrieved entities. If any entity was not found, its value would be null.
 	 * @throws EntityNotFoundException if any entity could not be found
 	 */
 	<T> Map<Key, T> get(Transaction transaction, Iterable<Key> keys);

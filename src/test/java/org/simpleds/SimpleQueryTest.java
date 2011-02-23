@@ -3,6 +3,7 @@ package org.simpleds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.simpleds.testdb.Dummy1;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 
 public class SimpleQueryTest extends AbstractEntityManagerTest {
@@ -102,6 +104,22 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		List<Dummy1> list = entityManager.find(query);
 		assertEquals(1, list.size());
 		assertEquals(baz.getKey(), list.get(0).getKey());
+	}
+	
+	@Test
+	public void testPredicate() throws Exception {
+		entityManager.put(Dummy1.create());
+		SimpleQuery query = entityManager.createQuery(Dummy1.class)
+			.withPredicate(new Predicate<Dummy1>() {
+
+				@Override
+				public boolean apply(Dummy1 input) {
+					return !"foo".equals(input.getName());
+				}
+				
+			});
+		List<Dummy1> list = entityManager.find(query);
+		assertTrue(list.isEmpty());
 	}
 
 	@javax.persistence.Entity

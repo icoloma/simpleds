@@ -1,6 +1,8 @@
 package org.simpleds;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +11,7 @@ import org.simpleds.functions.EntityToPropertyFunction;
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
@@ -74,12 +77,34 @@ public class CursorList<J> {
 	 * Transform this {@link CursorList} instance by applying the transformation function to each data list item.
 	 * Notice that the cursor instance will not be modified, so it will be usable only in the context of the original query.
 	 * @param <O> the type of the resulting {@link CursorList}, after applying the transformation
-	 * @param function the function to apply to each data item
+	 * @param function the {@link Function} to apply to each data item
 	 * @return a new {@link CursorList} instance. The original instance is not modified.
 	 */
 	public <O> CursorList<O> transform(Function<? super J, ? extends O> function) {
+		return transform(function, null);
+	}
+	
+	/**
+	 * Transform this {@link CursorList} instance by applying the transformation function to each data list item.
+	 * Notice that the cursor instance will not be modified, so it will be usable only in the context of the original query.
+	 * @param <O> the type of the resulting {@link CursorList}, after applying the transformation
+	 * @param function the function to apply to each data item. May be null.
+	 * @param predicate the {@link Predicate} to filter returned data. Not-matching entities will not be returned. May be null.
+	 * @return a new {@link CursorList} instance. The original instance is not modified.
+	 */
+	public <O> CursorList<O> transform(Function<? super J, ? extends O> function, Predicate<? super O> predicate) {
+		Collection<O> result = null;
+		if (function != null) {
+			result = Lists.transform(this.data, function);
+		} else {
+			result = (List) this.data;
+		}
+		if (predicate != null) {
+			result = Collections2.filter(result, predicate);
+		}
+		
 		// copy the source data, since "live" collections are incompatible with paged results.
-		ArrayList<O> dataCopy = Lists.newArrayList(Lists.transform(this.data, function));
+		ArrayList<O> dataCopy = Lists.newArrayList(result);
 		CursorList<O> copy = new CursorList<O>(dataCopy, this.cursor);
 		return copy;
 	}
@@ -104,6 +129,19 @@ public class CursorList<J> {
 		});
 		CursorList<O> copy = new CursorList<O>(entities, this.cursor);
 		return copy;
+	}
+	
+	/**
+	 * Remove null values from this collection
+	 * Be aware that this may result in smaller page size
+	 */
+	public CursorList<J> filterNullValues() {
+		for (Iterator<J> it = data.iterator(); it.hasNext(); ) {
+			if (it.next() == null) {
+				it.remove();
+			}
+		}
+		return this;
 	}
 
 	public List<J> getData() {

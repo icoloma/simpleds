@@ -10,12 +10,13 @@ import org.simpleds.metadata.ClassMetadata;
 
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.ReadPolicy;
-import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.SortPredicate;
+import com.google.appengine.api.datastore.ReadPolicy;
+import com.google.appengine.api.datastore.Transaction;
+import com.google.common.base.Predicate;
 
 /**
  * Paged query.
@@ -300,6 +301,17 @@ public class PagedQuery implements ParameterQuery, Cloneable {
 	public void clearCache() {
 		query.withCacheSeconds(cacheSeconds);
 		query.clearCache();
+	}
+	
+	@Override
+	public PagedQuery withPredicate(Predicate<?> predicate) {
+		query.withPredicate(predicate);
+		return this;
+	}
+	
+	@Override
+	public Predicate<?> getPredicate() {
+		return query.getPredicate();
 	}
 
 }

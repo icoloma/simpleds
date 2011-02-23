@@ -27,6 +27,7 @@ import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.ReadPolicy;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -60,6 +61,9 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	/** the number of seconds to store data in the memcache. Default (0) will only use the Level 1 cache */
 	private int cacheSeconds = NO_CACHE;
+	
+	/** Predicate to filter using Java code */
+	private Predicate<Object> predicate;
 	
 	SimpleQuery(EntityManager entityManager, Key ancestor, ClassMetadata metadata) {
 		this.entityManager = entityManager;
@@ -414,7 +418,9 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		List<T> result = Lists.newArrayList();
 		SimpleQueryResultIterable<T> iterable = asIterable();
 		for (T item : iterable) {
-			result.add(item);
+			if (predicate == null || predicate.apply(item)) {
+				result.add(item);
+			}
 		}
 		
 		if (isCacheable()) {
@@ -597,6 +603,16 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	private CacheManager getCacheManager() {
 		return entityManager.getCacheManager();
+	}
+	
+	@Override
+	public SimpleQuery withPredicate(Predicate<?> predicate) {
+		this.predicate = (Predicate) predicate;
+		return this;
+	}
+
+	public Predicate<?> getPredicate() {
+		return predicate;
 	}
 	
 }

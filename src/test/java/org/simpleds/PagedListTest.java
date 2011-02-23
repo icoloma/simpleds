@@ -14,6 +14,7 @@ import org.simpleds.testdb.Root;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 
 public class PagedListTest extends AbstractEntityManagerTest {
@@ -32,8 +33,24 @@ public class PagedListTest extends AbstractEntityManagerTest {
 		assertEquals(29, list.getTotalResults());
 		assertEquals(10, list.getTotalPages());
 		
+		// just transform
 		PagedList<String> names = list.transform(new GetDummy1Name());
 		assertTrue(names.getData().get(0) instanceof String);
+		
+		// transform and filter
+		PagedList<String> emptyList = list.transform(new GetDummy1Name(), new FilterFooName());
+		assertTrue(emptyList.getData().isEmpty());
+		
+		// just filter
+		list = list.transform(null, new Predicate<Dummy1>() {
+
+			@Override
+			public boolean apply(Dummy1 dummy1) {
+				return !"foo".equals(dummy1.getName());
+			}
+		});
+		assertTrue(emptyList.getData().isEmpty());
+		
 	}
 
 	@Test
@@ -53,6 +70,15 @@ public class PagedListTest extends AbstractEntityManagerTest {
 		@Override
 		public String apply(Dummy1 from) {
 			return from.getName();
+		}
+		
+	}
+	
+	private class FilterFooName implements Predicate<String> {
+
+		@Override
+		public boolean apply(String name) {
+			return !"foo".equals(name);
 		}
 		
 	}

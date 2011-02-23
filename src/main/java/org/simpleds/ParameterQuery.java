@@ -9,12 +9,14 @@ import com.google.appengine.api.datastore.DatastoreServiceConfig;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.ReadPolicy;
-import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.SortPredicate;
+import com.google.appengine.api.datastore.ReadPolicy;
+import com.google.appengine.api.datastore.Transaction;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 
 /**
  * The parameter methods associated to a query
@@ -235,5 +237,18 @@ public interface ParameterQuery {
 	 * Clears the cache of any data corresponding to this {@link ParameterQuery} instance, according to its cacheKey.
 	 */
 	void clearCache();
+	
+	/**
+	 * Filter out entities using java code. Only one predicate can be specified at a given time. 
+	 * For multiple predicates, use {@link Predicates#and(Predicate...)}
+	 * @param predicate the predicate to use for filtering. 
+	 * @return this instance
+	 */
+	public ParameterQuery withPredicate(Predicate<?> predicate);
+	
+	/**
+	 * @return the {@link Predicate} set, if any.
+	 */
+	public Predicate<?> getPredicate();
 
 }
