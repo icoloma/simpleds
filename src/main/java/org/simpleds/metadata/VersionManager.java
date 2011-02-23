@@ -8,7 +8,6 @@ import com.google.appengine.api.datastore.Entity;
  * Manages the {@link Version} values
  * @author icoloma
  *
- * @param <T> the type of the Version attribute 
  */
 public interface VersionManager {
 

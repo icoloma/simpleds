@@ -58,7 +58,7 @@ public abstract class AbstractPropertyFunction<T, P> implements Function<T, P> {
 	 * which means that all collection items will share the same class.
 	 * This yields better iteration performance, since it saves from retrieving
 	 * the same class metadata over and over again.
-	 * @return
+	 * @return this instance
 	 */
 	public AbstractPropertyFunction<T, P> consistent() {
 		this.consistent = true;

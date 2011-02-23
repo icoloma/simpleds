@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.simpleds.functions.EntityToPropertyFunction;
 
@@ -14,6 +15,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * A limited list of results with the cursor to resume the query where it was stopped.
@@ -42,14 +44,17 @@ public class CursorList<J> {
 	
 	/**
 	 * Load the list of related entities.
-	 * @param propertyName the name of the property to be used as Key
+	 * @param propertyName the name of the properties to be used as Key
 	 * @return the list of retrieved entities
 	 */
-	public CursorList<J> loadRelatedEntities(String propertyName) {
+	public Map<Key, Object> loadRelatedEntities(String... propertyName) {
 		EntityManager entityManager = EntityManagerFactory.getEntityManager();
 		Class<J> persistentClass = (Class<J>) query.getClassMetadata().getPersistentClass();
-		entityManager.get(Collections2.transform(data, new EntityToPropertyFunction(persistentClass, propertyName)));
-		return this;
+		Set<Key> keys = Sets.newHashSet();
+		for (String p : propertyName) {
+			keys.addAll(Collections2.transform(data, new EntityToPropertyFunction(persistentClass, p)));
+		}
+		return entityManager.get(keys);
 	}
 
 	/**
