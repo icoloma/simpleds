@@ -31,7 +31,7 @@ dependencies {
 					"org.springframework:spring-beans:3.0.0.RELEASE",
 					"org.zeroturnaround:jr-sdk:2.1.1"
 	
-	compile			"com.google.guava:guava:r05",
+	compile			"com.google.guava:guava:10.0.1",
 					"org.slf4j:slf4j-api:1.6.1",
 					"javax.inject:javax.inject:1",
 					"org.springframework:spring-core:3.0.0.RELEASE"
