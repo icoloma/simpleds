@@ -13,6 +13,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.TransactionOptions;
 
 public interface EntityManager {
 
@@ -238,6 +239,12 @@ public interface EntityManager {
 	 */
 	Transaction beginTransaction();
 
+	/**
+	 * Wrapper method for DatastoreService.beginTransaction(TransactionOptions
+	 * @return the created {@link Transaction}
+	 */
+	Transaction beginTransaction(TransactionOptions options);
+	
 	/**
 	 * @return the {@link CacheManager} instance used by this {@link EntityManager}
 	 */

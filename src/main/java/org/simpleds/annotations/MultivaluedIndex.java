@@ -5,7 +5,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -28,7 +27,7 @@ public @interface MultivaluedIndex {
 	String name();
 	
 	/** The type of the collection container, defaults to Set. SortedSet, Set and List are supported */
-	Class<? extends Collection> collectionClass() default Set.class;
+	Class<?> collectionClass() default Set.class;
 	
 	/** The type of each item inside the collection. Any simple data type is supported */
 	Class<?> itemClass();

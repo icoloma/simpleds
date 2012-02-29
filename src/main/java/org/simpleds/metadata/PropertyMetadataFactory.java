@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import javax.persistence.Column;
 
 import org.simpleds.annotations.Property;
+import org.simpleds.converter.Converter;
 import org.simpleds.converter.NullConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class PropertyMetadataFactory {
 					metadata.setName(propertyAnn.name());
 				}
 				if (propertyAnn.converter() != NullConverter.class) {
-					metadata.setConverter(propertyAnn.converter().newInstance());
+					metadata.setConverter((Converter<J, D>) propertyAnn.converter().newInstance());
 				} 				
 			}
 			

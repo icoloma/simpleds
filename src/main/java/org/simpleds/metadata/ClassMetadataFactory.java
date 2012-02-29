@@ -115,7 +115,7 @@ public class ClassMetadataFactory {
 		MultivaluedIndexMetadata metadata = new MultivaluedIndexMetadata();
 		metadata.setName(index.name());
 		metadata.setKind(classMetadata.getKind() + "_" + index.name());
-		metadata.setConverter(ConverterFactory.getCollectionConverter(index.collectionClass(), index.itemClass()));
+		metadata.setConverter(ConverterFactory.getCollectionConverter((Class<? extends Iterable>) index.collectionClass(), index.itemClass()));
 		metadata.setClassMetadata(classMetadata);
 		classMetadata.add(metadata);
 	}

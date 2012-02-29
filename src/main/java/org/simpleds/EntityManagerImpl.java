@@ -24,6 +24,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.TransactionOptions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -34,6 +35,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 @Singleton
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class EntityManagerImpl implements EntityManager {
 
 	@Inject
@@ -57,6 +59,11 @@ public class EntityManagerImpl implements EntityManager {
 	@Override
 	public Transaction beginTransaction() {
 		return datastoreService.beginTransaction();
+	}
+	
+	@Override
+	public Transaction beginTransaction(TransactionOptions options) {
+		return datastoreService.beginTransaction(options);
 	}
 	
 	@Override
@@ -394,13 +401,11 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> T get(Key key) {
 		return (T) get(null, key);
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> T get(Transaction transaction, Key key) {
 		try {
 			ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
@@ -442,7 +447,6 @@ public class EntityManagerImpl implements EntityManager {
 		return get(null, keys);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Map<Key, T> get(Transaction transaction, Iterable<Key> unsortedKeys) {
 		Multimap<ClassMetadata, Key> sortedKeys = ArrayListMultimap.create();
@@ -485,7 +489,6 @@ public class EntityManagerImpl implements EntityManager {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> T datastoreToJava(Entity entity) {
 		ClassMetadata metadata = persistenceMetadataRepository.get(entity.getKind());
 		return (T)metadata.datastoreToJava(entity);
@@ -520,7 +523,6 @@ public class EntityManagerImpl implements EntityManager {
 	}
 		
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> List<T> find(SimpleQuery simpleQuery) {
 		return simpleQuery.asList();
 	}
@@ -556,7 +558,6 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> PagedList<T> findPaged(PagedQuery query) {
 		return query.asPagedList();
 	}

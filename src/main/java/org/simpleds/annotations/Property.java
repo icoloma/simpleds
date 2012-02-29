@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.simpleds.converter.Converter;
 import org.simpleds.converter.NullConverter;
 
 import com.google.appengine.api.datastore.Blob;
@@ -40,9 +41,9 @@ public @interface Property {
 	boolean unindexed() default false;
 	
 	/** 
-	 * The converter class to use with this attribute.
+	 * The {@link Converter} class to use with this attribute.
 	 * If not specified, the default converter for this attribute type will be used 
 	 */
-	Class<? extends org.simpleds.converter.Converter> converter() default NullConverter.class;
+	Class<?> converter() default NullConverter.class;
 	
 }
