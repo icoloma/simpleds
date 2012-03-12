@@ -6,7 +6,7 @@
 	<classpathentry kind="src" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="src/test/genlib/junit-4.5.jar" sourcepath="src/test/genlib/junit-4.5-sources.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/spring-test-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/spring-test-3.0.0.RELEASE.jar" sourcepath="src/test/genlib/spring-test-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-context-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-expression-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/aopalliance-1.0.jar"/>

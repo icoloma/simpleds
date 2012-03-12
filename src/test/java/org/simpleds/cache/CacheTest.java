@@ -21,6 +21,7 @@ import org.simpleds.KeyFactory2;
 import org.simpleds.PagedList;
 import org.simpleds.PagedQuery;
 import org.simpleds.SimpleQuery;
+import org.simpleds.SimpleQueryResultIterator;
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.functions.EntityToKeyFunction;
 import org.simpleds.metadata.ClassMetadata;
@@ -170,8 +171,8 @@ public class CacheTest extends AbstractEntityManagerTest {
 		
 		// filter conditions
 		assertCacheKeys(
-				"qcount{kind=Dummy1,pred=[date = Thu Jan 01 01:00:00 CET 1970, evalue > NULL, name IN [foo, bar], name > bar]}",
-				"qdata{kind=Dummy1,pred=[date = Thu Jan 01 01:00:00 CET 1970, evalue > NULL, name IN [foo, bar], name > bar]}", 
+				"qcount{kind=Dummy1,pred=[date = Thu Jan 01 00:00:00 UTC 1970, evalue > NULL, name IN [foo, bar], name > bar]}",
+				"qdata{kind=Dummy1,pred=[date = Thu Jan 01 00:00:00 UTC 1970, evalue > NULL, name IN [foo, bar], name > bar]}", 
 				entityManager.createQuery(Dummy1.class)
 					.equal("date", new Date(100))
 					.isNotNull("evalue")
@@ -180,10 +181,13 @@ public class CacheTest extends AbstractEntityManagerTest {
 		);
 		
 		// cursor
-		Cursor cursor = entityManager.createQuery(Dummy1.class).asIterator().getCursor();
+		entityManager.put(Dummy1.create());
+		SimpleQueryResultIterator<Object> it = entityManager.createQuery(Dummy1.class).asIterator();
+		it.next();
+		Cursor cursor = it.getCursor();
 		assertCacheKeys(
 				"qcount{kind=Dummy1}",
-				"qdata{kind=Dummy1,start=ExQ,end=ExQ}", 
+				"qdata{kind=Dummy1,start=E9oBJ2oiagR0ZXN0choLEgoKABoGRHVtbXkxDAsSBkR1bW15MRgDDIIBAOABABQ,end=E9oBJ2oiagR0ZXN0choLEgoKABoGRHVtbXkxDAsSBkR1bW15MRgDDIIBAOABABQ}", 
 				entityManager.createQuery(Dummy1.class)
 					.withStartCursor(cursor)
 					.withEndCursor(cursor)
