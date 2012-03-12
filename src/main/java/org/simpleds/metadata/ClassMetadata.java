@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import org.simpleds.annotations.Property;
 import org.simpleds.annotations.Transient;
 import org.simpleds.exception.ConfigException;
+import org.simpleds.exception.DuplicateException;
 import org.simpleds.exception.RequiredFieldException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -155,10 +156,7 @@ public class ClassMetadata {
 				requiredProperties.add(property.getName());
 			}
 			if (properties.keySet().contains(property.getName())) {
-				throw new IllegalArgumentException("Attempting to add twice a property with name '" + property.getName() + 
-						"' for class " + persistentClass.getSimpleName() + 
-						". Existing: " + properties.get(property.getName()) + 
-						", New: " + property);
+				throw new DuplicateException("Duplicate property found with name '" + property.getName() + "' for class " + persistentClass.getSimpleName());
 			}
 			properties.put(property.getName(), property);
 		}

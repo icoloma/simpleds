@@ -27,22 +27,22 @@ public class PropertyMetadataFactory {
 			metadata.setSetter(setter);
 			metadata.setField(field);
 			
-			// @Property
-			Property propertyAnn = metadata.getAnnotation(Property.class);
-			if (propertyAnn != null) {
-				metadata.setIndexed(!propertyAnn.unindexed());
-				if (propertyAnn.name().length() > 0) {
-					metadata.setName(propertyAnn.name());
-				}
-				if (propertyAnn.converter() != NullConverter.class) {
-					metadata.setConverter((Converter<J, D>) propertyAnn.converter().newInstance());
-				} 				
-			}
-			
 			// @Column 
 			Column column = metadata.getAnnotation(Column.class);
 			if (column != null && column.name().length() > 0) {
 				name = column.name();
+			}
+			
+			// @Property
+			Property propertyAnn = metadata.getAnnotation(Property.class);
+			if (propertyAnn != null) {
+				metadata.setIndexed(!propertyAnn.unindexed());
+				if (propertyAnn.value().length() > 0) {
+					name = propertyAnn.value();
+				}
+				if (propertyAnn.converter() != NullConverter.class) {
+					metadata.setConverter((Converter<J, D>) propertyAnn.converter().newInstance());
+				} 				
 			}
 			
 			metadata.setName(name);

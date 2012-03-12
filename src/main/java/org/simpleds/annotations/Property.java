@@ -25,7 +25,7 @@ public @interface Property {
 	/**
 	 * The name of the datastore property. If unspecified the java attribute name will be used.
 	 */
-	String name() default "";
+	String value() default "";
 	
 	/**
 	 * Marks this attribute as required. Default is false.

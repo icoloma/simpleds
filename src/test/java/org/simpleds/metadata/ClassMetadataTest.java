@@ -14,7 +14,9 @@ import javax.persistence.Id;
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.AbstractEntityManagerTest;
+import org.simpleds.annotations.Property;
 import org.simpleds.converter.IntegerConverter;
+import org.simpleds.exception.ConfigException;
 import org.simpleds.exception.DuplicateException;
 import org.simpleds.testdb.Dummy1;
 
@@ -96,11 +98,26 @@ public class ClassMetadataTest extends AbstractEntityManagerTest {
 	public void testRepeatedKind() throws Exception {
 		repository.add(RepeatedKind.class);
 	}
+	
+	@Test(expected=ConfigException.class)
+	public void testRepeatedProperty() throws Exception {
+		repository.add(RepeatedProperty.class);
+	}
 
 	@org.simpleds.annotations.Entity("d2")
 	static class RepeatedKind {
 		@Id
 		private Key key;
+	}
+	
+	static class RepeatedProperty {
+		@Id
+		private Key key;
+		
+		private String foo;
+		
+		@Property("foo")
+		private String bar;
 	}
 	
 }
