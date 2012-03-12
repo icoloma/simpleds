@@ -37,10 +37,18 @@ public class ClassMetadataFactory {
 
 	private static Logger log = LoggerFactory.getLogger(ClassMetadataFactory.class);
 	
+	/** Maximum number of chars recommended for a kind */
+	private int maxKindChars = 3;
+	
 	public ClassMetadata createMetadata(Class<?> clazz) {
 		ClassMetadata metadata = new ClassMetadata();
 		metadata.setPersistentClass(clazz);
-		metadata.setKind(getKind(clazz));
+		String kind = getKind(clazz);
+		if (kind.length() > maxKindChars) {
+			log.warn(kind + " is a long name for an entity kind. Consider using @Entity to make it shorter, which will save space in the Datastore. Use " + 
+					ClassMetadataFactory.class.getSimpleName() + ".setMaxKindChars() to disable this warning");
+		}
+		metadata.setKind(kind);
 		visit(clazz, metadata, new HashSet<String>());
 		initParents(metadata);
 		return metadata;
@@ -205,5 +213,12 @@ public class ClassMetadataFactory {
 			return false;
 		}
 		return property.getReadMethod().getAnnotation(Transient.class) == null && (field == null || field.getAnnotation(Transient.class) == null);  
+	}
+
+	/**
+	 * Set maximum number of chars for an entity kind. Set to Integer.MAX_VALUE to disable the warning associated to long entity names
+	 */
+	public void setMaxKindChars(int maxKindChars) {
+		this.maxKindChars = maxKindChars;
 	}
 }

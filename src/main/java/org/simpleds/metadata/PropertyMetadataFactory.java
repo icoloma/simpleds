@@ -15,6 +15,9 @@ public class PropertyMetadataFactory {
 
 	private static Logger log = LoggerFactory.getLogger(PropertyMetadataFactory.class);
 	
+	/** maximum number of characters recommended for a property name */
+	private static int MAX_PROPERTY_CHARS = 3;
+	
 	@SuppressWarnings("unchecked")
 	public static <J, D> SinglePropertyMetadata<J, D> create(String name, Field field, Method getter, Method setter) {
 		try {
@@ -45,6 +48,11 @@ public class PropertyMetadataFactory {
 				} 				
 			}
 			
+			if (name.length() > MAX_PROPERTY_CHARS) {
+				log.warn((getter != null? getter.getDeclaringClass().getSimpleName() : field.getDeclaringClass().getSimpleName() ) + 
+						"." + name + " is a long name for a property. Consider using @Property to make it shorter, which will save space in the Datastore. Use " + 
+						PropertyMetadataFactory.class.getSimpleName() + ".setMaxPropertyChars() to disable this warning");
+			}
 			metadata.setName(name);
 			
 			// calculate the property type
@@ -63,6 +71,13 @@ public class PropertyMetadataFactory {
 		} catch (IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	/**
+	 * Set maximum number of chars for a property name. Set to Integer.MAX_VALUE to disable the warning associated to long attribute names
+	 */
+	public static void setMaxPropertyChars(int maxChars) {
+		MAX_PROPERTY_CHARS = maxChars;
 	}
 
 }
