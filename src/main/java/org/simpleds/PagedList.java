@@ -14,8 +14,10 @@ import com.google.common.collect.Lists;
 
 /**
  * The result of executing a paged query
+ * @deprecated {@link CursorList} instead
  * @author icoloma
  */
+@Deprecated
 public class PagedList<T> implements Cloneable {
 
 	/** the executed PagedQuery */

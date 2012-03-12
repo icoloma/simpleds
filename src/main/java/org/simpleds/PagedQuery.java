@@ -28,10 +28,12 @@ import com.google.common.base.Predicate;
  * <p>  
  * 
  * Paging has been explained <a href="http://code.google.com/appengine/articles/paging.html">here</a>
+ * @deprecated use {@link CursorList} and {@link SimpleQuery#asCursorList(int)} instead
  * 
  * @author icoloma
  *
  */
+@Deprecated
 public class PagedQuery implements ParameterQuery, Cloneable {
 
 	/** the default size of each page */

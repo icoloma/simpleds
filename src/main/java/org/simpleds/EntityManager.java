@@ -198,27 +198,35 @@ public interface EntityManager {
 	/**
 	 * Create a new {@link PagedQuery} instance
 	 * @param kind the unqualified class name for this query
+	 * @deprecated use {@link SimpleQuery#asCursorList(int)} instead
 	 */
+	@Deprecated
 	PagedQuery createPagedQuery(String kind);
 	
 	/**
 	 * Create a new {@link PagedQuery} instance
 	 * @param clazz the class for this query
+	 * @deprecated {@link SimpleQuery#asCursorList(int)} instead
 	 */
+	@Deprecated
 	PagedQuery createPagedQuery(Class<?> clazz);
 	
 	/**
 	 * Create a new {@link PagedQuery} instance
 	 * @param ancestor the parent key to use for this query. Can be null.
 	 * @param kind the unqualified class name for this query
+	 * @deprecated {@link SimpleQuery#asCursorList(int)} instead
 	 */
+	@Deprecated
 	PagedQuery createPagedQuery(Key ancestor, String kind);
 	
 	/**
 	 * Create a new {@link PagedQuery} instance
 	 * @param ancestor the parent key to use for this query. Can be null.
 	 * @param clazz the class for this query
+	 * @deprecated {@link SimpleQuery#asCursorList(int)} instead
 	 */
+	@Deprecated
 	PagedQuery createPagedQuery(Key ancestor, Class<?> clazz);
 
 	/**
