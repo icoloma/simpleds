@@ -25,7 +25,7 @@ public class CacheableEntity {
 	@Property(required=true)
 	private String name;
 	
-	@Property(name="date")
+	@Property("date")
 	private Date overridenNameDate;
 	
 	@Embedded
