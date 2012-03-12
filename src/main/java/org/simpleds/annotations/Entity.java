@@ -26,4 +26,11 @@ public @interface Entity {
 	 */
 	Class<?>[] parent() default {};
 	
+	/**
+	 * The kind name to use in the datastore to identify this entity. Defaults to the 
+	 * unqualified class name.
+	 * This can be used to use shorter names that save space in the datastore. 
+	 */
+	String value() default "";
+	
 }

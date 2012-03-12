@@ -21,7 +21,7 @@ import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
 import org.simpleds.testdb.Dummy3;
 import org.simpleds.testdb.Root;
-import org.simpleds.testdb.VersionedClass;
+import org.simpleds.testdb.BasicVersionedClass;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -84,7 +84,7 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		Dummy3 dummy3 = new Dummy3();
 		dummy3.setKey(KeyFactory2.createKey(Dummy3.class, 1));
 		CacheableEntity cacheableEntity = CacheableEntity.create();
-		VersionedClass vc = new VersionedClass();
+		BasicVersionedClass vc = new BasicVersionedClass();
 		
 		List l = ImmutableList.of(dummy3, dummy1, cacheableEntity, vc);
 		entityManager.put(l);
@@ -99,7 +99,7 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		Dummy3 retrievedDummy3 = (Dummy3) retrieved.get(dummy3.getKey());
 		Dummy1 retrievedDummy1 = (Dummy1) retrieved.get(dummy1.getKey());
 		CacheableEntity retrievedCacheableEntity = (CacheableEntity) retrieved.get(cacheableEntity.getKey());
-		VersionedClass retrievedVC = (VersionedClass) retrieved.get(vc.getKey());
+		BasicVersionedClass retrievedVC = (BasicVersionedClass) retrieved.get(vc.getKey());
 		
 		assertEquals(dummy3.getKey(), retrievedDummy3.getKey());
 		assertEquals(dummy1.getKey(), retrievedDummy1.getKey());
@@ -111,20 +111,20 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		
 		entityManager.put(l);
 		retrieved = entityManager.get(keys);
-		retrievedVC = (VersionedClass) retrieved.get(vc.getKey());
+		retrievedVC = (BasicVersionedClass) retrieved.get(vc.getKey());
 		assertEquals((Long) 1L, retrievedVC.getVersion());
 	}
 	
 	@Test
 	public void testVersionedWithPK() {
-		VersionedClass vc = new VersionedClass();
-		vc.setKey(KeyFactory2.createKey(VersionedClass.class, 10));
+		BasicVersionedClass vc = new BasicVersionedClass();
+		vc.setKey(KeyFactory2.createKey(BasicVersionedClass.class, 10));
 		List l = ImmutableList.of(vc);
 		entityManager.put(l);
 		assertEquals((Long) 0L, vc.getVersion());
 		
-		VersionedClass vc2 = new VersionedClass();
-		vc.setKey(KeyFactory2.createKey(VersionedClass.class, 11));
+		BasicVersionedClass vc2 = new BasicVersionedClass();
+		vc.setKey(KeyFactory2.createKey(BasicVersionedClass.class, 11));
 		entityManager.put(vc2);
 		assertEquals((Long) 0L, vc2.getVersion());
 
@@ -139,11 +139,11 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	@SuppressWarnings("cast")
 	public void testMultiplePutWithKeysSuccess() {
 		// root entities
-		Key key = KeyFactory.createKey(Dummy1.class.getSimpleName(), 1);
+		Key key = KeyFactory.createKey(Dummy1.KIND, 1);
 		Dummy1 dummy1 = Dummy1.create();
 		dummy1.setKey(key);
 		Dummy1 dummy2 = Dummy1.create();
-		dummy2.setKey(KeyFactory.createKey(Dummy1.class.getSimpleName(), 2));
+		dummy2.setKey(KeyFactory.createKey(Dummy1.KIND, 2));
 		entityManager.put(Arrays.asList(dummy1, dummy2));
 		
 		// parent-childs

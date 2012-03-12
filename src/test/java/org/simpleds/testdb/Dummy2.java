@@ -5,7 +5,7 @@ import org.simpleds.annotations.Id;
 
 import com.google.appengine.api.datastore.Key;
 
-@Entity
+@Entity("d2")
 public class Dummy2 {
 
 	@Id(generated=true, parent=Dummy1.class)

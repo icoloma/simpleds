@@ -25,7 +25,7 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 	
 	@Test
 	public void testClone() throws Exception {
-		SimpleQuery query = entityManager.createQuery(Dummy1.class.getSimpleName());
+		SimpleQuery query = entityManager.createQuery(Dummy1.KIND);
 		query.equal("name", "bar");
 		query.equal("evalue", Dummy1.EnumValues.BAR);
 		SimpleQuery copy = query.clone();
@@ -56,7 +56,7 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		query.equal("date", new Date());
 		query.equal("name", null);
 		query.equal("int1", 2);
-		query.equal("__key__", KeyFactory.createKey(Dummy1.class.getSimpleName(), 1));
+		query.equal("__key__", KeyFactory.createKey(Dummy1.KIND, 1));
 		query.sortAsc("name");
 	}
 	
@@ -100,7 +100,7 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		baz.setOverridenNameDate(now);
 		entityManager.put(baz);
 		entityManager.put(Dummy1.create());
-		SimpleQuery query = entityManager.createQuery(Dummy1.class.getSimpleName()).in("date", ImmutableList.of(now));
+		SimpleQuery query = entityManager.createQuery(Dummy1.KIND).in("date", ImmutableList.of(now));
 		List<Dummy1> list = entityManager.find(query);
 		assertEquals(1, list.size());
 		assertEquals(baz.getKey(), list.get(0).getKey());

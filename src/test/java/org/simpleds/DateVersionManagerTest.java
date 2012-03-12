@@ -11,10 +11,10 @@ public class DateVersionManagerTest extends AbstractVersionManagerTest {
 
 	@Override
 	protected Object createEntity() {
-		return new VersionedClass();
+		return new DateVersionedClass();
 	}
 	
-	public static class VersionedClass {
+	public static class DateVersionedClass {
 		@Id
 		private Key key;
 		

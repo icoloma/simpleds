@@ -5,20 +5,22 @@ import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.Property;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
-@Entity
+@Entity("d1")
 @MultivaluedIndex(name="friends", itemClass=Key.class)
 public class Dummy1 {
 
+	public static final String KIND = "d1";
+	
 	public enum EnumValues {
 		FOO, BAR
 	}
@@ -46,7 +48,7 @@ public class Dummy1 {
 	 * Create a simple dummy key
 	 */
 	public static Key createDummyKey() {
-		return KeyFactory.createKey(Dummy1.class.getSimpleName(), 1);
+		return KeyFactory.createKey(Dummy1.KIND, 1);
 	}
 	
 	public static Dummy1 create() {

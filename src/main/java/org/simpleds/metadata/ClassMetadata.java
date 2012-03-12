@@ -106,7 +106,7 @@ public class ClassMetadata {
 	public void validateConstraints(Entity entity) {
 		for (String propertyName : requiredProperties) {
 			if (entity.getProperty(propertyName) == null) {
-				throw new RequiredFieldException("Required property '" + kind + "." + propertyName + "' is not set");
+				throw new RequiredFieldException("Required property '" + this.persistentClass.getSimpleName() + "." + propertyName + "' is not set");
 			}
 		}
 	}
@@ -117,7 +117,6 @@ public class ClassMetadata {
 	 * @param parentKey the parent {@link Key} (may be null)
 	 */
 	public Entity javaToDatastore(Key parentKey, Object javaObject) {
-		String kind = javaObject.getClass().getSimpleName();
 		Key key = keyProperty.getValue(javaObject);
 		Entity entity = key == null? new Entity(kind, parentKey) : new Entity(key); 
 		for (Entry<String, PropertyMetadata<?, ?>> entry : properties.entrySet()) {
@@ -178,20 +177,15 @@ public class ClassMetadata {
 
 	public void setPersistentClass(Class<?> persistentClass) {
 		this.persistentClass = persistentClass;
-		this.kind = persistentClass.getSimpleName().intern();
 	}
 
 	@SuppressWarnings("unchecked")
 	public <J, D> PropertyMetadata<J, D> getProperty(String propertyName) {
 		PropertyMetadata<J, D> metadata = (PropertyMetadata<J, D>) properties.get(propertyName);
 		if (metadata == null) {
-			throwPropertyNotFoundException(propertyName);
+			throw new IllegalArgumentException(this.persistentClass.getSimpleName() + ": Persistent property " + propertyName + " not found");
 		}
 		return metadata;
-	}
-	
-	private void throwPropertyNotFoundException(String propertyName) {
-		throw new IllegalArgumentException("Persistent property " + kind + "." + propertyName + " not found");
 	}
 	
 	public MultivaluedIndexMetadata getMultivaluedIndex(String relationIndexName) {
@@ -208,14 +202,14 @@ public class ClassMetadata {
 	public void validateParentKey(Key parentKey) {
 		if (parents.isEmpty()) {
 			if (parentKey != null) {
-				throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.kind + " is configured as a root class (missing @Id(parent)?)");
+				throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.persistentClass.getSimpleName() + " is configured as a root class (missing @Id(parent)?)");
 			}
 		} else {
 			if (parentKey == null) {
-				throw new IllegalArgumentException("Missing parent key for entity " + this.kind + ". Expected: " + Joiner.on(", ").join(parents));
+				throw new IllegalArgumentException("Missing parent key for entity " + this.persistentClass.getSimpleName() + ". Expected: " + Joiner.on(", ").join(parents));
 			}
 			if (!parents.contains(parentKey.getKind())) {
-				throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.kind + " expects parents with type " + Joiner.on(", ").join(parents));
+				throw new IllegalArgumentException("Specified parent key " + parentKey + ", but entity " + this.persistentClass.getSimpleName() + " expects parents with type " + Joiner.on(", ").join(parents));
 			}
 		}
 	}

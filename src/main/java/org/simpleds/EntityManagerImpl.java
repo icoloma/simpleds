@@ -118,7 +118,8 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public Key allocateId(Class<?> clazz) {
-		return datastoreService.allocateIds(clazz.getSimpleName(), 1).getStart();
+		String kind = persistenceMetadataRepository.get(clazz).getKind();
+		return datastoreService.allocateIds(kind, 1).getStart();
 	}
 	
 	private PagedQuery createPagedQueryImpl(Key ancestor, ClassMetadata metadata) {

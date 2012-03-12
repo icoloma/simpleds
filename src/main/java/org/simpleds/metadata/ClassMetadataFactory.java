@@ -18,6 +18,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import org.simpleds.annotations.Cacheable;
+import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
@@ -39,6 +40,7 @@ public class ClassMetadataFactory {
 	public ClassMetadata createMetadata(Class<?> clazz) {
 		ClassMetadata metadata = new ClassMetadata();
 		metadata.setPersistentClass(clazz);
+		metadata.setKind(getKind(clazz));
 		visit(clazz, metadata, new HashSet<String>());
 		initParents(metadata);
 		return metadata;
@@ -46,17 +48,25 @@ public class ClassMetadataFactory {
 	
 	private void initParents(ClassMetadata metadata) {
 		org.simpleds.annotations.Entity entity = metadata.getPersistentClass().getAnnotation(org.simpleds.annotations.Entity.class);
-		Id idAnn = metadata.getKeyProperty().getAnnotation(Id.class);
+		Id idAnn = metadata.getKeyProperty() != null? metadata.getKeyProperty().getAnnotation(Id.class) : null;
 		Class<?>[] cparents = idAnn != null? idAnn.parent() : 
 							 entity != null? entity.parent() : 
 							 ROOT_ANCESTORS; 
 		if (cparents.length > 0) {
 			Set<String> parents = Sets.newTreeSet();
 			for (Class<?> clazz : cparents) {
-				parents.add(clazz.getSimpleName());
+				parents.add(getKind(clazz));
 			}
 			metadata.setParents(parents);
 		}
+	}
+	
+	private String getKind(Class clazz) {
+		org.simpleds.annotations.Entity entity = (Entity) clazz.getAnnotation(org.simpleds.annotations.Entity.class);
+		if (entity != null && entity.value().length() > 0) {
+			return entity.value();
+		}
+		return clazz.getSimpleName().intern();
 	}
 
 	private void visit(Class<?> clazz, ClassMetadata classMetadata, Set<String> visitedPropertyNames) {

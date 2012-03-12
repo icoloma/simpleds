@@ -9,10 +9,13 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Set;
 
+import javax.persistence.Id;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.AbstractEntityManagerTest;
 import org.simpleds.converter.IntegerConverter;
+import org.simpleds.exception.DuplicateException;
 import org.simpleds.testdb.Dummy1;
 
 import com.google.appengine.api.datastore.Entity;
@@ -60,7 +63,7 @@ public class ClassMetadataTest extends AbstractEntityManagerTest {
 	@Test
 	public void testDatastoreToJava() throws Exception {
 		Date d = new Date();
-		Key key = KeyFactory.createKey(Dummy1.class.getSimpleName(), 1);
+		Key key = KeyFactory.createKey(Dummy1.KIND, 1);
 		Entity entity = new Entity(key);
 		entity.setProperty("name", "foo");
 		entity.setProperty("date", d);
@@ -80,7 +83,7 @@ public class ClassMetadataTest extends AbstractEntityManagerTest {
 	@Test
 	public void testJavaToDatastore() throws Exception {
 		Dummy1 dummy = new Dummy1();
-		Key key = new KeyFactory.Builder(Dummy1.class.getSimpleName(), 1L).getKey();
+		Key key = new KeyFactory.Builder(Dummy1.KIND, 1L).getKey();
 		dummy.setKey(key);
 		dummy.setName("foo");
 		Entity entity = metadata.javaToDatastore(null, dummy);
@@ -88,6 +91,16 @@ public class ClassMetadataTest extends AbstractEntityManagerTest {
 		assertNull(entity.getProperty("id"));
 		assertEquals("foo", entity.getProperty("name"));
 	}
+	
+	@Test(expected=DuplicateException.class)
+	public void testRepeatedKind() throws Exception {
+		repository.add(RepeatedKind.class);
+	}
 
+	@org.simpleds.annotations.Entity("d2")
+	static class RepeatedKind {
+		@Id
+		private Key key;
+	}
 	
 }

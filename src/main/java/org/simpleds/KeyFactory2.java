@@ -14,32 +14,36 @@ import com.google.common.collect.Collections2;
  */
 public class KeyFactory2 {
 
+	private static String getKind(Class<?> clazz) {
+		return EntityManagerFactory.getEntityManager().getClassMetadata(clazz).getKind();
+	}
+	
 	/**
 	 * Creates a key using the class simple name as kind
 	 */
 	public static Key createKey(Class<?> clazz, long id) {
-		return KeyFactory.createKey(clazz.getSimpleName(), id);
+		return KeyFactory.createKey(getKind(clazz), id);
 	}
 	
 	/**
 	 * Creates a key using the class simple name as kind
 	 */
 	public static Key createKey(Class<?> clazz, String name) {
-		return KeyFactory.createKey(clazz.getSimpleName(), name);
+		return KeyFactory.createKey(getKind(clazz), name);
 	}
 	
 	/**
 	 * Creates a key using the class simple name as kind
 	 */
 	public static Key createKey(Key parent, Class<?> clazz, long id) {
-		return KeyFactory.createKey(parent, clazz.getSimpleName(), id);
+		return KeyFactory.createKey(parent, getKind(clazz), id);
 	}
 	
 	/**
 	 * Creates a key using the class simple name as kind
 	 */
 	public static Key createKey(Key parent, Class<?> clazz, String name) {
-		return KeyFactory.createKey(parent, clazz.getSimpleName(), name);
+		return KeyFactory.createKey(parent, getKind(clazz), name);
 	}
 	
 	/**

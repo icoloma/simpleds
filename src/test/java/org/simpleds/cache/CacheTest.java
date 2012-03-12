@@ -165,14 +165,14 @@ public class CacheTest extends AbstractEntityManagerTest {
 	public void testCalculateCacheKey() throws Exception {
 		// empty
 		assertCacheKeys(
-				"qcount{kind=Dummy1}", 
-				"qdata{kind=Dummy1}", 
+				"qcount{kind=d1}", 
+				"qdata{kind=d1}", 
 				entityManager.createQuery(Dummy1.class));
 		
 		// filter conditions
 		assertCacheKeys(
-				"qcount{kind=Dummy1,pred=[date = Thu Jan 01 00:00:00 UTC 1970, evalue > NULL, name IN [foo, bar], name > bar]}",
-				"qdata{kind=Dummy1,pred=[date = Thu Jan 01 00:00:00 UTC 1970, evalue > NULL, name IN [foo, bar], name > bar]}", 
+				"qcount{kind=d1,pred=[date = Thu Jan 01 00:00:00 UTC 1970, evalue > NULL, name IN [foo, bar], name > bar]}",
+				"qdata{kind=d1,pred=[date = Thu Jan 01 00:00:00 UTC 1970, evalue > NULL, name IN [foo, bar], name > bar]}", 
 				entityManager.createQuery(Dummy1.class)
 					.equal("date", new Date(100))
 					.isNotNull("evalue")
@@ -186,8 +186,8 @@ public class CacheTest extends AbstractEntityManagerTest {
 		it.next();
 		Cursor cursor = it.getCursor();
 		assertCacheKeys(
-				"qcount{kind=Dummy1}",
-				"qdata{kind=Dummy1,start=E9oBJ2oiagR0ZXN0choLEgoKABoGRHVtbXkxDAsSBkR1bW15MRgDDIIBAOABABQ,end=E9oBJ2oiagR0ZXN0choLEgoKABoGRHVtbXkxDAsSBkR1bW15MRgDDIIBAOABABQ}", 
+				"qcount{kind=d1}",
+				"qdata{kind=d1,start=E9oBH2oaagR0ZXN0chILEgYKABoCZDEMCxICZDEYAwyCAQDgAQAU,end=E9oBH2oaagR0ZXN0chILEgYKABoCZDEMCxICZDEYAwyCAQDgAQAU}", 
 				entityManager.createQuery(Dummy1.class)
 					.withStartCursor(cursor)
 					.withEndCursor(cursor)
@@ -195,8 +195,8 @@ public class CacheTest extends AbstractEntityManagerTest {
 		
 		// fetchOptions
 		assertCacheKeys(
-				"qcount{kind=Dummy1}",
-				"qdata{kind=Dummy1,off=5,lim=100}", 
+				"qcount{kind=d1}",
+				"qdata{kind=d1,off=5,lim=100}", 
 				entityManager.createQuery(Dummy1.class)
 					.withOffset(5)
 					.withLimit(100)

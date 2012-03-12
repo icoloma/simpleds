@@ -5,7 +5,8 @@ import org.simpleds.annotations.Version;
 
 import com.google.appengine.api.datastore.Key;
 
-public class VersionedClass {
+public class BasicVersionedClass {
+	
 	@Id
 	private Key key;
 	

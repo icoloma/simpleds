@@ -3,6 +3,7 @@ package org.simpleds.metadata;
 import java.util.Collection;
 import java.util.Map;
 
+import org.simpleds.exception.DuplicateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +33,23 @@ public class PersistenceMetadataRepository {
 		ClassMetadata metadata = classMetadataFactory.createMetadata(clazz);
 		log.debug("Adding persistent class " + metadata.getKind());
 		metadata.validate();
+		if (metadataByKind.get(metadata.getKind()) != null) {
+			throw new DuplicateException("Two entities found with kind='" + metadata.getKind() + "': " + metadata.getPersistentClass().getName() + " and " + metadataByKind.get(metadata.getKind()).getPersistentClass().getName());
+		}
 		metadataByClass.put(metadata.getPersistentClass(), metadata);
 		metadataByKind.put(metadata.getKind(), metadata);
 		return metadata;
+	}
+	
+	/**
+	 * Removes a persistent class from the repository
+	 * @param clazz the persistent class to remove
+	 * @throws IllegalArgumentException if the class is not present in the repository
+	 */
+	public void remove(Class<?> clazz) {
+		ClassMetadata metadata = get(clazz);
+		metadataByClass.remove(clazz);
+		metadataByKind.remove(metadata.getKind());
 	}
 	
 	/**
