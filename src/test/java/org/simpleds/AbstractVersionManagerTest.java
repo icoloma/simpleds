@@ -18,6 +18,7 @@ import org.simpleds.metadata.VersionManager;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.common.collect.ImmutableList;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public abstract class AbstractVersionManagerTest<T> extends AbstractEntityManagerTest {
 
 	protected abstract T createEntity();
@@ -105,7 +106,7 @@ public abstract class AbstractVersionManagerTest<T> extends AbstractEntityManage
 		entityManager.put(entity);
 		
 		// a copy of the entity object
-		T entity2 = entityManager.get(repository.get(entity.getClass()).getKeyProperty().getValue(entity));
+		T entity2 = (T) entityManager.get(repository.get(entity.getClass()).getKeyProperty().getValue(entity));
 		
 		Object versionValue = versionProperty.getValue(entity);
 		
