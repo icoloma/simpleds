@@ -6,16 +6,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.simpleds.cache.CacheManager;
 import org.simpleds.cache.CacheManagerImpl;
+import org.simpleds.converter.ConverterFactory;
 import org.simpleds.metadata.ClassMetadata;
+import org.simpleds.metadata.ClassMetadataFactory;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.simpleds.test.AbstractDatastoreTest;
+import org.simpleds.testdb.BasicVersionedClass;
 import org.simpleds.testdb.CacheableEntity;
 import org.simpleds.testdb.Child;
 import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
 import org.simpleds.testdb.Dummy3;
 import org.simpleds.testdb.Root;
-import org.simpleds.testdb.BasicVersionedClass;
 import org.simpleds.tx.TransactionManagerImpl;
 
 import com.google.appengine.api.memcache.MemcacheService;
@@ -36,7 +38,13 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 
 	@Before
 	public void setupEntityManager() {
+		ConverterFactory converterFactory = new ConverterFactory();
+		
+		ClassMetadataFactory classMetadataFactory = new ClassMetadataFactory();
+		classMetadataFactory.setConverterFactory(converterFactory);
+		
 		repository = new PersistenceMetadataRepository();
+		repository.setClassMetadataFactory(classMetadataFactory);
 		repository.add(CacheableEntity.class);
 		repository.add(Child.class);
 		repository.add(Dummy1.class);

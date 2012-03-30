@@ -34,5 +34,7 @@
 	<classpathentry kind="lib" path="src/test/genlib/appengine-api-labs-1.6.0.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/appengine-api-stubs-1.6.0.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/appengine-testing-1.6.0.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/jackson-core-asl-1.9.2.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/jackson-mapper-asl-1.9.2.jar" sourcepath="src/test/genlib/jackson-mapper-asl-1.9.2-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

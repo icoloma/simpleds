@@ -14,11 +14,13 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 public class ConverterTest extends AbstractDatastoreTest {
 	
+	private ConverterFactory converterFactory = new ConverterFactory();
+	
 	@Test
 	public void testNull() throws Exception {
 		Field convertersField = ConverterFactory.class.getDeclaredField("converters");
 		convertersField.setAccessible(true);
-		Map<Class, Converter>  converters = (Map<Class, Converter>) convertersField.get(null);
+		Map<Class, Converter>  converters = (Map<Class, Converter>) convertersField.get(converterFactory);
 		for (Converter converter : converters.values()) {
 			assertNull(converter.javaToDatastore(null));
 			Object nullValue = converter instanceof AbstractConverter? ((AbstractConverter) converter).getNullValue() : null;
@@ -35,7 +37,7 @@ public class ConverterTest extends AbstractDatastoreTest {
 	}
 
 	private void assertConvert(Object javaValue, Object dsValue) {
-		Converter converter = ConverterFactory.getConverter(javaValue.getClass());
+		Converter converter = converterFactory.getConverter(javaValue.getClass());
 		assertEquals(javaValue, converter.datastoreToJava(dsValue));
 		assertEquals(dsValue, converter.javaToDatastore(javaValue));
 	}

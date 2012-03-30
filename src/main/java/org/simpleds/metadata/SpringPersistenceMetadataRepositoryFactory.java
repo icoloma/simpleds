@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Entity;
 
+import org.simpleds.converter.ConverterFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -44,7 +45,9 @@ public class SpringPersistenceMetadataRepositoryFactory implements FactoryBean<P
 				throw new IllegalArgumentException("locations has not been specified");
 			}
 			if (classMetadataFactory == null) {
+				ConverterFactory converterFactory = new ConverterFactory();
 				classMetadataFactory = new ClassMetadataFactory();
+				classMetadataFactory.setConverterFactory(converterFactory);
 			}
 			persistenceMetadataRepository = new PersistenceMetadataRepository();
 			persistenceMetadataRepository.setClassMetadataFactory(classMetadataFactory);

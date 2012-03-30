@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.persistence.Embedded;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
+@SuppressWarnings("unchecked")
 public class ClassMetadataFactory {
 
 	private static final Class<?>[] ROOT_ANCESTORS = new Class<?>[] {};
@@ -39,6 +41,9 @@ public class ClassMetadataFactory {
 	
 	/** Maximum number of chars recommended for a kind */
 	private int maxKindChars = 3;
+	
+	@Inject
+	private ConverterFactory converterFactory;
 	
 	public ClassMetadata createMetadata(Class<?> clazz) {
 		ClassMetadata metadata = new ClassMetadata();
@@ -57,6 +62,7 @@ public class ClassMetadataFactory {
 	private void initParents(ClassMetadata metadata) {
 		org.simpleds.annotations.Entity entity = metadata.getPersistentClass().getAnnotation(org.simpleds.annotations.Entity.class);
 		Id idAnn = metadata.getKeyProperty() != null? metadata.getKeyProperty().getAnnotation(Id.class) : null;
+		@SuppressWarnings("deprecation")
 		Class<?>[] cparents = idAnn != null? idAnn.parent() : 
 							 entity != null? entity.parent() : 
 							 ROOT_ANCESTORS; 
@@ -133,7 +139,7 @@ public class ClassMetadataFactory {
 		MultivaluedIndexMetadata metadata = new MultivaluedIndexMetadata();
 		metadata.setName(index.name());
 		metadata.setKind(classMetadata.getKind() + "_" + index.name());
-		metadata.setConverter(ConverterFactory.getCollectionConverter((Class<? extends Iterable>) index.collectionClass(), index.itemClass()));
+		metadata.setConverter(converterFactory.getCollectionConverter((Class<? extends Iterable>) index.collectionClass(), index.itemClass()));
 		metadata.setClassMetadata(classMetadata);
 		classMetadata.add(metadata);
 	}
@@ -149,7 +155,7 @@ public class ClassMetadataFactory {
 			addEmbeddedProperties(classMetadata, propertyMetadata);
 		} else {
 			if (propertyMetadata.getConverter() == null) { // calculate default converter
-				Converter<J, D> converter = ConverterFactory.getConverter(propertyMetadata);
+				Converter<J, D> converter = converterFactory.getConverter(propertyMetadata);
 				propertyMetadata.setConverter(converter);
 			}
 			if (propertyMetadata.getAnnotation(Version.class) != null) {
@@ -220,5 +226,9 @@ public class ClassMetadataFactory {
 	 */
 	public void setMaxKindChars(int maxKindChars) {
 		this.maxKindChars = maxKindChars;
+	}
+
+	public void setConverterFactory(ConverterFactory converterFactory) {
+		this.converterFactory = converterFactory;
 	}
 }

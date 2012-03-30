@@ -17,9 +17,11 @@ import com.google.common.collect.Sets;
 
 public class CollectionConvertersTest {
 
+	private ConverterFactory converterFactory = new ConverterFactory();
+	
 	@Test
 	public void testListConverter() {
-		Converter listConverter = ConverterFactory.getCollectionConverter(List.class, Integer.class);
+		Converter listConverter = converterFactory.getCollectionConverter(List.class, Integer.class);
 		List l = Arrays.asList(1, 2, 3);
 		List ds = (List) listConverter.javaToDatastore(l);
 		assertEquals(3, ds.size());
@@ -29,7 +31,7 @@ public class CollectionConvertersTest {
 	
 	@Test
 	public void testSetConverter() {
-		Converter setConverter = ConverterFactory.getCollectionConverter(Set.class, String.class);
+		Converter setConverter = converterFactory.getCollectionConverter(Set.class, String.class);
 		Set js = Sets.newHashSet("a", "b", "c");
 		Set ds = (Set) setConverter.javaToDatastore(js);
 		assertEquals(3, ds.size());
@@ -44,7 +46,7 @@ public class CollectionConvertersTest {
 	}
 
 	private void assertConvertNull(Class<? extends Collection> collectionClass) {
-		CollectionConverter converter = ConverterFactory.getCollectionConverter(collectionClass, Integer.class);
+		CollectionConverter converter = converterFactory.getCollectionConverter(collectionClass, Integer.class);
 		assertNull(converter.javaToDatastore(null));
 		assertTrue(((Collection)converter.datastoreToJava(null)).isEmpty());
 	}

@@ -3,6 +3,8 @@ package org.simpleds.metadata;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.simpleds.exception.DuplicateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +23,8 @@ public class PersistenceMetadataRepository {
 	/** the list of ClassMetadata by simple (unqualified) class name */
 	private Map<String, ClassMetadata> metadataByKind = Maps.newHashMap();
 	
-	private ClassMetadataFactory classMetadataFactory = new ClassMetadataFactory();
+	@Inject
+	private ClassMetadataFactory classMetadataFactory;
 
 	private static Logger log = LoggerFactory.getLogger(PersistenceMetadataRepository.class);
 	

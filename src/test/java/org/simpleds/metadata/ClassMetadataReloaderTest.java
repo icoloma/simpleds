@@ -4,6 +4,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
 import org.junit.Test;
+import org.simpleds.converter.ConverterFactory;
 import org.simpleds.testdb.Dummy1;
 import org.zeroturnaround.javarebel.ClassEventListener;
 
@@ -14,7 +15,10 @@ public class ClassMetadataReloaderTest {
 	
 	@Test
 	public void test() {
+		ClassMetadataFactory classMetadataFactory = new ClassMetadataFactory();
+		classMetadataFactory.setConverterFactory(new ConverterFactory());
 		persistenceMetadataRepository = new PersistenceMetadataRepository();
+		persistenceMetadataRepository.setClassMetadataFactory(classMetadataFactory );
 		persistenceMetadataRepository.add(Dummy1.class);
 		classMetadataReloader = new ClassMetadataReloader();
 		classMetadataReloader.setPersistenceMetadataRepository(persistenceMetadataRepository);

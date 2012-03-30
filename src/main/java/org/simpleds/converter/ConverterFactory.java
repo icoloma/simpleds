@@ -8,6 +8,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.type.TypeFactory;
+import org.codehaus.jackson.type.JavaType;
+import org.simpleds.annotations.AsJSON;
 import org.simpleds.metadata.SinglePropertyMetadata;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -25,11 +32,16 @@ import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.users.User;
 import com.google.common.collect.Maps;
 
+@Singleton
+@SuppressWarnings("rawtypes")
 public class ConverterFactory {
-
-	private static Map<Class, Converter> converters = Maps.newHashMap();
 	
-	static {
+	@Inject
+	private ObjectMapper objectMapper;
+
+	private Map<Class, Converter> converters = Maps.newHashMap();
+	
+	public ConverterFactory() {
 		addConverter(Boolean.TYPE, new NullConverter<Boolean>(Boolean.class));
 		addConverter(Boolean.class, new NullConverter<Boolean>(Boolean.class));
 		addConverter(Short.TYPE, new ShortConverter().setNullValue((short)0));
@@ -61,21 +73,37 @@ public class ConverterFactory {
 	}
 	
 	/**
+	 * Adds a new Converter to the current config
+	 */
+	public void addConverter(Class clazz, Converter converter) {
+		converters.put(clazz, converter);
+	}
+	
+	/**
 	 * @return the converter for a PropertyMetadata instance
 	 */
-	public static <J, D> Converter<J, D> getConverter(SinglePropertyMetadata<J, D> metadata) {
-		// assign converter
+	public <J, D> Converter<J, D> getConverter(SinglePropertyMetadata<J, D> metadata) {
 		Class<J> propertyType = metadata.getPropertyType();
+		if (metadata.getAnnotation(AsJSON.class) != null) {
+			TypeFactory typeFactory = objectMapper.getTypeFactory();
+			JavaType type;
+			if (Collection.class.isAssignableFrom(propertyType)) {
+				type = typeFactory.constructCollectionType(List.class, guessCollectionGenericType(metadata));
+			} else {
+				type = typeFactory.uncheckedSimpleType(propertyType);
+			}
+			return new JsonConverter(type, objectMapper);
+		}
 		if (Collection.class.isAssignableFrom(propertyType)) {
-			return ConverterFactory.getCollectionConverter((Class<? extends Iterable>) propertyType, guessCollectionGenericType(metadata));
+			return getCollectionConverter((Class<? extends Iterable>) propertyType, guessCollectionGenericType(metadata));
 		} else {
-			return ConverterFactory.getConverter(propertyType);
+			return getConverter(propertyType);
 		}
 
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <J, D> Converter<J, D> getConverter(Class<J> clazz) {
+	public <J, D> Converter<J, D> getConverter(Class<J> clazz) {
 		if (Enum.class.isAssignableFrom(clazz)) {
 			return new EnumToStringConverter(clazz);
 		}
@@ -86,7 +114,7 @@ public class ConverterFactory {
 		return converter;
 	}
 	
-	public static CollectionConverter getCollectionConverter(Class<? extends Iterable> collectionType, Class<?> itemType) {
+	public CollectionConverter getCollectionConverter(Class<? extends Iterable> collectionType, Class<?> itemType) {
 		if (itemType == null) {
 			throw new IllegalArgumentException("Cannot create collection converter for unspecified node type");
 		}
@@ -105,7 +133,7 @@ public class ConverterFactory {
 		return c;
 	}	
 	
-	private static Class guessCollectionGenericType(SinglePropertyMetadata metadata) {
+	private Class guessCollectionGenericType(SinglePropertyMetadata metadata) {
 		if (metadata.getGetter() != null) {
 			return GenericCollectionTypeResolver.getCollectionReturnType(metadata.getGetter());
 		} else if (metadata.getSetter() != null) {
@@ -115,14 +143,9 @@ public class ConverterFactory {
 		}
 		return null;
 	}
-	
-	/**
-	 * Adds a new Converter to the current config
-	 */
-	public static void addConverter(Class clazz, Converter converter) {
-		converters.put(clazz, converter);
+
+	public void setObjectMapper(ObjectMapper objectMapper) {
+		this.objectMapper = objectMapper;
 	}
 
-
-	
 }
