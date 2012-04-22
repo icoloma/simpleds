@@ -11,18 +11,14 @@ import java.util.Iterator;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.persistence.Embedded;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
 
 import org.simpleds.annotations.Cacheable;
+import org.simpleds.annotations.Embedded;
 import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
+import org.simpleds.annotations.Transient;
 import org.simpleds.annotations.Version;
 import org.simpleds.converter.Converter;
 import org.simpleds.converter.ConverterFactory;
@@ -32,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" }) 
 public class ClassMetadataFactory {
 
 	private static final Class<?>[] ROOT_ANCESTORS = new Class<?>[] {};
@@ -60,12 +56,8 @@ public class ClassMetadataFactory {
 	}
 	
 	private void initParents(ClassMetadata metadata) {
-		org.simpleds.annotations.Entity entity = metadata.getPersistentClass().getAnnotation(org.simpleds.annotations.Entity.class);
 		Id idAnn = metadata.getKeyProperty() != null? metadata.getKeyProperty().getAnnotation(Id.class) : null;
-		@SuppressWarnings("deprecation")
-		Class<?>[] cparents = idAnn != null? idAnn.parent() : 
-							 entity != null? entity.parent() : 
-							 ROOT_ANCESTORS; 
+		Class<?>[] cparents = idAnn != null? idAnn.parent() : ROOT_ANCESTORS;
 		if (cparents.length > 0) {
 			Set<String> parents = Sets.newTreeSet();
 			for (Class<?> clazz : cparents) {
@@ -145,13 +137,7 @@ public class ClassMetadataFactory {
 	}
 
 	private <J, D> void addProperty(ClassMetadata classMetadata, SinglePropertyMetadata<J, D> propertyMetadata) {
-		if (propertyMetadata.getAnnotation(OneToOne.class) != null || 
-				propertyMetadata.getAnnotation(ManyToOne.class) != null ||
-				propertyMetadata.getAnnotation(OneToMany.class) !=  null ||
-				propertyMetadata.getAnnotation(ManyToMany.class) != null) {
-			throw new IllegalArgumentException("Property " + classMetadata.getKind() + "." + propertyMetadata.getName() + " cannot be processed. The following annotations are not supported: @OneToOne, @ManyToOne, @OneToMany, @ManyToMany");
-		}
-		if (propertyMetadata.getAnnotation(Embedded.class) != null || propertyMetadata.getAnnotation(org.simpleds.annotations.Embedded.class) != null) {
+		if (propertyMetadata.getAnnotation(org.simpleds.annotations.Embedded.class) != null) {
 			addEmbeddedProperties(classMetadata, propertyMetadata);
 		} else {
 			if (propertyMetadata.getConverter() == null) { // calculate default converter
@@ -192,7 +178,7 @@ public class ClassMetadataFactory {
 	}
 
 	/**
-	 * Return true if the field is marked as transient
+	 * Return true if the field is static or marked as transient
 	 */
 	private boolean isCandidate(Field field) {
 		return !Modifier.isStatic(field.getModifiers()) && field.getAnnotation(Transient.class) == null;

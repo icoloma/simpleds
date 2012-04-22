@@ -7,9 +7,9 @@ import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.labs.taskqueue.Queue;
-import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import com.google.appengine.api.labs.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 
 /**
  * Common superclass
@@ -77,7 +77,7 @@ public abstract class AbstractBackgroundTask implements BackgroundTask {
 	 */
 	public void deferProceed(TaskRequest request) {
 		log.info("Deferring " + getId() + " with cursor " + request.getCursor() == null? "<none>" : request.getCursor().toWebSafeString());
-		TaskOptions url = TaskOptions.Builder.url(request.getUri()); 
+		TaskOptions url = TaskOptions.Builder.withUrl(request.getUri()); 
 		for (String paramName : request.getParameterNames()) {
 			url.param(paramName, request.getParameter(paramName));
 		}

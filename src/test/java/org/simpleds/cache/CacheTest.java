@@ -187,7 +187,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 		Cursor cursor = it.getCursor();
 		assertCacheKeys(
 				"qcount{kind=d1}",
-				"qdata{kind=d1,start=E9oBH2oaagR0ZXN0chILEgYKABoCZDEMCxICZDEYAwyCAQDgAQAU,end=E9oBH2oaagR0ZXN0chILEgYKABoCZDEMCxICZDEYAwyCAQDgAQAU}", 
+				"qdata{kind=d1,start=E-ABAIICEGoEdGVzdHIICxICZDEYAwwU,end=E-ABAIICEGoEdGVzdHIICxICZDEYAwwU}", 
 				entityManager.createQuery(Dummy1.class)
 					.withStartCursor(cursor)
 					.withEndCursor(cursor)

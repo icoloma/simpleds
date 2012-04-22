@@ -27,7 +27,7 @@ public class ClassMetadataReloader implements ClassEventListener {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void onClassEvent(int eventType, Class klass) {
-		if (klass.getAnnotation(Entity.class) != null || klass.getAnnotation(javax.persistence.Entity.class) != null) {
+		if (klass.getAnnotation(Entity.class) != null) {
 			log.info("Reloading SimpleDS metadata for " + klass.getName());
 			persistenceMetadataRepository.remove(klass);
 			persistenceMetadataRepository.add(klass);

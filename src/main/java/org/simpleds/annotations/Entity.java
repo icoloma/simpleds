@@ -23,8 +23,9 @@ public @interface Entity {
 	 * The parent class. Indicates the possible parent types when generating 
 	 * key values for this class. Leave empty for root entities. 
 	 * @deprecated use {@link Id} instead
-	 */
+	 * /
 	Class<?>[] parent() default {};
+	*/
 	
 	/**
 	 * The kind name to use in the datastore to identify this entity. Defaults to the 

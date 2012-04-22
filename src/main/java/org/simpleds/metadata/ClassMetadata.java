@@ -5,11 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
 import org.simpleds.annotations.Property;
 import org.simpleds.annotations.Transient;
 import org.simpleds.exception.ConfigException;
@@ -26,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ClassMetadata {
 
 	/** persistent class */
@@ -64,7 +60,6 @@ public class ClassMetadata {
 	 * Convert a value from Google representation to a Java value
 	 * @param entity the persistent {@link Entity} from the google datastore
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T datastoreToJava(Entity entity) {
 		try {
 			if (entity == null) {
@@ -122,7 +117,6 @@ public class ClassMetadata {
 		Entity entity = key == null? new Entity(kind, parentKey) : new Entity(key); 
 		for (Entry<String, PropertyMetadata<?, ?>> entry : properties.entrySet()) {
 			PropertyMetadata property = entry.getValue();
-			String name = entry.getKey();
 			Object javaValue = property.getValue(javaObject);
 			property.setEntityValue(entity, javaValue);
 		}
@@ -135,24 +129,21 @@ public class ClassMetadata {
 		}	
 	} 
 	
-	@SuppressWarnings("unchecked")
 	public void add(PropertyMetadata<?, ?> property) {
 		org.simpleds.annotations.Id simpledsId = property.getAnnotation(org.simpleds.annotations.Id.class);
-		if (property.getAnnotation(Id.class) != null || simpledsId != null) {
+		if (simpledsId != null) {
 			if (keyProperty != null) {
 				throw new IllegalArgumentException("Key property specified more than once for class " + persistentClass.getSimpleName() + "(" + keyProperty.getName() + ", " + property.getName() + ")");
 			}
 			keyProperty = (PropertyMetadata<Key, Key>) property;
-			generateKeyValue = property.getAnnotation(GeneratedValue.class) != null || (simpledsId != null && simpledsId.generated());
+			generateKeyValue = simpledsId != null && simpledsId.generated();
 			Class<?> type = property.getPropertyType();
 			if (!Key.class.equals(type)) {
 				throw new IllegalArgumentException("Error processing " + persistentClass.getSimpleName() + ". Only Key.class is supported as primary key");
 			}
 		} else if (property.getAnnotation(Transient.class) == null){
-			Basic basic = property.getAnnotation(Basic.class);
-			Column column = property.getAnnotation(Column.class);
 			Property propertyAnn = property.getAnnotation(Property.class); 
-			if (basic != null && !basic.optional() || column != null && !column.nullable() || propertyAnn != null && propertyAnn.required()) {
+			if (propertyAnn != null && propertyAnn.required()) {
 				requiredProperties.add(property.getName());
 			}
 			if (properties.keySet().contains(property.getName())) {
@@ -177,7 +168,6 @@ public class ClassMetadata {
 		this.persistentClass = persistentClass;
 	}
 
-	@SuppressWarnings("unchecked")
 	public <J, D> PropertyMetadata<J, D> getProperty(String propertyName) {
 		PropertyMetadata<J, D> metadata = (PropertyMetadata<J, D>) properties.get(propertyName);
 		if (metadata == null) {

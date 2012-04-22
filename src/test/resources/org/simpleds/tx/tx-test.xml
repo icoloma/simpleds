@@ -17,11 +17,11 @@
     	factory-method="getDatastoreService" 
     />
 	<bean 
-		class="org.simpleds.metadata.SpringPersistenceMetadataRepositoryFactory" 
+		class="org.simpleds.spring.SpringPersistenceMetadataRepositoryFactory" 
 		p:locations="classpath:org/simpleds/testdb/**" 
 	/>
 	<bean 
-		class="org.simpleds.SpringEntityManagerFactory" 
+		class="org.simpleds.spring.SpringEntityManagerFactory" 
 		p:enforceSchemaConstraints="true" 
 	/>
 	

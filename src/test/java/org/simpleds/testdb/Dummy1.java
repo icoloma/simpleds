@@ -2,13 +2,9 @@ package org.simpleds.testdb;
 
 import java.util.Date;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
+import org.simpleds.annotations.Embedded;
 import org.simpleds.annotations.Entity;
+import org.simpleds.annotations.Id;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.Property;
 
@@ -26,13 +22,12 @@ public class Dummy1 {
 	}
 	
 	@Id
-	@GeneratedValue
 	private Key key;
 	
-	@Basic(optional=false)
+	@Property(required=true)
 	private String name;
 	
-	@Column(nullable=false, name="date")
+	@Property(required=true, value="date")
 	private Date overridenNameDate;
 	
 	@SuppressWarnings("unused")

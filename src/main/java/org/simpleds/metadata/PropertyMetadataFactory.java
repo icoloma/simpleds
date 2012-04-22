@@ -3,8 +3,6 @@ package org.simpleds.metadata;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import javax.persistence.Column;
-
 import org.simpleds.annotations.Property;
 import org.simpleds.converter.Converter;
 import org.simpleds.converter.NullConverter;
@@ -29,12 +27,6 @@ public class PropertyMetadataFactory {
 			metadata.setGetter(getter);
 			metadata.setSetter(setter);
 			metadata.setField(field);
-			
-			// @Column 
-			Column column = metadata.getAnnotation(Column.class);
-			if (column != null && column.name().length() > 0) {
-				name = column.name();
-			}
 			
 			// @Property
 			Property propertyAnn = metadata.getAnnotation(Property.class);

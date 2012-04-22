@@ -1,9 +1,12 @@
-package org.simpleds;
+package org.simpleds.spring;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.simpleds.IndexManager;
+import org.simpleds.IndexManagerFactory;
+import org.simpleds.IndexManagerImpl;
 import org.simpleds.metadata.PersistenceMetadataRepository;
 import org.springframework.beans.factory.FactoryBean;
 

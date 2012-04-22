@@ -1,9 +1,11 @@
-package org.simpleds.metadata;
+package org.simpleds.spring;
 
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.simpleds.metadata.PersistenceMetadataRepository;
+import org.simpleds.spring.SpringPersistenceMetadataRepositoryFactory;
 import org.simpleds.testdb.Dummy1;
 import org.simpleds.testdb.Dummy2;
 import org.simpleds.testdb.Excluded;

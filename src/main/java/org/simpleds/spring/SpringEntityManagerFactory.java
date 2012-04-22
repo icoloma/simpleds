@@ -1,9 +1,12 @@
-package org.simpleds;
+package org.simpleds.spring;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.simpleds.EntityManager;
+import org.simpleds.EntityManagerFactory;
+import org.simpleds.EntityManagerImpl;
 import org.simpleds.cache.CacheManager;
 import org.simpleds.cache.CacheManagerImpl;
 import org.simpleds.metadata.PersistenceMetadataRepository;

@@ -8,9 +8,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Id;
-
 import org.junit.Test;
+import org.simpleds.annotations.Entity;
+import org.simpleds.annotations.Id;
 import org.simpleds.testdb.Dummy1;
 
 import com.google.appengine.api.datastore.Key;
@@ -122,9 +122,10 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		assertTrue(list.isEmpty());
 	}
 
-	@javax.persistence.Entity
+	@Entity
 	@SuppressWarnings("unused")
 	public static class CollectionDummy {
+		
 		@Id 
 		private Key key;
 		

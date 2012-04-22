@@ -9,11 +9,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Set;
 
-import javax.persistence.Id;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.AbstractEntityManagerTest;
+import org.simpleds.annotations.Id;
 import org.simpleds.annotations.Property;
 import org.simpleds.converter.IntegerConverter;
 import org.simpleds.exception.ConfigException;

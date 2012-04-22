@@ -1,13 +1,15 @@
-package org.simpleds.metadata;
+package org.simpleds.spring;
 
 import java.io.IOException;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.Entity;
 
 import org.simpleds.converter.ConverterFactory;
+import org.simpleds.metadata.ClassMetadataFactory;
+import org.simpleds.metadata.PersistenceMetadataRepository;
+import org.simpleds.util.ClassUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -17,7 +19,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.util.ClassUtils;
 
 /**
  * Wrapper that makes injection of {@link PersistenceMetadataRepository} attributes easier using spring.
@@ -61,9 +62,8 @@ public class SpringPersistenceMetadataRepositoryFactory implements FactoryBean<P
 						}
 						MetadataReader metadataReader = readerFactory.getMetadataReader(resource);
 						AnnotationMetadata am = metadataReader.getAnnotationMetadata();
-						if (am.hasAnnotation(Entity.class.getName()) || 
-								am.hasAnnotation(org.simpleds.annotations.Entity.class.getName())) {
-							Class<?> clazz = ClassUtils.forName(am.getClassName(), ClassUtils.getDefaultClassLoader());
+						if (am.hasAnnotation(org.simpleds.annotations.Entity.class.getName())) {
+							Class<?> clazz = ClassUtils.getDefaultClassLoader().loadClass(am.getClassName());
 							persistenceMetadataRepository.add(clazz);
 						}
 					}

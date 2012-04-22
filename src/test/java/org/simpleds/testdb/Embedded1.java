@@ -1,6 +1,6 @@
 package org.simpleds.testdb;
 
-import javax.persistence.Embedded;
+import org.simpleds.annotations.Embedded;
 
 public class Embedded1 {
 

@@ -1,16 +1,14 @@
 package org.simpleds.testdb;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
 import org.simpleds.annotations.Entity;
+import org.simpleds.annotations.Id;
 
 import com.google.appengine.api.datastore.Key;
 
-@Entity(parent=Root.class)
+@Entity
 public class Child {
 
-	@Id @GeneratedValue
+	@Id(parent=Root.class)
 	private Key key;
 
 	public Key getKey() {

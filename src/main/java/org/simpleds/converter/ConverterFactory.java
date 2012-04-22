@@ -16,8 +16,8 @@ import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
 import org.simpleds.annotations.AsJSON;
 import org.simpleds.metadata.SinglePropertyMetadata;
-import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.MethodParameter;
+import org.simpleds.util.GenericCollectionTypeResolver;
+import org.simpleds.util.MethodParameter;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Email;

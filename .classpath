@@ -12,7 +12,6 @@
 	<classpathentry kind="lib" path="src/test/genlib/aopalliance-1.0.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/aspectjrt-1.6.6.jar" sourcepath="src/test/genlib/aspectjrt-1.6.6-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/aspectjweaver-1.6.6.jar" sourcepath="src/test/genlib/aspectjweaver-1.6.6-sources.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/geronimo-jpa_3.0_spec-1.1.1.jar" sourcepath="src/test/genlib/geronimo-jpa_3.0_spec-1.1.1-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-aop-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-asm-3.0.0.RELEASE.jar" sourcepath="src/test/genlib/spring-asm-3.0.0.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/spring-beans-3.0.0.RELEASE.jar" sourcepath="src/test/genlib/spring-beans-3.0.0.RELEASE-sources.jar"/>
@@ -30,11 +29,11 @@
 	<classpathentry kind="lib" path="src/test/genlib/logback-core-0.9.24.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/jul-to-slf4j-1.6.1.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/guava-10.0.1.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-sdk-1.6.0.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/appengine-api-labs-1.6.0.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/appengine-api-stubs-1.6.0.jar"/>
-	<classpathentry kind="lib" path="src/test/genlib/appengine-testing-1.6.0.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/jackson-core-asl-1.9.2.jar"/>
 	<classpathentry kind="lib" path="src/test/genlib/jackson-mapper-asl-1.9.2.jar" sourcepath="src/test/genlib/jackson-mapper-asl-1.9.2-sources.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/appengine-api-1.0-sdk-1.6.4.1.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/appengine-api-labs-1.6.4.1.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/appengine-api-stubs-1.6.4.1.jar"/>
+	<classpathentry kind="lib" path="src/test/genlib/appengine-testing-1.6.4.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

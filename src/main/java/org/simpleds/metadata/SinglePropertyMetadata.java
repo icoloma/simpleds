@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 import org.simpleds.converter.CollectionConverter;
 import org.simpleds.converter.Converter;
-import org.springframework.util.ClassUtils;
+import org.simpleds.util.ClassUtils;
 
 /**
  * A single property
@@ -86,6 +86,7 @@ public class SinglePropertyMetadata<J, D> extends AbstractPropertyMetadata<J, D>
 	}
 	
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object convertQueryParam(Object value) {
 		Converter converter = getConverter();
 		Object convertedValue;

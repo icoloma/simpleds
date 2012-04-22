@@ -62,4 +62,10 @@ public class TestEnvironment implements ApiProxy.Environment {
 	public void setRequestNamespace(String requestNamespace) {
 		this.requestNamespace = requestNamespace;
 	}
+
+	@Override
+	public long getRemainingMillis() {
+		// TODO what is expected here?
+		return 0;
+	}
 }

@@ -3,6 +3,7 @@ package org.simpleds.metadata;
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.IndexManagerImpl;
+import org.simpleds.spring.SpringPersistenceMetadataRepositoryFactory;
 import org.simpleds.test.AbstractDatastoreTest;
 import org.simpleds.testdb.Dummy1;
 

@@ -7,18 +7,16 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Transient;
-
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.annotations.AsJSON;
+import org.simpleds.annotations.Id;
 import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.MultivaluedIndexes;
 import org.simpleds.annotations.Property;
+import org.simpleds.annotations.Transient;
 import org.simpleds.converter.AbstractCollectionConverter;
 import org.simpleds.converter.ConverterFactory;
 import org.simpleds.converter.JsonConverter;
@@ -133,7 +131,6 @@ public class ClassMetadataFactoryTest {
 		private String yyy;
 		
 		// left empty on purpose
-		@Column
 		private int intProperty;
 		
 		@Property(converter=StringToTextConverter.class)
