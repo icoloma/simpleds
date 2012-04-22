@@ -29,12 +29,12 @@ dependencies {
                     "org.springframework:spring-aop:3.0.0.RELEASE",
 					"org.springframework:spring-asm:3.0.0.RELEASE",
 					"org.springframework:spring-beans:3.0.0.RELEASE",
+					"org.springframework:spring-core:3.0.0.RELEASE",
 					"org.zeroturnaround:jr-sdk:2.1.1"
 	
 	compile			"com.google.guava:guava:10.0.1",
 					"org.slf4j:slf4j-api:1.6.1",
-					"javax.inject:javax.inject:1",
-					"org.springframework:spring-core:3.0.0.RELEASE"
+					"javax.inject:javax.inject:1"
 					
 	testCompile		"asm:asm:3.2",
 					"asm:asm-util:3.2",
