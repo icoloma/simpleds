@@ -1,18 +1,22 @@
 package org.simpleds;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.junit.Test;
 import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
 import org.simpleds.testdb.Dummy1;
 
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
@@ -107,7 +111,7 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 	}
 	
 	@Test
-	public void testPredicate() throws Exception {
+	public void testPredicateList() throws Exception {
 		entityManager.put(Dummy1.create());
 		SimpleQuery query = entityManager.createQuery(Dummy1.class)
 			.withPredicate(new Predicate<Dummy1>() {
@@ -120,6 +124,54 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 			});
 		List<Dummy1> list = entityManager.find(query);
 		assertTrue(list.isEmpty());
+	}
+	
+	@Test
+	public void testPredicateIterator() throws Exception {
+		for (int i = 1; i < 7; i++) {
+			entityManager.put(Dummy1.create());
+		}
+		Predicate<Dummy1> predicate = new Predicate<Dummy1>() {
+			
+			@Override
+			public boolean apply(Dummy1 input) {
+				return input.getKey().getId() % 2 == 0;
+			}
+			
+		};
+		
+		// retrieve first two results
+		SimpleQueryResultIterator<Dummy1> it = entityManager.createQuery(Dummy1.class)
+				.sortAsc("__key__")
+				.withPredicate(predicate)
+				.asIterator();
+		assertTrue(it.hasNext());
+		assertEquals(2, it.next().getKey().getId());
+		assertEquals(4, it.next().getKey().getId());
+		assertTrue(it.hasNext());
+		
+		// confirm the cursor position (WITHOUT PREDICATE)
+		Cursor cursor = it.getCursor();
+		SimpleQueryResultIterator<Dummy1> it2 = entityManager.createQuery(Dummy1.class)
+				.sortAsc("__key__")
+				.withStartCursor(cursor)
+				.asIterator();
+		assertTrue(it2.hasNext());
+		assertEquals(6, it2.next().getKey().getId());
+		
+		// retrieve the last two results
+		it = entityManager.createQuery(Dummy1.class)
+				.sortAsc("__key__")
+				.withPredicate(predicate)
+				.withStartCursor(cursor)
+				.asIterator();
+		assertEquals(6, it.next().getKey().getId());
+		assertFalse(it.hasNext());
+		try {
+			it.next();
+			fail();
+		} catch (NoSuchElementException e) {
+		}
 	}
 
 	@Entity

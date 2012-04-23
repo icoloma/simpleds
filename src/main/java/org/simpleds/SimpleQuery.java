@@ -36,6 +36,7 @@ import com.google.common.collect.Lists;
  * Proxy class to handle a {@link Query} instance. 
  * @author icoloma
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	/** the value of cacheSeconds to skip cache */
@@ -63,7 +64,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	private int cacheSeconds = NO_CACHE;
 	
 	/** Predicate to filter using Java code */
-	private Predicate<Object> predicate;
+	private Predicate predicate;
 	
 	SimpleQuery(EntityManager entityManager, Key ancestor, ClassMetadata metadata) {
 		this.entityManager = entityManager;
@@ -177,7 +178,6 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		return addFilter(propertyName, FilterOperator.NOT_EQUAL, value);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public SimpleQuery in(String propertyName, Collection<?> values) {
 		if (values != null) {
@@ -388,7 +388,6 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * Execute the provided query and returns the result as a List of java objects 
 	 * @return the list of resulting java entities
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> List<T> asList() {
 		String cacheKey = null;
 		
@@ -405,7 +404,6 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 
 						@Override
 						public T apply(Key key) {
-							// TODO Auto-generated method stub
 							return values.get(key);
 						}
 						
@@ -415,14 +413,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		}
 		
 		// execute the query
-		List<T> result = Lists.newArrayList();
-		SimpleQueryResultIterable<T> iterable = asIterable();
-		for (T item : iterable) {
-			if (predicate == null || predicate.apply(item)) {
-				result.add(item);
-			}
-		}
-		
+		List<T> result = Lists.newArrayList((Iterable<T>) asIterable());
 		if (isCacheable()) {
 			Collection<Key> keys = isKeysOnly()? result : Collections2.transform(result, new EntityToKeyFunction(classMetadata.getPersistentClass()));
 			getCacheManager().put(cacheKey, Lists.newArrayList(keys), cacheSeconds);
@@ -456,7 +447,6 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * @return the first result of the query
 	 * @throws EntityNotFoundException if the query did not return any result
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T asSingleResult() {
 		T javaObject = null;
 		String cacheKey = calculateDataCacheKey();
@@ -492,7 +482,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		}
 		if (result == null) {
 			SimpleQuery q = this.isKeysOnly()? this : this.clone().keysOnly();
-			result = getDatastoreService().prepare(q.getQuery()).countEntities();
+			result = getDatastoreService().prepare(q.getQuery()).countEntities(fetchOptions);
 			if (isCacheable()) {
 				getCacheManager().put(cacheKey, result, cacheSeconds);
 			}
@@ -509,7 +499,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	public <T> SimpleQueryResultIterable<T> asIterable() {
 		PreparedQuery preparedQuery = getDatastoreService().prepare(transaction, query);
 		QueryResultIterable<Entity> iterable = fetchOptions == null? preparedQuery.asQueryResultIterable() : preparedQuery.asQueryResultIterable(fetchOptions);
-		return new SimpleQueryResultIterableImpl<T>(classMetadata, iterable).setKeysOnly(isKeysOnly());
+		return new SimpleQueryResultIterableImpl<T>(classMetadata, predicate, iterable).setKeysOnly(isKeysOnly());
 	}
 	
 	/** 
@@ -607,7 +597,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	@Override
 	public SimpleQuery withPredicate(Predicate<?> predicate) {
-		this.predicate = (Predicate) predicate;
+		this.predicate = predicate;
 		return this;
 	}
 

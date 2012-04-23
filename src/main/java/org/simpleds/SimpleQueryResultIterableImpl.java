@@ -4,6 +4,7 @@ import org.simpleds.metadata.ClassMetadata;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.common.base.Predicate;
 
 class SimpleQueryResultIterableImpl<T> implements SimpleQueryResultIterable<T> {
 
@@ -15,15 +16,20 @@ class SimpleQueryResultIterableImpl<T> implements SimpleQueryResultIterable<T> {
 	
 	/** true to return keys only, false otherwise */
 	private boolean keysOnly;
+
+	/** if not null, predicate will be used to filter the returned collection using Java code */
+	private Predicate<T> predicate;
 	
-	SimpleQueryResultIterableImpl(ClassMetadata metadata, QueryResultIterable<Entity> iterable) {
+	SimpleQueryResultIterableImpl(ClassMetadata metadata, Predicate<T> predicate, QueryResultIterable<Entity> iterable) {
 		this.metadata = metadata;
 		this.iterable = iterable;
+		this.predicate = predicate;
 	}
 
 	@Override
 	public SimpleQueryResultIterator<T> iterator() {
-		return new SimpleQueryResultIteratorImpl<T>(metadata, iterable.iterator()).setKeysOnly(keysOnly);
+		return predicate == null? new SimpleQueryResultIteratorImpl<T>(metadata, iterable.iterator()).setKeysOnly(keysOnly)
+				: new PredicateSimpleQueryResultIteratorImpl<T>(metadata, predicate, iterable.iterator()).setKeysOnly(keysOnly);
 	}
 	
 	public SimpleQueryResultIterableImpl<T> setKeysOnly(boolean keysOnly) {

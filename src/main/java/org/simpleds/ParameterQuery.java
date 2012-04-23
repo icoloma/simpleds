@@ -146,6 +146,8 @@ public interface ParameterQuery {
 	 * Set this query to retrieve and return {@link Key} instances only.
 	 * This yields better performance for the cases where only the {@link Key} values
 	 * are required.
+	 * After invoking this method any returned Iterable/Iterator will contain Key values 
+	 * instead of persistent instances.
 	 * @return this instance
 	 */
 	public ParameterQuery keysOnly();

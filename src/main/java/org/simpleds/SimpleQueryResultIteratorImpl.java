@@ -17,8 +17,7 @@ class SimpleQueryResultIteratorImpl<T> implements SimpleQueryResultIterator<T> {
 	/** true to return keys only instead of full-blown entities */
 	private boolean keysOnly;
 	
-	SimpleQueryResultIteratorImpl(ClassMetadata metadata,
-			QueryResultIterator<Entity> iterator) {
+	SimpleQueryResultIteratorImpl(ClassMetadata metadata, QueryResultIterator<Entity> iterator) {
 		this.metadata = metadata;
 		this.iterator = iterator;
 	}
