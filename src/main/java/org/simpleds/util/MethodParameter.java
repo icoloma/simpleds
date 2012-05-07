@@ -8,8 +8,6 @@ import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.core.ParameterNameDiscoverer;
-
 import com.google.common.base.Preconditions;
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e.
@@ -35,10 +33,6 @@ public class MethodParameter {
 	private Type genericParameterType;
 
 	private Annotation[] parameterAnnotations;
-
-	private ParameterNameDiscoverer parameterNameDiscoverer;
-
-	private String parameterName;
 
 	private int nestingLevel = 1;
 
@@ -234,36 +228,6 @@ public class MethodParameter {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Initialize parameter name discovery for this method parameter.
-	 * <p>This method does not actually try to retrieve the parameter name at
-	 * this point; it just allows discovery to happen when the application calls
-	 * {@link #getParameterName()} (if ever).
-	 * /
-	public void initParameterNameDiscovery(ParameterNameDiscoverer parameterNameDiscoverer) {
-		this.parameterNameDiscoverer = parameterNameDiscoverer;
-	}
-
-	/**
-	 * Return the name of the method/constructor parameter.
-	 * @return the parameter name (may be <code>null</code> if no
-	 * parameter name metadata is contained in the class file or no
-	 * {@link #initParameterNameDiscovery ParameterNameDiscoverer}
-	 * has been set to begin with)
-	 * /
-	public String getParameterName() {
-		if (this.parameterNameDiscoverer != null) {
-			String[] parameterNames = (this.method != null ?
-					this.parameterNameDiscoverer.getParameterNames(this.method) :
-					this.parameterNameDiscoverer.getParameterNames(this.constructor));
-			if (parameterNames != null) {
-				this.parameterName = parameterNames[this.parameterIndex];
-			}
-			this.parameterNameDiscoverer = null;
-		}
-		return this.parameterName;
 	}
 
 	/**

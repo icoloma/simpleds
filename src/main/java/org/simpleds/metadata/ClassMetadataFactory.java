@@ -36,8 +36,11 @@ public class ClassMetadataFactory {
 	private static Logger log = LoggerFactory.getLogger(ClassMetadataFactory.class);
 	
 	/** Maximum number of chars recommended for a kind */
-	private int maxKindChars = 3;
+	private int maxKindLength = 3;
 	
+	/** maximum number of characters recommended for a property name */
+	private int maxPropertyLength = 3;
+
 	@Inject
 	private ConverterFactory converterFactory;
 	
@@ -45,9 +48,9 @@ public class ClassMetadataFactory {
 		ClassMetadata metadata = new ClassMetadata();
 		metadata.setPersistentClass(clazz);
 		String kind = getKind(clazz);
-		if (kind.length() > maxKindChars) {
+		if (kind.length() > maxKindLength) {
 			log.warn(kind + " is a long name for an entity kind. Consider using @Entity to make it shorter, which will save space in the Datastore. Use " + 
-					ClassMetadataFactory.class.getSimpleName() + ".setMaxKindChars() to disable this warning");
+					getClass().getSimpleName() + ".setMaxKindLength() to disable this warning");
 		}
 		metadata.setKind(kind);
 		visit(clazz, metadata, new HashSet<String>());
@@ -157,7 +160,7 @@ public class ClassMetadataFactory {
 				versionManager.setPropertyMetadata(propertyMetadata);
 				classMetadata.setVersionManager(versionManager);
 			}
-			classMetadata.add(propertyMetadata);
+			doAddProperty(classMetadata, propertyMetadata);
 		}
 	}
 
@@ -171,10 +174,17 @@ public class ClassMetadataFactory {
 		for (Iterator<String> i = nested.getPropertyNames(); i.hasNext(); ) {
 			String propertyName = i.next();
 			EmbeddedPropertyMetadata property = new EmbeddedPropertyMetadata(propertyMetadata, nested.getProperty(propertyName));
-			//SinglePropertyMetadata lastNode = property.getLastNode();
-			//lastNode.setConverter(ConverterFactory.getConverter(lastNode));
-			classMetadata.add(property);
+			doAddProperty(classMetadata, property);
 		}
+	}
+	
+	private void doAddProperty(ClassMetadata classMetadata, PropertyMetadata property) {
+		if (property.getName().length() > maxPropertyLength) {
+			log.warn(classMetadata.getPersistentClass().getSimpleName() + 
+					"." + property.getName() + " is a long name for a property. Consider using @Property to make it shorter, which will save space in the Datastore. Use " + 
+					getClass().getSimpleName() + ".setMaxPropertyLength() to disable this warning");
+		}
+		classMetadata.add(property);
 	}
 
 	/**
@@ -210,11 +220,16 @@ public class ClassMetadataFactory {
 	/**
 	 * Set maximum number of chars for an entity kind. Set to Integer.MAX_VALUE to disable the warning associated to long entity names
 	 */
-	public void setMaxKindChars(int maxKindChars) {
-		this.maxKindChars = maxKindChars;
+	public void setMaxKindLength(int maxKindChars) {
+		this.maxKindLength = maxKindChars;
 	}
 
 	public void setConverterFactory(ConverterFactory converterFactory) {
 		this.converterFactory = converterFactory;
 	}
+
+	public void setMaxPropertyLength(int maxPropertyLength) {
+		this.maxPropertyLength = maxPropertyLength;
+	}
+	
 }

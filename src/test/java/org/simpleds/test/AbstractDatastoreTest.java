@@ -2,7 +2,6 @@ package org.simpleds.test;
 
 import org.junit.After;
 import org.junit.Before;
-import org.simpleds.metadata.PropertyMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -36,7 +35,6 @@ public abstract class AbstractDatastoreTest {
 		// to let Spring initialize Datastore-dependent classes
 		helper.setUp();
 		SLF4JBridgeHandler.install();
-		PropertyMetadataFactory.setMaxPropertyChars(Integer.MAX_VALUE);
 	}
 	
 	@Before
