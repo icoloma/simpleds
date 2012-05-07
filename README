@@ -2,9 +2,7 @@ Welcome to SimpleDS
 ===================
 
 SimpleDS provides a simple Java-to-Entity framework that maps java classes
-to persistent entities, getting as little in the way as possible. What you 
-get is barely a wrapper around Datastore APIs, providing mapping between 
-Entity and Java classes. 
+to persistent entities, getting as little in the way as possible. 
 
 Distribution
 ============
@@ -15,3 +13,9 @@ The distribution file includes the following:
  * simpleds-javadoc.jar 	The javadoc jar file
  * simpleds-sources 		The jar file with all sources
  * lib/						The third-party libraries required to use simpleds
+ 
+Compile
+=======
+
+If you are working from the sources, execute "gradle eclipse"
+ 

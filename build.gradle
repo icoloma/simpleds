@@ -1,51 +1,104 @@
-apply from: "$sharedLocation/extrema.gradle"
+apply plugin: 'java'
+apply plugin: 'eclipse'
 apply plugin: 'maven'
+apply plugin: 'signing'
+apply from: '../gradle-plugins/providedCompile.gradle'
+apply from: '../gradle-plugins/artifacts.gradle'
 
-project.version=simpledsVersion
+project.version='1.2-SNAPSHOT'
+project.group='org.extrema-sistemas'
 
 repositories {
-    mavenRepo name: 'gae-plugin', urls: 'http://maven-gae-plugin.googlecode.com/svn/repository/'
+    if (project.hasProperty('nexus')) {
+        mavenRepo name: 'nexus', url: nexus
+    }
+    mavenCentral()
 }
 
 configurations {
-    sources.exclude group: 'com.google.appengine'
-    sources.exclude group: 'asm'
     all*.exclude module: 'commons-logging'
 }
 
 dependencies {
 
-	providedCompile	":guice:2010.10.10-snapshot",
-					"com.google.appengine:appengine-api-labs:${appengineVersion}",
-					"com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}",
-					"com.google.appengine:appengine-api-stubs:${appengineVersion}",
-					"com.google.appengine:appengine-testing:${appengineVersion}",
-					"aopalliance:aopalliance:1.0",
-					"org.apache.geronimo.specs:geronimo-servlet_2.4_spec:1.1.1",
-					"org.aspectj:aspectjrt:1.6.6",
-					"org.aspectj:aspectjweaver:1.6.6",
-					"org.codehaus.jackson:jackson-core-asl:1.9.2",
-                    "org.codehaus.jackson:jackson-mapper-asl:1.9.2",
-                    "org.springframework:spring-aop:3.0.0.RELEASE",
-					"org.springframework:spring-asm:3.0.0.RELEASE",
-					"org.springframework:spring-beans:3.0.0.RELEASE",
-					"org.springframework:spring-core:3.0.0.RELEASE",
-					"org.zeroturnaround:jr-sdk:2.1.1"
-	
 	compile			"com.google.guava:guava:10.0.1",
 					"org.slf4j:slf4j-api:1.6.1",
 					"javax.inject:javax.inject:1"
 					
-	testCompile		"asm:asm:3.2",
-					"asm:asm-util:3.2",
-					"ch.qos.logback:logback-classic:0.9.24",
-					"junit:junit:4.5",
+	providedCompile	"com.google.inject:guice:3.0",
+                    "com.google.appengine:appengine-api-labs:${appengineVersion}",
+                    "com.google.appengine:appengine-api-1.0-sdk:${appengineVersion}",
+                    "com.google.appengine:appengine-api-stubs:${appengineVersion}",
+                    "com.google.appengine:appengine-testing:${appengineVersion}",
+                    "aopalliance:aopalliance:1.0",
+                    "org.apache.geronimo.specs:geronimo-servlet_2.4_spec:1.1.1",
+                    "org.aspectj:aspectjrt:1.6.6",
+                    "org.aspectj:aspectjweaver:1.6.6",
+                    "org.codehaus.jackson:jackson-core-asl:1.9.2",
+                    "org.codehaus.jackson:jackson-mapper-asl:1.9.2",
+                    "org.springframework:spring-aop:3.0.0.RELEASE",
+                    "org.springframework:spring-asm:3.0.0.RELEASE",
+                    "org.springframework:spring-beans:3.0.0.RELEASE",
+                    "org.springframework:spring-core:3.0.0.RELEASE",
+                    "org.zeroturnaround:jr-sdk:2.1.1",
+			"ch.qos.logback:logback-classic:0.9.24",
 					"org.slf4j:jcl-over-slf4j:1.6.1",
 					"org.slf4j:jul-to-slf4j:1.6.1",
 					"org.springframework:spring-context:3.0.0.RELEASE",
 					"org.springframework:spring-expression:3.0.0.RELEASE",
 					"org.springframework:spring-test:3.0.0.RELEASE"
 					
+	testCompile		"junit:junit:4.5"
+}
+
+
+artifacts {
+    archives jar
+}
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+ 
+        pom.project {
+            name project.name
+            packaging 'jar'
+            description 'SimpleDS provides a simple persistence framework for Google AppEngine that gets as little in the way as possible.'
+            url 'http://code.google.com/p/simpleds/'
+            scm {
+                url 'https://code.google.com/p/simpleds/'
+                connection "scm:git:https://code.google.com/p/simpleds/"
+                developerConnection "scm:git:https://code.google.com/p/simpleds/"
+            }
+            licenses {
+                license {
+                    name 'The Apache Software License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    distribution 'repo'
+                }
+            }
+            developers {
+               developer {
+                   id 'icoloma'
+                   name 'Nacho Coloma'
+               }
+           }
+        }
+        uniqueVersion = true // 'false' failing due to http://jira.codehaus.org/browse/GRADLE-629
+        configuration = configurations.archives
+        
+        snapshotRepository(url: 'http://oss.sonatype.org/content/repositories/snapshots') {
+            authentication(userName: sonatypeUsername, password: sonatypePassword)
+        }
+        
+        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2') {
+            authentication(userName: sonatypeUsername, password: sonatypePassword)
+        }
+    }
 }
 
 task 'zipDist'(type: Zip, dependsOn: javadoc) {

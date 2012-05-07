@@ -1,4 +1,3 @@
 build
-src/test/genlib
 bin
 .gradle
