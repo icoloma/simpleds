@@ -18,12 +18,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.AbstractEntityManagerTest;
 import org.simpleds.KeyFactory2;
-import org.simpleds.PagedList;
-import org.simpleds.PagedQuery;
 import org.simpleds.SimpleQuery;
 import org.simpleds.SimpleQueryResultIterator;
 import org.simpleds.exception.EntityNotFoundException;
-import org.simpleds.functions.EntityToKeyFunction;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.testdb.CacheableEntity;
 import org.simpleds.testdb.Dummy1;
@@ -33,7 +30,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 
 public class CacheTest extends AbstractEntityManagerTest {
@@ -139,8 +135,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 	
 	@Test
 	public void testNotCacheableData() {
-		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
-		memcache.setNamespace(CacheManager.MEMCACHE_NAMESPACE);
+		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService(CacheManager.MEMCACHE_NAMESPACE);
 		memcache.clearAll();
 		Dummy1 dummy = Dummy1.create();
 		entityManager.put(dummy);
@@ -158,7 +153,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 	
 	@Test(expected=EntityNotFoundException.class)
 	public void testSingleGetDoesNotExist() {
-		CacheableEntity result = entityManager.get(KeyFactory2.createKey(CacheableEntity.class, 1234));
+		entityManager.get(KeyFactory2.createKey(CacheableEntity.class, 1234));
 	}
 	
 	@Test
@@ -301,58 +296,6 @@ public class CacheTest extends AbstractEntityManagerTest {
 		query.clearCache();
 	}
 	
-	@Test
-	public void testCachePagedQueryTotal() {
-		initPagedData();
-		PagedQuery query = entityManager.createPagedQuery(Dummy1.class)
-			.withCacheSeconds(100);
-		query.setPageIndex(0);
-		query.setPageSize(3);
-		PagedList<Dummy1> pagedList = query.asPagedList();
-		assertEquals(5, pagedList.getTotalResults());
-		entityManager.delete(Collections2.transform(pagedList.getData(), new EntityToKeyFunction(Dummy1.class)));
-
-		// total is out of date, but data is not
-		PagedList<Dummy1> pagedList2 = query.asPagedList();
-		assertEquals(5, pagedList2.getTotalResults());
-		assertEquals(2, pagedList2.getData().size());
-		
-		// refresh totals
-		query.clearCache();
-		PagedList<Dummy1> pagedList3 = query.asPagedList();
-		assertEquals(2, pagedList3.getTotalResults());
-	}
-	
-	@Test
-	public void testCachePagedQueryData() {
-		initPagedData();
-		PagedQuery query = entityManager.createPagedQuery(Dummy1.class)
-			.withCacheSeconds(100)
-			.withCacheType(PagedCacheType.DATA)
-			;
-		query.setPageIndex(0);
-		query.setPageSize(3);
-		PagedList<Dummy1> pagedList = query.asPagedList();
-		assertEquals(3, pagedList.getData().size());
-		entityManager.delete(pagedList.getData().get(0).getKey());
-		
-		// data is out of date, but total is not
-		PagedList<Dummy1> pagedList2 = query.asPagedList();
-		assertEquals(4, pagedList2.getTotalResults());
-		assertEquals(3, pagedList2.getData().size());
-		assertNull(pagedList2.getData().get(0));
-		
-		// refresh totals
-		query.clearCache();
-		PagedList<Dummy1> pagedList3 = query.asPagedList();
-		assertEquals(4, pagedList3.getTotalResults());
-	}
-	
-	private void initPagedData() {
-		for (int i = 0; i < 5; i++) {
-			entityManager.put(Dummy1.create());
-		}
-	}
 
 	private void assertGet() {
 		// assert cache contents

@@ -97,36 +97,9 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	public PagedQuery createPagedQuery(String kind) {
-		return createPagedQueryImpl(null, persistenceMetadataRepository.get(kind));
-	}
-	
-	@Override
-	public PagedQuery createPagedQuery(Class<?> clazz) {
-		return createPagedQueryImpl(null, persistenceMetadataRepository.get(clazz));
-	}
-	
-	@Override
-	public PagedQuery createPagedQuery(Key ancestor, String kind) {
-		return createPagedQueryImpl(ancestor, persistenceMetadataRepository.get(kind));
-	}
-	
-	@Override
-	public PagedQuery createPagedQuery(Key ancestor, Class<?> clazz) {
-		return createPagedQueryImpl(ancestor, persistenceMetadataRepository.get(clazz));
-	}
-	
-	@Override
 	public Key allocateId(Class<?> clazz) {
 		String kind = persistenceMetadataRepository.get(clazz).getKind();
 		return datastoreService.allocateIds(kind, 1).getStart();
-	}
-	
-	private PagedQuery createPagedQueryImpl(Key ancestor, ClassMetadata metadata) {
-		if (enforceSchemaConstraints && ancestor != null) { 
-			metadata.validateParentKey(ancestor);
-		}
-		return new PagedQuery(this, ancestor, metadata);
 	}
 	
 	private SimpleQuery createQueryImpl(Key ancestor, ClassMetadata metadata) {
@@ -557,16 +530,10 @@ public class EntityManagerImpl implements EntityManager {
 	public int count(SimpleQuery query) {
 		return query.count();
 	}
-	
-	@Override
-	public <T> PagedList<T> findPaged(PagedQuery query) {
-		return query.asPagedList();
-	}
 
 	@Override
 	public DatastoreService getDatastoreService() {
 		return datastoreService;
 	}
-	
 	
 }

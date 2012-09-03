@@ -194,40 +194,6 @@ public interface EntityManager {
 	 * @param clazz the class for this query
 	 */
 	SimpleQuery createQuery(Key ancestor, Class<?> clazz);
-	
-	/**
-	 * Create a new {@link PagedQuery} instance
-	 * @param kind the unqualified class name for this query
-	 * @deprecated use {@link SimpleQuery#asCursorList(int)} instead
-	 */
-	@Deprecated
-	PagedQuery createPagedQuery(String kind);
-	
-	/**
-	 * Create a new {@link PagedQuery} instance
-	 * @param clazz the class for this query
-	 * @deprecated {@link SimpleQuery#asCursorList(int)} instead
-	 */
-	@Deprecated
-	PagedQuery createPagedQuery(Class<?> clazz);
-	
-	/**
-	 * Create a new {@link PagedQuery} instance
-	 * @param ancestor the parent key to use for this query. Can be null.
-	 * @param kind the unqualified class name for this query
-	 * @deprecated {@link SimpleQuery#asCursorList(int)} instead
-	 */
-	@Deprecated
-	PagedQuery createPagedQuery(Key ancestor, String kind);
-	
-	/**
-	 * Create a new {@link PagedQuery} instance
-	 * @param ancestor the parent key to use for this query. Can be null.
-	 * @param clazz the class for this query
-	 * @deprecated {@link SimpleQuery#asCursorList(int)} instead
-	 */
-	@Deprecated
-	PagedQuery createPagedQuery(Key ancestor, Class<?> clazz);
 
 	/**
 	 * @return the configured {@link ClassMetadata} for the provided persistent class
@@ -302,15 +268,6 @@ public interface EntityManager {
 	 */
 	@Deprecated
 	List<Key> findChildrenKeys(Key parentKey, Class<?> childrenClass);
-
-	/**
-	 * Return a {@link PagedList} result after computing a PagedQuery
-	 * @param query the query to execute
-	 * @return the result of the query
-	 * @deprecated use {@link PagedQuery#asPagedList()} instead
-	 */
-	@Deprecated
-	<T> PagedList<T> findPaged(PagedQuery query);
 	
 	/** 
 	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterable} of java objects.
