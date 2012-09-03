@@ -19,6 +19,7 @@ import org.simpleds.metadata.SinglePropertyMetadata;
 import org.simpleds.util.GenericCollectionTypeResolver;
 import org.simpleds.util.MethodParameter;
 
+import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.api.datastore.GeoPt;
@@ -60,6 +61,7 @@ public class ConverterFactory {
 		
 		// native Google classes
 		addConverter(Key.class, new NullConverter<Key>(Key.class));
+		addConverter(BlobKey.class, new NullConverter<BlobKey>(BlobKey.class));
 		addConverter(GeoPt.class, new NullConverter<GeoPt>(GeoPt.class));
 		addConverter(Link.class, new NullConverter<Link>(Link.class));
 		addConverter(PostalAddress.class, new NullConverter<PostalAddress>(PostalAddress.class));
