@@ -70,6 +70,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		this.entityManager = entityManager;
 		this.classMetadata = metadata;
 		this.query = new Query(metadata.getKind(), ancestor);
+		this.fetchOptions = FetchOptions.Builder.withDefaults();
 	}
 	
 	@Override
@@ -81,25 +82,23 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		for (SortPredicate spredicate : query.getSortPredicates()) {
 			copy.query.addSort(spredicate.getPropertyName(), spredicate.getDirection());
 		}
-		if (fetchOptions != null) {
-			if (fetchOptions.getChunkSize() != null) {
-				copy.withChunkSize(fetchOptions.getChunkSize());
-			}
-			if (fetchOptions.getLimit() != null) {
-				copy.withLimit(fetchOptions.getLimit());
-			}
-			if (fetchOptions.getOffset() != null) {
-				copy.withOffset(fetchOptions.getOffset());
-			}
-			if (fetchOptions.getPrefetchSize() != null) {
-				copy.withPrefetchSize(fetchOptions.getPrefetchSize());
-			}
-			if (fetchOptions.getStartCursor() != null) {
-				copy.withStartCursor(fetchOptions.getStartCursor());
-			}
-			if (fetchOptions.getEndCursor() != null) {
-				copy.withEndCursor(fetchOptions.getEndCursor());
-			}
+		if (fetchOptions.getChunkSize() != null) {
+			copy.withChunkSize(fetchOptions.getChunkSize());
+		}
+		if (fetchOptions.getLimit() != null) {
+			copy.withLimit(fetchOptions.getLimit());
+		}
+		if (fetchOptions.getOffset() != null) {
+			copy.withOffset(fetchOptions.getOffset());
+		}
+		if (fetchOptions.getPrefetchSize() != null) {
+			copy.withPrefetchSize(fetchOptions.getPrefetchSize());
+		}
+		if (fetchOptions.getStartCursor() != null) {
+			copy.withStartCursor(fetchOptions.getStartCursor());
+		}
+		if (fetchOptions.getEndCursor() != null) {
+			copy.withEndCursor(fetchOptions.getEndCursor());
 		}
 		copy.withTransaction(transaction);
 		copy.datastoreServiceConfig = datastoreServiceConfig;
@@ -246,24 +245,24 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	}
 	
 	public SimpleQuery withLimit(int limit) {
-		fetchOptions = fetchOptions == null? FetchOptions.Builder.withLimit(limit) : fetchOptions.limit(limit);
+		fetchOptions.limit(limit);
 		return this;
 	}
 	
 	public SimpleQuery withOffset(int offset) {
-		fetchOptions = fetchOptions == null? FetchOptions.Builder.withOffset(offset) : fetchOptions.offset(offset);
+		fetchOptions.offset(offset);
 		return this;
 	}
 	
 	@Override
 	public SimpleQuery withPrefetchSize(int size) {
-		fetchOptions = fetchOptions == null? FetchOptions.Builder.withPrefetchSize(size) : fetchOptions.prefetchSize(size);
+		fetchOptions.prefetchSize(size);
 		return this;
 	}
 	
 	@Override
 	public SimpleQuery withChunkSize(int size) {
-		fetchOptions = fetchOptions == null? FetchOptions.Builder.withChunkSize(size) : fetchOptions.chunkSize(size);
+		fetchOptions.chunkSize(size);
 		return this;
 	}
 	
@@ -285,7 +284,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 */
 	public SimpleQuery withStartCursor(Cursor cursor) {
 		if (cursor != null) {
-			fetchOptions = fetchOptions == null? FetchOptions.Builder.withStartCursor(cursor) : fetchOptions.startCursor(cursor);
+			fetchOptions.startCursor(cursor);
 		}
 		return this;
 	}
@@ -297,7 +296,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 */
 	public SimpleQuery withEndCursor(Cursor cursor) {
 		if (cursor != null) {
-			fetchOptions = fetchOptions == null? FetchOptions.Builder.withEndCursor(cursor) : fetchOptions.endCursor(cursor);
+			fetchOptions.endCursor(cursor);
 		}
 		return this;
 	}
@@ -498,7 +497,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 */
 	public <T> SimpleQueryResultIterable<T> asIterable() {
 		PreparedQuery preparedQuery = getDatastoreService().prepare(transaction, query);
-		QueryResultIterable<Entity> iterable = fetchOptions == null? preparedQuery.asQueryResultIterable() : preparedQuery.asQueryResultIterable(fetchOptions);
+		QueryResultIterable<Entity> iterable = preparedQuery.asQueryResultIterable(fetchOptions);
 		return new SimpleQueryResultIterableImpl<T>(classMetadata, predicate, iterable).setKeysOnly(isKeysOnly());
 	}
 	
@@ -543,19 +542,17 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		StringBuilder builder = new StringBuilder(100);
 		builder.append("qdata{");
 		addCommonCacheKeyParts(builder);
-		if (fetchOptions != null) {
-			if(fetchOptions.getOffset() != null) {
-				builder.append(",off=").append(fetchOptions.getOffset());
-			}
-			if(fetchOptions.getLimit() != null) {
-				builder.append(",lim=").append(fetchOptions.getLimit());
-			}
-			if (fetchOptions.getStartCursor() != null) {
-				builder.append(",start=").append(fetchOptions.getStartCursor().toWebSafeString());
-			}
-			if (fetchOptions.getEndCursor() != null) {
-				builder.append(",end=").append(fetchOptions.getEndCursor().toWebSafeString());
-			}
+		if(fetchOptions.getOffset() != null) {
+			builder.append(",off=").append(fetchOptions.getOffset());
+		}
+		if(fetchOptions.getLimit() != null) {
+			builder.append(",lim=").append(fetchOptions.getLimit());
+		}
+		if (fetchOptions.getStartCursor() != null) {
+			builder.append(",start=").append(fetchOptions.getStartCursor().toWebSafeString());
+		}
+		if (fetchOptions.getEndCursor() != null) {
+			builder.append(",end=").append(fetchOptions.getEndCursor().toWebSafeString());
 		}
 		builder.append("}");
 		return builder.toString();
