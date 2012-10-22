@@ -1,5 +1,7 @@
 package org.simpleds.converter;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
@@ -89,8 +91,13 @@ public class ConverterFactory {
 		if (metadata.getAnnotation(AsJSON.class) != null) {
 			TypeFactory typeFactory = objectMapper.getTypeFactory();
 			JavaType type;
-			if (Collection.class.isAssignableFrom(propertyType)) {
-				type = typeFactory.constructCollectionType(List.class, guessCollectionGenericType(metadata));
+			if (Map.class.isAssignableFrom(propertyType)) {
+				Class[] mapKeyValue = guessMapGenericType(metadata);
+				type = typeFactory.constructMapType(Map.class, mapKeyValue[0], mapKeyValue[1]);
+			} else if (Set.class.isAssignableFrom(propertyType)) {
+				type = typeFactory.constructCollectionType(Set.class, guessCollectionGenericType(metadata));
+			} else if (Collection.class.isAssignableFrom(propertyType)) {
+					type = typeFactory.constructCollectionType(List.class, guessCollectionGenericType(metadata));
 			} else {
 				type = typeFactory.uncheckedSimpleType(propertyType);
 			}
@@ -142,6 +149,30 @@ public class ConverterFactory {
 			return GenericCollectionTypeResolver.getCollectionParameterType(new MethodParameter(metadata.getSetter(), 0));
 		} else if (metadata.getField() != null) {
 			return GenericCollectionTypeResolver.getCollectionFieldType(metadata.getField());
+		}
+		return null;
+	}
+	
+	private Class[] guessMapGenericType(SinglePropertyMetadata metadata) {
+		Method getter = metadata.getGetter();
+		Method setter = metadata.getSetter();
+		Field field = metadata.getField();
+		if (getter != null) {
+			return new Class[] { 
+				GenericCollectionTypeResolver.getMapKeyReturnType(getter), 
+				GenericCollectionTypeResolver.getMapValueReturnType(getter) 
+			};
+		} else if (setter != null) {
+			MethodParameter methodParam = new MethodParameter(setter, 0);
+			return new Class[] { 
+				GenericCollectionTypeResolver.getMapKeyParameterType(methodParam),
+				GenericCollectionTypeResolver.getMapValueParameterType(methodParam),
+			};
+		} else if (field != null) {
+			return new Class[] {
+				GenericCollectionTypeResolver.getMapKeyFieldType(field),
+				GenericCollectionTypeResolver.getMapValueFieldType(field)
+			};
 		}
 		return null;
 	}

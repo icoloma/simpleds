@@ -24,6 +24,8 @@ public class JsonConverterTest {
 		converter = new JsonConverter<Dummy1>(javaType, objectMapper);
 	}
 	
+	// for more complex tests, see JsonStoredTest
+	
 	@Test
 	public void testSerializeDeserialize() {
 		Dummy1 d1 = Dummy1.create();

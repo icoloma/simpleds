@@ -2,6 +2,7 @@ package org.simpleds;
 
 import static org.junit.Assert.assertTrue;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
 import org.simpleds.cache.CacheManager;
@@ -39,6 +40,7 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 	@Before
 	public void setupEntityManager() {
 		ConverterFactory converterFactory = new ConverterFactory();
+		converterFactory.setObjectMapper(new ObjectMapper());
 		
 		ClassMetadataFactory classMetadataFactory = new ClassMetadataFactory();
 		classMetadataFactory.setConverterFactory(converterFactory);
