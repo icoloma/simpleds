@@ -57,13 +57,17 @@ public class CursorList<J> {
 		return entityManager.get(keys);
 	}
 
+	public static <J> CursorList<J> create(SimpleQuery query, int size) {
+		return create(query, size, false);
+	}
 	/**
 	 * Create a new CursorList instance. 
 	 * @param query the query to execute
 	 * @param size the size of the CursorList data. To retrieve more data, use query.withStartCursor()
+	 * @param forceCursor if true, the cursor will be not null even on the last page of results. Useful to check for new contents after the last page has been retrieved.
 	 * @return the created {@link CursorList} instance
 	 */
-	public static <J> CursorList<J> create(SimpleQuery query, int size) {
+	public static <J> CursorList<J> create(SimpleQuery query, int size, boolean cursorOnLastPage) {
 		query.withPrefetchSize(size);
 		CursorList<J> result = new CursorList<J>();
 		result.query = query;
@@ -72,7 +76,7 @@ public class CursorList<J> {
 		for (int i = 0; it.hasNext() && i < size; i++) {
 			result.data.add(it.next());
 		}
-		if (it.hasNext()) {
+		if (it.hasNext() || cursorOnLastPage) {
 			result.cursor = it.getCursor();
 		}
 		return result;
