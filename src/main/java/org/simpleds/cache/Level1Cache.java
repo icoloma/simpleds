@@ -73,7 +73,7 @@ class Level1Cache {
 			contents.remove(key);
 		}
 		if (log.isDebugEnabled()) {
-			log.debug("Deleted from Level 2 cache: " + keys);
+			log.debug("Deleted from Level 1 cache: " + keys);
 		}
 	}
 
