@@ -42,15 +42,12 @@ public class CacheTest extends AbstractEntityManagerTest {
 	private ClassMetadata metadata;
 
 	private Method simpleQueryCalculateDataCacheKey;
-	private Method simpleQueryCalculateCountCacheKey;
 	
 	@Before
 	public void initCachedData() throws Exception {
 		
 		simpleQueryCalculateDataCacheKey = SimpleQuery.class.getDeclaredMethod("calculateDataCacheKey");
 		simpleQueryCalculateDataCacheKey.setAccessible(true);
-		simpleQueryCalculateCountCacheKey = SimpleQuery.class.getDeclaredMethod("calculateCountCacheKey");
-		simpleQueryCalculateCountCacheKey.setAccessible(true);
 		
 		cacheManager = entityManager.getCacheManager();
 		Level1Cache.setCacheInstance();
@@ -160,13 +157,11 @@ public class CacheTest extends AbstractEntityManagerTest {
 	public void testCalculateCacheKey() throws Exception {
 		// empty
 		assertCacheKeys(
-				"qcount{kind=d1}", 
 				"qdata{kind=d1}", 
 				entityManager.createQuery(Dummy1.class));
 		
 		// filter conditions
 		assertCacheKeys(
-				"qcount{kind=d1,pred=[date = Thu Jan 01 00:00:00 UTC 1970, evalue > NULL, name IN [foo, bar], name > bar]}",
 				"qdata{kind=d1,pred=[date = Thu Jan 01 00:00:00 UTC 1970, evalue > NULL, name IN [foo, bar], name > bar]}", 
 				entityManager.createQuery(Dummy1.class)
 					.equal("date", new Date(100))
@@ -181,7 +176,6 @@ public class CacheTest extends AbstractEntityManagerTest {
 		it.next();
 		Cursor cursor = it.getCursor();
 		assertCacheKeys(
-				"qcount{kind=d1}",
 				"qdata{kind=d1,start=E-ABAIICEGoEdGVzdHIICxICZDEYAwwU,end=E-ABAIICEGoEdGVzdHIICxICZDEYAwwU}", 
 				entityManager.createQuery(Dummy1.class)
 					.withStartCursor(cursor)
@@ -190,7 +184,6 @@ public class CacheTest extends AbstractEntityManagerTest {
 		
 		// fetchOptions
 		assertCacheKeys(
-				"qcount{kind=d1}",
 				"qdata{kind=d1,off=5,lim=100}", 
 				entityManager.createQuery(Dummy1.class)
 					.withOffset(5)
@@ -280,14 +273,12 @@ public class CacheTest extends AbstractEntityManagerTest {
 		// insert new data (ignored)
 		entityManager.put(ImmutableList.of(Dummy1.create()));
 		List<Dummy1> list2 = query.asList();
-		assertEquals(2, query.count());
 		assertEquals(2, list2.size());
 		assertEquals(list.get(0).getKey(), list2.get(0).getKey());
 		
 		// clean the cache
 		query.clearCache();
 		List<Dummy1> list3 = query.asList();
-		assertEquals(3, query.count());
 		assertEquals(3, list3.size());
 		
 		// clean the database
@@ -329,8 +320,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 		assertNull(cacheManager.get(entity.getKey(), metadata));
 	}
 	
-	private void assertCacheKeys(String expectedCountKey, String expectedDataKey, SimpleQuery query) throws Exception {
-		assertEquals(expectedCountKey, simpleQueryCalculateCountCacheKey.invoke(query));
+	private void assertCacheKeys(String expectedDataKey, SimpleQuery query) throws Exception {
 		assertEquals(expectedDataKey, simpleQueryCalculateDataCacheKey.invoke(query));
 	}
 

@@ -422,10 +422,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	@Override
 	public void clearCache() {
-		if (!isCacheable()) {
-			throw new IllegalStateException();
-		}
-		getCacheManager().delete(ImmutableList.of(calculateDataCacheKey(), calculateCountCacheKey()));
+		getCacheManager().delete(ImmutableList.of(calculateDataCacheKey()));
 	}
 	
 	private boolean isCacheable() {
@@ -474,17 +471,10 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * retrieve the matching keys, not the entities themselves.
 	 */
 	public int count() {
-		String cacheKey = calculateCountCacheKey();
 		Integer result = null;
-		if (isCacheable() && transaction == null) {
-			result = getCacheManager().get(cacheKey);
-		}
 		if (result == null) {
 			SimpleQuery q = this.isKeysOnly()? this : this.clone().keysOnly();
 			result = getDatastoreService().prepare(q.getQuery()).countEntities(fetchOptions);
-			if (isCacheable()) {
-				getCacheManager().put(cacheKey, result, cacheSeconds);
-			}
 		}
 		return result;
 	}
@@ -568,18 +558,6 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		if (predicates.size() > 0) {
 			builder.append(",pred=").append(predicates);
 		}
-	}
-
-	/** 
-	 * Calculate the cache key to use. This method combines the query kind, any filter predicates,
- 	 * the start/end cursors and limit / offset values to produce a cache key
-	 */
-	protected String calculateCountCacheKey() {
-		StringBuilder builder = new StringBuilder(100);
-		builder.append("qcount{");
-		addCommonCacheKeyParts(builder);
-		builder.append("}");
-		return builder.toString();
 	}
 	
 	@Override
