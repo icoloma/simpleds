@@ -267,10 +267,9 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	}
 	
 	/**
-	 * Set the {@link Cursor} to use with this query.
+	 * Set the {@link Cursor} to use with this query. This method is an alias of {@link SimpleQuery#withStartCursor(Cursor)}
 	 * @param cursor the cursor to use with this query. If null, it will be ignored.
 	 * @return this instance
-	 * @deprecated use withStartCursor instead
 	 */
 	@Deprecated
 	public SimpleQuery withCursor(Cursor cursor) {
