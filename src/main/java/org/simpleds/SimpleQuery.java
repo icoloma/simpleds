@@ -480,23 +480,23 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 
 
 	/** 
-	 * Execute this query and return the result as a {@link SimpleQueryResultIterable} of java objects.
+	 * Execute this query and return the result as a {@link CursorIterable} of java objects.
 	 * This method does not check the cache.
 	 * @return the list of resulting java entities
 	 */
-	public <T> SimpleQueryResultIterable<T> asIterable() {
+	public <T> CursorIterable<T> asIterable() {
 		PreparedQuery preparedQuery = getDatastoreService().prepare(transaction, query);
 		QueryResultIterable<Entity> iterable = preparedQuery.asQueryResultIterable(fetchOptions);
-		return new SimpleQueryResultIterableImpl<T>(classMetadata, predicate, iterable).setKeysOnly(isKeysOnly());
+		return new CursorIterableImpl<T>(classMetadata, predicate, iterable).setKeysOnly(isKeysOnly());
 	}
 	
 	/** 
-	 * Execute this query and returns the result as a {@link SimpleQueryResultIterator} of java objects.
+	 * Execute this query and returns the result as a {@link CursorIterator} of java objects.
 	 * This method does not check the cache.
 	 * @return the list of resulting java entities
 	 */
-	public <T> SimpleQueryResultIterator<T> asIterator() {
-		SimpleQueryResultIterable<T> iterable = asIterable();
+	public <T> CursorIterator<T> asIterator() {
+		CursorIterable<T> iterable = asIterable();
 		return iterable.iterator();
 	}
 

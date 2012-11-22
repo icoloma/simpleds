@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.simpleds.AbstractEntityManagerTest;
 import org.simpleds.KeyFactory2;
 import org.simpleds.SimpleQuery;
-import org.simpleds.SimpleQueryResultIterator;
+import org.simpleds.CursorIterator;
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
 import org.simpleds.testdb.CacheableEntity;
@@ -172,7 +172,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 		
 		// cursor
 		entityManager.put(Dummy1.create());
-		SimpleQueryResultIterator<Object> it = entityManager.createQuery(Dummy1.class).asIterator();
+		CursorIterator<Object> it = entityManager.createQuery(Dummy1.class).asIterator();
 		it.next();
 		Cursor cursor = it.getCursor();
 		assertCacheKeys(

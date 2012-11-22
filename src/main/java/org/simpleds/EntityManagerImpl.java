@@ -507,12 +507,12 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	public <T> SimpleQueryResultIterable<T> asIterable(SimpleQuery query) {
+	public <T> CursorIterable<T> asIterable(SimpleQuery query) {
 		return query.asIterable();
 	}
 	
 	@Override
-	public <T> SimpleQueryResultIterator<T> asIterator(SimpleQuery simpleQuery) {
+	public <T> CursorIterator<T> asIterator(SimpleQuery simpleQuery) {
 		return simpleQuery.asIterator();
 	}
 	

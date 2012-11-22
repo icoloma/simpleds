@@ -8,8 +8,8 @@ package org.simpleds;
  *
  * @param <T>
  */
-public interface SimpleQueryResultIterable<T> extends Iterable<T> {
+public interface CursorIterable<T> extends Iterable<T> {
 	
-	public abstract SimpleQueryResultIterator<T> iterator();
+	public abstract CursorIterator<T> iterator();
 	
 }

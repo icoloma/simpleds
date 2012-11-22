@@ -270,24 +270,24 @@ public interface EntityManager {
 	List<Key> findChildrenKeys(Key parentKey, Class<?> childrenClass);
 	
 	/** 
-	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterable} of java objects.
+	 * Execute the provided query and returns the result as a {@link CursorIterable} of java objects.
 	 * This method does not check the cache.
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
 	 * @deprecated use {@link SimpleQuery#asIterable()} instead
 	 */
 	@Deprecated
-	<T> SimpleQueryResultIterable<T> asIterable(SimpleQuery query);
+	<T> CursorIterable<T> asIterable(SimpleQuery query);
 	
 	/** 
-	 * Execute the provided query and returns the result as a {@link SimpleQueryResultIterator} of java objects
+	 * Execute the provided query and returns the result as a {@link CursorIterator} of java objects
 	 * This method does not check the cache.
 	 * @param query the query to execute
 	 * @return the list of resulting java entities
 	 * @deprecated use {@link SimpleQuery#asIterator()} instead
 	 */
 	@Deprecated
-	<T> SimpleQueryResultIterator<T> asIterator(SimpleQuery query);
+	<T> CursorIterator<T> asIterator(SimpleQuery query);
 
 	/**
 	 * @return the {@link DatastoreService} used by this instance.

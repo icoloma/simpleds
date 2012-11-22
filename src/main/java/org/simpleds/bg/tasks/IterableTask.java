@@ -3,7 +3,7 @@ package org.simpleds.bg.tasks;
 import org.simpleds.EntityManager;
 import org.simpleds.EntityManagerFactory;
 import org.simpleds.SimpleQuery;
-import org.simpleds.SimpleQueryResultIterator;
+import org.simpleds.CursorIterator;
 import org.simpleds.bg.AbstractBackgroundTask;
 import org.simpleds.bg.TaskRequest;
 
@@ -30,7 +30,7 @@ public abstract class IterableTask<T> extends AbstractBackgroundTask {
 		// execute the query and locate the cursor, if any
 		SimpleQuery query = createQuery(request).withFetchOptions(createFetchOptions(request));
 		
-		SimpleQueryResultIterator<T> it = entityManager.asIterator(query);
+		CursorIterator<T> it = entityManager.asIterator(query);
 		int count = 0;
 		while (it.hasNext()) {
 			process(it.next(), request);

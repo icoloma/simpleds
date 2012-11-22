@@ -141,7 +141,7 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		};
 		
 		// retrieve first two results
-		SimpleQueryResultIterator<Dummy1> it = entityManager.createQuery(Dummy1.class)
+		CursorIterator<Dummy1> it = entityManager.createQuery(Dummy1.class)
 				.sortAsc("__key__")
 				.withPredicate(predicate)
 				.asIterator();
@@ -152,7 +152,7 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		
 		// confirm the cursor position (WITHOUT PREDICATE)
 		Cursor cursor = it.getCursor();
-		SimpleQueryResultIterator<Dummy1> it2 = entityManager.createQuery(Dummy1.class)
+		CursorIterator<Dummy1> it2 = entityManager.createQuery(Dummy1.class)
 				.sortAsc("__key__")
 				.withStartCursor(cursor)
 				.asIterator();

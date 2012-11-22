@@ -15,7 +15,7 @@ import com.google.common.base.Predicate;
  *
  * @param <T>
  */
-class PredicateSimpleQueryResultIteratorImpl<T> implements SimpleQueryResultIterator<T> {
+class PredicateCursorIteratorImpl<T> implements CursorIterator<T> {
 
 	/** the class metadata to transform datastore Entities to java and viceversa */ 
 	private ClassMetadata metadata;
@@ -35,7 +35,7 @@ class PredicateSimpleQueryResultIteratorImpl<T> implements SimpleQueryResultIter
 	/** cursor previous to the current element */
 	private Cursor cursor;
 	
-	PredicateSimpleQueryResultIteratorImpl(ClassMetadata metadata, Predicate<T> predicate, QueryResultIterator<Entity> iterator) {
+	PredicateCursorIteratorImpl(ClassMetadata metadata, Predicate<T> predicate, QueryResultIterator<Entity> iterator) {
 		this.metadata = metadata;
 		this.predicate = predicate;
 		this.iterator = iterator;
@@ -81,7 +81,7 @@ class PredicateSimpleQueryResultIteratorImpl<T> implements SimpleQueryResultIter
 		throw new UnsupportedOperationException("remove() is not allowed with Predicates");
 	}
 	
-	public PredicateSimpleQueryResultIteratorImpl<T> setKeysOnly(boolean keysOnly) {
+	public PredicateCursorIteratorImpl<T> setKeysOnly(boolean keysOnly) {
 		this.keysOnly = keysOnly;
 		return this;
 	}

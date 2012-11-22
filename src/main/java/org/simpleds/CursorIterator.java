@@ -11,7 +11,7 @@ import com.google.appengine.api.datastore.Cursor;
  *
  * @param <T>
  */
-public interface SimpleQueryResultIterator<T> extends Iterator<T> {
+public interface CursorIterator<T> extends Iterator<T> {
 	
 	/**
 	 * @return the Cursor instance to continue iterating at this point. See QueryResultIterator javadoc for more details.

@@ -6,7 +6,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.common.base.Predicate;
 
-class SimpleQueryResultIterableImpl<T> implements SimpleQueryResultIterable<T> {
+class CursorIterableImpl<T> implements CursorIterable<T> {
 
 	/** the classMetadata used to transform each Entity into the corresponding Java type */
 	private ClassMetadata metadata;
@@ -20,19 +20,19 @@ class SimpleQueryResultIterableImpl<T> implements SimpleQueryResultIterable<T> {
 	/** if not null, predicate will be used to filter the returned collection using Java code */
 	private Predicate<T> predicate;
 	
-	SimpleQueryResultIterableImpl(ClassMetadata metadata, Predicate<T> predicate, QueryResultIterable<Entity> iterable) {
+	CursorIterableImpl(ClassMetadata metadata, Predicate<T> predicate, QueryResultIterable<Entity> iterable) {
 		this.metadata = metadata;
 		this.iterable = iterable;
 		this.predicate = predicate;
 	}
 
 	@Override
-	public SimpleQueryResultIterator<T> iterator() {
-		return predicate == null? new SimpleQueryResultIteratorImpl<T>(metadata, iterable.iterator()).setKeysOnly(keysOnly)
-				: new PredicateSimpleQueryResultIteratorImpl<T>(metadata, predicate, iterable.iterator()).setKeysOnly(keysOnly);
+	public CursorIterator<T> iterator() {
+		return predicate == null? new CursorIteratorImpl<T>(metadata, iterable.iterator()).setKeysOnly(keysOnly)
+				: new PredicateCursorIteratorImpl<T>(metadata, predicate, iterable.iterator()).setKeysOnly(keysOnly);
 	}
 	
-	public SimpleQueryResultIterableImpl<T> setKeysOnly(boolean keysOnly) {
+	public CursorIterableImpl<T> setKeysOnly(boolean keysOnly) {
 		this.keysOnly = keysOnly;
 		return this;
 	}

@@ -72,7 +72,7 @@ public class CursorList<J> {
 		CursorList<J> result = new CursorList<J>();
 		result.query = query;
 		result.data = Lists.newArrayListWithCapacity(size);
-		SimpleQueryResultIterator<J> it = query.asIterator();
+		CursorIterator<J> it = query.asIterator();
 		for (int i = 0; it.hasNext() && i < size; i++) {
 			result.data.add(it.next());
 		}

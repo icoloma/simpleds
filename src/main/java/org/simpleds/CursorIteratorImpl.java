@@ -6,7 +6,7 @@ import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.QueryResultIterator;
 
-class SimpleQueryResultIteratorImpl<T> implements SimpleQueryResultIterator<T> {
+class CursorIteratorImpl<T> implements CursorIterator<T> {
 
 	/** the class metadata to transform datastore Entities to java and viceversa */ 
 	private ClassMetadata metadata;
@@ -17,7 +17,7 @@ class SimpleQueryResultIteratorImpl<T> implements SimpleQueryResultIterator<T> {
 	/** true to return keys only instead of full-blown entities */
 	private boolean keysOnly;
 	
-	SimpleQueryResultIteratorImpl(ClassMetadata metadata, QueryResultIterator<Entity> iterator) {
+	CursorIteratorImpl(ClassMetadata metadata, QueryResultIterator<Entity> iterator) {
 		this.metadata = metadata;
 		this.iterator = iterator;
 	}
@@ -44,7 +44,7 @@ class SimpleQueryResultIteratorImpl<T> implements SimpleQueryResultIterator<T> {
 		iterator.remove();
 	}
 	
-	public SimpleQueryResultIteratorImpl<T> setKeysOnly(boolean keysOnly) {
+	public CursorIteratorImpl<T> setKeysOnly(boolean keysOnly) {
 		this.keysOnly = keysOnly;
 		return this;
 	}
