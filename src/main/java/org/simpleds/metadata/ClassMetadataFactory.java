@@ -49,8 +49,8 @@ public class ClassMetadataFactory {
 		metadata.setPersistentClass(clazz);
 		String kind = getKind(clazz);
 		if (kind.length() > maxKindLength) {
-			log.warn(kind + " is a long name for an entity kind. Consider using @Entity to make it shorter, which will save space in the Datastore. Use " + 
-					getClass().getSimpleName() + ".setMaxKindLength() to disable this warning");
+			throw new ConfigException(kind + " is a long name for an entity kind. Consider using @Entity to make it shorter, which will save space in the Datastore. Use " + 
+					getClass().getSimpleName() + ".setMaxKindLength() to disable this error");
 		}
 		metadata.setKind(kind);
 		visit(clazz, metadata, new HashSet<String>());
@@ -180,7 +180,7 @@ public class ClassMetadataFactory {
 	
 	private void doAddProperty(ClassMetadata classMetadata, PropertyMetadata property) {
 		if (property.getName().length() > maxPropertyLength) {
-			log.warn(classMetadata.getPersistentClass().getSimpleName() + 
+			throw new ConfigException(classMetadata.getPersistentClass().getSimpleName() + 
 					"." + property.getName() + " is a long name for a property. Consider using @Property to make it shorter, which will save space in the Datastore. Use " + 
 					getClass().getSimpleName() + ".setMaxPropertyLength() to disable this warning");
 		}
