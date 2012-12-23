@@ -271,7 +271,6 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * @param cursor the cursor to use with this query. If null, it will be ignored.
 	 * @return this instance
 	 */
-	@Deprecated
 	public SimpleQuery withCursor(Cursor cursor) {
 		return withStartCursor(cursor);
 	}
