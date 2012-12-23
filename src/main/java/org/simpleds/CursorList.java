@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import org.simpleds.functions.EntityToPropertyFunction;
 
 import com.google.appengine.api.datastore.Cursor;
@@ -57,14 +58,28 @@ public class CursorList<J> {
 		return entityManager.get(keys);
 	}
 
+    /**
+     * Create a new CursorList instance.
+     * @param query the query to execute
+     * @param size the size of the CursorList data. To retrieve more data, use query.withStartCursor()
+     * @return the created {@link CursorList} instance
+     */
 	public static <J> CursorList<J> create(SimpleQuery query, int size) {
 		return create(query, size, false);
 	}
+
+    /**
+     * @return an empty CursorList instance
+     */
+	public static <J> CursorList<J> empty() {
+		return new CursorList<J>(ImmutableList.<J>of(), null);
+	}
+
 	/**
 	 * Create a new CursorList instance. 
 	 * @param query the query to execute
 	 * @param size the size of the CursorList data. To retrieve more data, use query.withStartCursor()
-	 * @param forceCursor if true, the cursor will be not null even on the last page of results. Useful to check for new contents after the last page has been retrieved.
+	 * @param cursorOnLastPage if true, the cursor will be not null even on the last page of results. Useful to check for new contents after the last page has been retrieved.
 	 * @return the created {@link CursorList} instance
 	 */
 	public static <J> CursorList<J> create(SimpleQuery query, int size, boolean cursorOnLastPage) {
