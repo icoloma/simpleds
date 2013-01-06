@@ -12,20 +12,20 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
 @Cacheable(120)
-@Entity
+@Entity(Kinds.CACHEABLE_ENTITY)
 public class CacheableEntity {
 
 	public enum EnumValues {
 		FOO, BAR
 	}
 	
-	@Id(generated=true)
+	@Id(generated=true) @Property(Attrs.KEY)
 	private Key key;
 	
-	@Property(required=true)
+	@Property(required=true, value=Attrs.NAME)
 	private String name;
 	
-	@Property("date")
+	@Property(Attrs.DATE)
 	private Date overridenNameDate;
 	
 	@Embedded

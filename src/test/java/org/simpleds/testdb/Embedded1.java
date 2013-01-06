@@ -1,22 +1,24 @@
 package org.simpleds.testdb;
 
 import org.simpleds.annotations.Embedded;
+import org.simpleds.annotations.Property;
 
 public class Embedded1 {
 
+    @Property(Attrs.EMBEDDED_NAME)
 	private String embeddedName;
-	
-	private int int1;
+
+	private int i1;
 	
 	@Embedded
 	private Embedded2 embedded2;
 
-	public int getInt1() {
-		return int1;
+	public int getI1() {
+		return i1;
 	}
 
-	public void setInt1(int int1) {
-		this.int1 = int1;
+	public void setI1(int i1) {
+		this.i1 = i1;
 	}
 
 	public Embedded2 getEmbedded2() {

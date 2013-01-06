@@ -14,6 +14,8 @@ import java.util.NoSuchElementException;
 import org.junit.Test;
 import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
+import org.simpleds.annotations.Property;
+import org.simpleds.testdb.Attrs;
 import org.simpleds.testdb.Dummy1;
 
 import com.google.appengine.api.datastore.Cursor;
@@ -22,6 +24,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import org.simpleds.testdb.Kinds;
 
 public class SimpleQueryTest extends AbstractEntityManagerTest {
 	
@@ -30,8 +33,8 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 	@Test
 	public void testClone() throws Exception {
 		SimpleQuery query = entityManager.createQuery(Dummy1.KIND);
-		query.equal("name", "bar");
-		query.equal("evalue", Dummy1.EnumValues.BAR);
+		query.equal(Attrs.NAME, "bar");
+		query.equal(Attrs.E_VALUE, Dummy1.EnumValues.BAR);
 		SimpleQuery copy = query.clone();
 		assertNotSame(query.getFilterPredicates(), copy.getFilterPredicates());
 		assertEquals(query.getFilterPredicates().size(), copy.getFilterPredicates().size());
@@ -46,28 +49,28 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 	@Test
 	public void testIsNull() throws Exception {
 		SimpleQuery query = entityManager.createQuery(Dummy1.class);
-		query.equal("name", null);
-		query.isNull("evalue");
+		query.equal(Attrs.NAME, null);
+		query.isNull(Attrs.E_VALUE);
 		List<FilterPredicate> predicates = query.getFilterPredicates();
 		assertEquals(1, predicates.size());
-		assertEquals("evalue", predicates.get(0).getPropertyName());
+		assertEquals(Attrs.E_VALUE, predicates.get(0).getPropertyName());
 		assertNull(predicates.get(0).getValue());
 	}
 	
 	@Test
 	public void testValidateSimpleQueryOK() throws Exception {
 		SimpleQuery query = entityManager.createQuery(Dummy1.class);
-		query.equal("date", new Date());
-		query.equal("name", null);
-		query.equal("int1", 2);
+		query.equal(Attrs.DATE, new Date());
+		query.equal(Attrs.NAME, null);
+		query.equal("i1", 2);
 		query.equal("__key__", KeyFactory.createKey(Dummy1.KIND, 1));
-		query.sortAsc("name");
+		query.sortAsc(Attrs.NAME);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testValidateUnindexedProperty() throws Exception {
 		SimpleQuery query = entityManager.createQuery(Dummy1.class);
-		query.equal("int2", 2);
+		query.equal("i2", 2);
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
@@ -79,21 +82,21 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 	@Test(expected=IllegalArgumentException.class)
 	public void testValidateSimpleQueryWrongPropertyClass() throws Exception {
 		SimpleQuery query = entityManager.createQuery(Dummy1.class);
-		query.equal("date", 1);
+		query.equal(Attrs.DATE, 1);
 	}
 	
 	@Test
 	public void testValidateSimpleQueryCollectionOK() throws Exception {
 		addMetadata(CollectionDummy.class);
 		SimpleQuery query = entityManager.createQuery(CollectionDummy.class);
-		query.equal("intList", 1);
+		query.equal(Attrs.LIST, 1);
 	}
 	
 	@Test(expected=ClassCastException.class)
 	public void testValidateSimpleQueryCollectionWrongItemClass() throws Exception {
 		addMetadata(CollectionDummy.class);
 		SimpleQuery query = entityManager.createQuery(CollectionDummy.class);
-		query.equal("intList", "foo");
+		query.equal(Attrs.LIST, "foo");
 	}
 	
 	@Test
@@ -104,7 +107,7 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		baz.setOverridenNameDate(now);
 		entityManager.put(baz);
 		entityManager.put(Dummy1.create());
-		SimpleQuery query = entityManager.createQuery(Dummy1.KIND).in("date", ImmutableList.of(now));
+		SimpleQuery query = entityManager.createQuery(Dummy1.KIND).in(Attrs.DATE, ImmutableList.of(now));
 		List<Dummy1> list = entityManager.find(query);
 		assertEquals(1, list.size());
 		assertEquals(baz.getKey(), list.get(0).getKey());
@@ -174,13 +177,14 @@ public class SimpleQueryTest extends AbstractEntityManagerTest {
 		}
 	}
 
-	@Entity
+	@Entity(Kinds.COLLECTION_DUMMY)
 	@SuppressWarnings("unused")
 	public static class CollectionDummy {
 		
-		@Id 
+		@Id @Property(Attrs.KEY)
 		private Key key;
-		
+
+        @Property(Attrs.LIST)
 		private List<Integer> intList;
 	}
 }

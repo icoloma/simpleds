@@ -1,9 +1,13 @@
 package org.simpleds;
 
+import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
+import org.simpleds.annotations.Property;
 import org.simpleds.annotations.Version;
 
 import com.google.appengine.api.datastore.Key;
+import org.simpleds.testdb.Attrs;
+import org.simpleds.testdb.Kinds;
 
 public class PrimitiveLongVersionManagerTest extends AbstractVersionManagerTest {
 
@@ -15,12 +19,14 @@ public class PrimitiveLongVersionManagerTest extends AbstractVersionManagerTest 
 	protected Object createEntity() {
 		return new VersionedClass();
 	}
-	
+
+    @Entity(Kinds.PRIMITIVE_VERSIONED_CLASS)
 	public static class VersionedClass {
-		@Id
+
+		@Id @Property(Attrs.KEY)
 		private Key key;
 		
-		@Version
+		@Version @Property(Attrs.VERSION)
 		private long version;
 
 		public Key getKey() {

@@ -1,16 +1,19 @@
 package org.simpleds.testdb;
 
+import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
+import org.simpleds.annotations.Property;
 import org.simpleds.annotations.Version;
 
 import com.google.appengine.api.datastore.Key;
 
+@Entity(Kinds.BASIC_VERSIONED_CLASS)
 public class BasicVersionedClass {
 	
-	@Id
+	@Id @Property(Attrs.KEY)
 	private Key key;
 	
-	@Version
+	@Version @Property(Attrs.VERSION)
 	private Long version;
 
 	public Key getKey() {

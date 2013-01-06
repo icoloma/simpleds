@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.simpleds.functions.EntityToPropertyFunction;
+import org.simpleds.testdb.Attrs;
 import org.simpleds.testdb.Dummy1;
 
 import com.google.common.base.Predicate;
@@ -28,7 +29,7 @@ public class CursorListTest extends AbstractEntityManagerTest {
 
 		// test first page of results
 		SimpleQuery query = entityManager.createQuery(Dummy1.class)
-			.sortAsc("name");
+			.sortAsc(Attrs.NAME);
 		CursorList<Dummy1> list = query.asCursorList(3);
 		assertNotNull(list.getCursor());
 		assertEquals(3, list.getData().size());
@@ -49,7 +50,7 @@ public class CursorListTest extends AbstractEntityManagerTest {
 		assertEquals(1, list.getData().size());
 			
 		// just transform
-		EntityToPropertyFunction entityToName = new EntityToPropertyFunction(Dummy1.class, "name");
+		EntityToPropertyFunction entityToName = new EntityToPropertyFunction(Dummy1.class, Attrs.NAME);
 		CursorList<String> names = list.transform(entityToName);
 		assertTrue(names.getData().get(0) instanceof String);
 		

@@ -5,22 +5,25 @@ import java.util.Map;
 import java.util.Set;
 
 import org.simpleds.annotations.AsJSON;
+import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
 
 import com.google.appengine.api.datastore.Key;
+import org.simpleds.annotations.Property;
 
+@Entity(Kinds.JSON_STORED)
 public class JsonStored {
 
-	@Id
-	private Key key;
-	
-	@AsJSON
+    @Id @Property(Attrs.KEY)
+    private Key key;
+
+	@AsJSON @Property(Attrs.LIST)
 	private List<Dummy1> list;
-	
-	@AsJSON
+
+	@AsJSON @Property(Attrs.SET)
 	private Set<String> set;
-	
-	@AsJSON
+
+	@AsJSON @Property(Attrs.MAP)
 	private Map<String, Dummy1> map;
 
 	

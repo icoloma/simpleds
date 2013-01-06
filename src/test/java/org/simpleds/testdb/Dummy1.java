@@ -11,7 +11,7 @@ import org.simpleds.annotations.Property;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
-@Entity("d1")
+@Entity(Kinds.DUMMY1)
 @MultivaluedIndex(name="friends", itemClass=Key.class)
 public class Dummy1 {
 
@@ -21,22 +21,22 @@ public class Dummy1 {
 		FOO, BAR
 	}
 	
-	@Id
+	@Id @Property(Attrs.KEY)
 	private Key key;
 	
-	@Property(required=true)
+	@Property(required=true, value=Attrs.NAME)
 	private String name;
 	
-	@Property(required=true, value="date")
+	@Property(required=true, value=Attrs.DATE)
 	private Date overridenNameDate;
 	
-	@SuppressWarnings("unused")
+	@SuppressWarnings("unused") @Property(Attrs.E_VALUE)
 	private EnumValues evalue;
 	
 	@Embedded
 	private Embedded1 embedded;
 	
-	@Property(unindexed=true)
+	@Property(unindexed=true, value=Attrs.BIG_STRING)
 	private String bigString;
 	
 	/**

@@ -76,8 +76,8 @@ public class ClassMetadataTest extends AbstractEntityManagerTest {
 		assertEquals(key, dummy.getKey());
 		assertEquals("foo", dummy.getName());
 		assertSame(d, dummy.getOverridenNameDate());
-		assertEquals(1, dummy.getEmbedded().getInt1());
-		assertEquals(Integer.valueOf(2), dummy.getEmbedded().getEmbedded2().int2);
+		assertEquals(1, dummy.getEmbedded().getI1());
+		assertEquals(Integer.valueOf(2), dummy.getEmbedded().getEmbedded2().i2);
 		assertEquals("foobar", dummy.getBigString());
 	}
 	

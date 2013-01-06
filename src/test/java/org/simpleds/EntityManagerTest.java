@@ -15,13 +15,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.simpleds.exception.RequiredFieldException;
 import org.simpleds.functions.EntityToKeyFunction;
-import org.simpleds.testdb.CacheableEntity;
-import org.simpleds.testdb.Child;
-import org.simpleds.testdb.Dummy1;
-import org.simpleds.testdb.Dummy2;
-import org.simpleds.testdb.Dummy3;
-import org.simpleds.testdb.Root;
-import org.simpleds.testdb.BasicVersionedClass;
+import org.simpleds.testdb.*;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -206,7 +200,7 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	public void testFind() {
 		Dummy1  dummy = Dummy1.create();
 		entityManager.put(dummy);
-		SimpleQuery query = entityManager.createQuery(Dummy1.class).equal("name", "foo");
+		SimpleQuery query = entityManager.createQuery(Dummy1.class).equal(Attrs.NAME, "foo");
 		List<Dummy1> result = entityManager.find(query);
 		assertTrue(result.size() >= 1);
 		assertEquals("foo", result.get(0).getName());
