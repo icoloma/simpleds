@@ -16,8 +16,6 @@ import org.simpleds.annotations.Cacheable;
 import org.simpleds.annotations.Embedded;
 import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
-import org.simpleds.annotations.MultivaluedIndex;
-import org.simpleds.annotations.MultivaluedIndexes;
 import org.simpleds.annotations.Transient;
 import org.simpleds.annotations.Version;
 import org.simpleds.converter.Converter;
@@ -85,16 +83,6 @@ public class ClassMetadataFactory {
 				return;
 			}
 			
-			// process @MultivaluedIndex
-			if (clazz.getAnnotation(MultivaluedIndexes.class) != null) {
-				for (MultivaluedIndex index : clazz.getAnnotation(MultivaluedIndexes.class).value()) {
-					addMultivaluedIndex(classMetadata, index);
-				}
-			}
-			if (clazz.getAnnotation(MultivaluedIndex.class) != null) {
-				addMultivaluedIndex(classMetadata, clazz.getAnnotation(MultivaluedIndex.class));
-			}
-			
 			// process @Cacheable
 			if (clazz.getAnnotation(Cacheable.class) != null) {
 				Cacheable cacheable = clazz.getAnnotation(Cacheable.class);
@@ -128,15 +116,6 @@ public class ClassMetadataFactory {
 		} catch (IntrospectionException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	private void addMultivaluedIndex(ClassMetadata classMetadata, MultivaluedIndex index) {
-		MultivaluedIndexMetadata metadata = new MultivaluedIndexMetadata();
-		metadata.setName(index.name());
-		metadata.setKind(classMetadata.getKind() + "_" + index.name());
-		metadata.setConverter(converterFactory.getCollectionConverter((Class<? extends Iterable>) index.collectionClass(), index.itemClass()));
-		metadata.setClassMetadata(classMetadata);
-		classMetadata.add(metadata);
 	}
 
 	private <J, D> void addProperty(ClassMetadata classMetadata, SinglePropertyMetadata<J, D> propertyMetadata) {

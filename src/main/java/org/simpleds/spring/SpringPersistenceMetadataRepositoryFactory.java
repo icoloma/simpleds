@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.simpleds.converter.ConverterFactory;
 import org.simpleds.metadata.ClassMetadataFactory;
 import org.simpleds.metadata.PersistenceMetadataRepository;
@@ -47,6 +48,7 @@ public class SpringPersistenceMetadataRepositoryFactory implements FactoryBean<P
 			}
 			if (classMetadataFactory == null) {
 				ConverterFactory converterFactory = new ConverterFactory();
+                converterFactory.setObjectMapper(new ObjectMapper());
 				classMetadataFactory = new ClassMetadataFactory();
 				classMetadataFactory.setConverterFactory(converterFactory);
 			}

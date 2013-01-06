@@ -133,11 +133,11 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 	@SuppressWarnings("cast")
 	public void testMultiplePutWithKeysSuccess() {
 		// root entities
-		Key key = KeyFactory.createKey(Dummy1.KIND, 1);
+		Key key = KeyFactory.createKey(Kinds.DUMMY1, 1);
 		Dummy1 dummy1 = Dummy1.create();
 		dummy1.setKey(key);
 		Dummy1 dummy2 = Dummy1.create();
-		dummy2.setKey(KeyFactory.createKey(Dummy1.KIND, 2));
+		dummy2.setKey(KeyFactory.createKey(Kinds.DUMMY1, 2));
 		entityManager.put(Arrays.asList(dummy1, dummy2));
 		
 		// parent-childs

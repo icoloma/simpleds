@@ -5,18 +5,14 @@ import java.util.Date;
 import org.simpleds.annotations.Embedded;
 import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
-import org.simpleds.annotations.MultivaluedIndex;
 import org.simpleds.annotations.Property;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 
 @Entity(Kinds.DUMMY1)
-@MultivaluedIndex(name="friends", itemClass=Key.class)
 public class Dummy1 {
 
-	public static final String KIND = "d1";
-	
 	public enum EnumValues {
 		FOO, BAR
 	}
@@ -43,7 +39,7 @@ public class Dummy1 {
 	 * Create a simple dummy key
 	 */
 	public static Key createDummyKey() {
-		return KeyFactory.createKey(Dummy1.KIND, 1);
+		return KeyFactory.createKey(Kinds.DUMMY1, 1);
 	}
 	
 	public static Dummy1 create() {

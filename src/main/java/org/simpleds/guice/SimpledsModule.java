@@ -4,8 +4,6 @@ import java.util.Set;
 
 import org.simpleds.EntityManager;
 import org.simpleds.EntityManagerImpl;
-import org.simpleds.IndexManager;
-import org.simpleds.IndexManagerImpl;
 import org.simpleds.annotations.Transactional;
 import org.simpleds.cache.CacheManager;
 import org.simpleds.cache.CacheManagerImpl;
@@ -42,7 +40,6 @@ public class SimpledsModule extends AbstractModule {
 		initCacheManager();
 		initTransactionManager();
 		initEntityManager();
-		initIndexManager();
 		initJRebel();
 	}
 
@@ -99,10 +96,6 @@ public class SimpledsModule extends AbstractModule {
 
 	protected void initEntityManager() {
 		bind(EntityManager.class).to(EntityManagerImpl.class);
-	}
-
-	protected void initIndexManager() {
-		bind(IndexManager.class).to(IndexManagerImpl.class);
 	}
 
 	protected void initJRebel() {

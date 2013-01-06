@@ -45,9 +45,6 @@ public class ClassMetadata {
 	/** required properties */
 	private Set<String> requiredProperties = Sets.newHashSet();
 	
-	/** relation indexes */
-	private Map<String, MultivaluedIndexMetadata> multivaluedIndexes = Maps.newHashMap();
-	
 	/** the number of seconds that this class can be cached in memcache */
 	private Integer cacheSeconds;
 	
@@ -175,14 +172,6 @@ public class ClassMetadata {
 		}
 		return metadata;
 	}
-	
-	public MultivaluedIndexMetadata getMultivaluedIndex(String relationIndexName) {
-		MultivaluedIndexMetadata index = multivaluedIndexes.get(relationIndexName);
-		if (index == null) {
-			throw new IllegalArgumentException("MultivaluedIndex with name '" + relationIndexName + "' cannot be found");
-		}
-		return index;
-	}
 
 	/**
 	 * Validates the parent key when inserting
@@ -207,10 +196,6 @@ public class ClassMetadata {
 	 */
 	public boolean isCacheable() {
 		return cacheSeconds != null;
-	}
-	
-	public void add(MultivaluedIndexMetadata metadata) {
-		multivaluedIndexes.put(metadata.getName(), metadata);
 	}
 	
 	public Iterator<String> getPropertyNames() {

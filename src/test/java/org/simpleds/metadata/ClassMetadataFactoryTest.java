@@ -11,18 +11,15 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.CollectionType;
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleds.annotations.AsJSON;
-import org.simpleds.annotations.Id;
-import org.simpleds.annotations.MultivaluedIndex;
-import org.simpleds.annotations.MultivaluedIndexes;
-import org.simpleds.annotations.Property;
-import org.simpleds.annotations.Transient;
+import org.simpleds.annotations.*;
 import org.simpleds.converter.AbstractCollectionConverter;
 import org.simpleds.converter.ConverterFactory;
 import org.simpleds.converter.JsonConverter;
 import org.simpleds.converter.NullConverter;
 import org.simpleds.converter.StringToTextConverter;
 import org.simpleds.exception.ConfigException;
+import org.simpleds.testdb.Attrs;
+import org.simpleds.testdb.Kinds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +46,9 @@ public class ClassMetadataFactoryTest {
 		assertNotNull(metadata.getProperty("foo"));
 		assertNotNull(metadata.getProperty("bar"));
 		assertNotNull(metadata.getParents());
-		MultivaluedIndexMetadata index = metadata.getMultivaluedIndex("dummies1");
-		assertNotNull(index);
-		assertTrue(((AbstractCollectionConverter)index.getConverter()).getItemConverter() instanceof NullConverter);
-		
+
 		// test JSON property
-		JsonConverter<List<String>> jsonConverter = (JsonConverter) metadata.getProperty("json").getConverter();
+		JsonConverter<List<String>> jsonConverter = (JsonConverter) metadata.getProperty(Attrs.JSON).getConverter();
 		CollectionType jsonType = (CollectionType) jsonConverter.getJsonJavaType();
 		assertTrue(jsonType.isCollectionLikeType());
 		assertEquals(String.class, jsonType.getContentType().getRawClass());
@@ -100,7 +94,7 @@ public class ClassMetadataFactoryTest {
 	@Test
 	public void testPrivateAttribute() throws Exception {
 		ClassMetadata metadata = factory.createMetadata(MyClass.class);
-		PropertyMetadata property = metadata.getProperty("intProperty");
+		PropertyMetadata property = metadata.getProperty("i1");
 		assertNotNull(property);
 		MyClass instance = new MyClass();
 		property.setValue(instance, 5);
@@ -110,18 +104,18 @@ public class ClassMetadataFactoryTest {
 	@Test
 	public void testConverterAnnotation() throws Exception {
 		ClassMetadata metadata = factory.createMetadata(MyClass.class);
-		PropertyMetadata property = metadata.getProperty("overridenConverter");
+		PropertyMetadata property = metadata.getProperty(Attrs.OVERRIDEN_CONVERTER);
 		assertTrue(property.getConverter() instanceof StringToTextConverter);
 	}
 	
 	public static class Parent {
 		private Integer foo;
 	}
-	
-	@MultivaluedIndexes(@MultivaluedIndex(name="dummies1", itemClass=Key.class))
+
+    @Entity("mc")
 	public static class MyClass extends Parent {
 		
-		@Id
+		@Id @Property(Attrs.KEY)
 		private Key key;
 		
 		@Transient
@@ -131,12 +125,12 @@ public class ClassMetadataFactoryTest {
 		private String yyy;
 		
 		// left empty on purpose
-		private int intProperty;
+		private int i1;
 		
-		@Property(converter=StringToTextConverter.class)
+		@Property(converter=StringToTextConverter.class, value=Attrs.OVERRIDEN_CONVERTER)
 		private String overridenConverter;
 		
-		@AsJSON
+		@AsJSON @Property(Attrs.JSON)
 		private List<String> json;
 
 		public Key getBar() {
