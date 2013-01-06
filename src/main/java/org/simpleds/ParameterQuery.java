@@ -253,4 +253,9 @@ public interface ParameterQuery {
 	 */
 	public Predicate<?> getPredicate();
 
+    /**
+     * Initializes the cached return value of a query
+     * @param keys The primary keys to store as a cached result
+     */
+    void populateCache(List<Key> keys);
 }

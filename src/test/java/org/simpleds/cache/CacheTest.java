@@ -255,6 +255,17 @@ public class CacheTest extends AbstractEntityManagerTest {
 		cacheSeconds(10, true);
 		cacheSeconds(10, false);
 	}
+
+    @Test
+    public void testPopulate() {
+        SimpleQuery query = entityManager.createQuery(CacheableEntity.class)
+                .equal("name", "xxxyyyzzz")
+                .withCacheSeconds(100)
+                ;
+        query.populateCache(ImmutableList.of(cachedEntity.getKey()));
+        CacheableEntity result = query.asSingleResult();
+        assertEquals(result.getKey(), cachedEntity.getKey());
+    }
 	
 	private void cacheSeconds(int cacheSeconds, boolean withLevel1) {
 		if (withLevel1) {

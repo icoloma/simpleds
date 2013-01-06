@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Preconditions;
 import org.simpleds.cache.CacheManager;
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.functions.EntityToKeyFunction;
@@ -31,6 +32,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+
+import javax.annotation.Nullable;
 
 /**
  * Proxy class to handle a {@link Query} instance. 
@@ -413,7 +416,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		List<T> result = Lists.newArrayList((Iterable<T>) asIterable());
 		if (isCacheable()) {
 			Collection<Key> keys = isKeysOnly()? result : Collections2.transform(result, new EntityToKeyFunction(classMetadata.getPersistentClass()));
-			getCacheManager().put(cacheKey, Lists.newArrayList(keys), cacheSeconds);
+			populateCache(cacheKey, Lists.newArrayList(keys));
 		}
 		return result;
 	}
@@ -457,12 +460,22 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 			}
 			javaObject = (T) entityManager.datastoreToJava(entity);
 			if (isCacheable()) {
-				getCacheManager().put(cacheKey, ImmutableList.of(entity.getKey()), cacheSeconds);
+                populateCache(cacheKey, ImmutableList.of(entity.getKey()));
 			}
 		}
 		return javaObject;
 
 	}
+
+    private void populateCache(String cacheKey, List<Key> elements) {
+        getCacheManager().put(cacheKey, elements, cacheSeconds);
+    }
+
+    @Override
+    public void populateCache(List<Key> keys) {
+        Preconditions.checkState(isCacheable(), "Query is not cacheable. Invoke withCacheSeconds() first");
+        populateCache(calculateDataCacheKey(), keys);
+    }
 
 	/**
 	 * Counts the number of instances returned from this query. This method will only
