@@ -33,8 +33,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import javax.annotation.Nullable;
-
 /**
  * Proxy class to handle a {@link Query} instance. 
  * @author icoloma
@@ -393,7 +391,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		
 		// is the result of the query cached?
 		if (isCacheable() && transaction == null) {
-			cacheKey = calculateDataCacheKey();
+			cacheKey = getCacheKey();
 			List<Key> keys = getCacheManager().get(cacheKey);
 			if (keys != null) {
 				if (isKeysOnly()) {
@@ -423,7 +421,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	@Override
 	public void clearCache() {
-		getCacheManager().delete(ImmutableList.of(calculateDataCacheKey()));
+		getCacheManager().delete(ImmutableList.of(getCacheKey()));
 	}
 	
 	private boolean isCacheable() {
@@ -446,7 +444,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 */
 	public <T> T asSingleResult() {
 		T javaObject = null;
-		String cacheKey = calculateDataCacheKey();
+		String cacheKey = getCacheKey();
 		if (isCacheable() && transaction == null) {
 			Collection<Key> keys = getCacheManager().get(cacheKey);
 			if (keys != null && keys.size() > 0) {
@@ -474,7 +472,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
     @Override
     public void populateCache(List<Key> keys) {
         Preconditions.checkState(isCacheable(), "Query is not cacheable. Invoke withCacheSeconds() first");
-        populateCache(calculateDataCacheKey(), keys);
+        populateCache(getCacheKey(), keys);
     }
 
 	/**
@@ -539,7 +537,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	 * Calculate the cache key to use for query data. This method combines the query kind, any filter predicates,
  	 * the start/end cursors and limit / offset values to produce a cache key
 	 */
-	protected String calculateDataCacheKey() {
+	public String getCacheKey() {
 		StringBuilder builder = new StringBuilder(100);
 		builder.append("qdata{");
 		addCommonCacheKeyParts(builder);

@@ -22,6 +22,7 @@ import org.simpleds.SimpleQuery;
 import org.simpleds.CursorIterator;
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.metadata.ClassMetadata;
+import org.simpleds.testdb.Attrs;
 import org.simpleds.testdb.CacheableEntity;
 import org.simpleds.testdb.Dummy1;
 
@@ -41,13 +42,8 @@ public class CacheTest extends AbstractEntityManagerTest {
 	
 	private ClassMetadata metadata;
 
-	private Method simpleQueryCalculateDataCacheKey;
-	
 	@Before
 	public void initCachedData() throws Exception {
-		
-		simpleQueryCalculateDataCacheKey = SimpleQuery.class.getDeclaredMethod("calculateDataCacheKey");
-		simpleQueryCalculateDataCacheKey.setAccessible(true);
 		
 		cacheManager = entityManager.getCacheManager();
 		Level1Cache.setCacheInstance();
@@ -162,12 +158,12 @@ public class CacheTest extends AbstractEntityManagerTest {
 		
 		// filter conditions
 		assertCacheKeys(
-				"qdata{kind=d1,pred=[date = Thu Jan 01 00:00:00 UTC 1970, evalue > NULL, name IN [foo, bar], name > bar]}", 
+				"qdata{kind=d1,pred=[d = Thu Jan 01 00:00:00 UTC 1970, ev > NULL, n IN [foo, bar], n > bar]}",
 				entityManager.createQuery(Dummy1.class)
-					.equal("date", new Date(100))
-					.isNotNull("evalue")
-					.in("name", ImmutableList.of("foo", "bar"))
-					.greaterThan("name", "bar")
+					.equal(Attrs.DATE, new Date(100))
+					.isNotNull(Attrs.E_VALUE)
+					.in(Attrs.NAME, ImmutableList.of("foo", "bar"))
+					.greaterThan(Attrs.NAME, "bar")
 		);
 		
 		// cursor
@@ -207,7 +203,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 		
 		entityManager.put(ImmutableList.of(Dummy1.create()));
 		SimpleQuery query = entityManager.createQuery(Dummy1.class)
-			.greaterThan("date", new Date(1000))
+			.greaterThan(Attrs.DATE, new Date(1000))
 			.withCacheSeconds(cacheSeconds);
 		
 		// cache failure
@@ -259,7 +255,7 @@ public class CacheTest extends AbstractEntityManagerTest {
     @Test
     public void testPopulate() {
         SimpleQuery query = entityManager.createQuery(CacheableEntity.class)
-                .equal("name", "xxxyyyzzz")
+                .equal(Attrs.NAME, "xxxyyyzzz")
                 .withCacheSeconds(100)
                 ;
         query.populateCache(ImmutableList.of(cachedEntity.getKey()));
@@ -332,7 +328,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 	}
 	
 	private void assertCacheKeys(String expectedDataKey, SimpleQuery query) throws Exception {
-		assertEquals(expectedDataKey, simpleQueryCalculateDataCacheKey.invoke(query));
+		assertEquals(expectedDataKey, query.getCacheKey());
 	}
 
 }
