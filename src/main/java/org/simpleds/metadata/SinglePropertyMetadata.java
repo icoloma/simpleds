@@ -77,13 +77,22 @@ public class SinglePropertyMetadata<J, D> extends AbstractPropertyMetadata<J, D>
 				field.set(container, value);
 			}
 		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(e);
+            throwSetException(value, e);
 		} catch (IllegalAccessException e) {
-			throw new RuntimeException(e);
+            throwSetException(value, e);
 		} catch (InvocationTargetException e) {
-			throw new RuntimeException(e.getTargetException());
+            throwSetException(value, e.getTargetException());
 		} 
 	}
+
+    private void throwSetException(Object value, Throwable cause) {
+        String svalue = value == null? null : "(" + value.getClass().getSimpleName() + ") " + value;
+        if (setter != null) {
+            throw new RuntimeException("Cannot invoke " + setter.getDeclaringClass().getSimpleName() + "." + setter.getName() + "(" + svalue + ")", cause);
+        } else {
+            throw new RuntimeException("Cannot assign " + field.getDeclaringClass().getSimpleName() + "." + field.getName() + " = " + svalue, cause);
+        }
+    }
 	
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
