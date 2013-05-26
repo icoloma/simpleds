@@ -1,37 +1,26 @@
 package org.simpleds;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import com.google.common.base.Preconditions;
-import org.simpleds.cache.CacheManager;
-import org.simpleds.exception.EntityNotFoundException;
-import org.simpleds.functions.EntityToKeyFunction;
-import org.simpleds.metadata.ClassMetadata;
-import org.simpleds.metadata.PropertyMetadata;
-
-import com.google.appengine.api.datastore.Cursor;
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceConfig;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.PreparedQuery;
-import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.Query.SortPredicate;
-import com.google.appengine.api.datastore.QueryResultIterable;
-import com.google.appengine.api.datastore.ReadPolicy;
-import com.google.appengine.api.datastore.Transaction;
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import org.simpleds.cache.CacheManager;
+import org.simpleds.exception.EntityNotFoundException;
+import org.simpleds.exception.InconsistentCacheException;
+import org.simpleds.functions.EntityToKeyFunction;
+import org.simpleds.metadata.ClassMetadata;
+import org.simpleds.metadata.PropertyMetadata;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Proxy class to handle a {@link Query} instance. 
@@ -448,7 +437,12 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		if (isCacheable() && transaction == null) {
 			Collection<Key> keys = getCacheManager().get(cacheKey);
 			if (keys != null && keys.size() > 0) {
-				javaObject = (T) entityManager.get(keys.iterator().next());
+				Key key = keys.iterator().next();
+				try {
+					javaObject = (T) entityManager.get(key);
+				} catch (EntityNotFoundException e) {
+					throw new InconsistentCacheException("Entity Key " + key + " found in the cache but not in the Datastore");
+				}
 			}
 		}
 		if (javaObject == null) {

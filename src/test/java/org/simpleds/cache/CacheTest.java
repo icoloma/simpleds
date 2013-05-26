@@ -1,37 +1,30 @@
 package org.simpleds.cache;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.lang.reflect.Method;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.simpleds.AbstractEntityManagerTest;
-import org.simpleds.KeyFactory2;
-import org.simpleds.SimpleQuery;
-import org.simpleds.CursorIterator;
-import org.simpleds.exception.EntityNotFoundException;
-import org.simpleds.metadata.ClassMetadata;
-import org.simpleds.testdb.Attrs;
-import org.simpleds.testdb.CacheableEntity;
-import org.simpleds.testdb.Dummy1;
-
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.collect.ImmutableList;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.simpleds.AbstractEntityManagerTest;
+import org.simpleds.CursorIterator;
+import org.simpleds.KeyFactory2;
+import org.simpleds.SimpleQuery;
+import org.simpleds.exception.EntityNotFoundException;
+import org.simpleds.exception.InconsistentCacheException;
+import org.simpleds.metadata.ClassMetadata;
+import org.simpleds.testdb.Attrs;
+import org.simpleds.testdb.CacheableEntity;
+import org.simpleds.testdb.Dummy1;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class CacheTest extends AbstractEntityManagerTest {
 
@@ -79,7 +72,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 		assertNotSame(noncachedEntity, nc2);
 		assertSame(nc2, entityManager.get(noncachedEntity.getKey()));
 	}
-	
+
 	@Test
 	public void testSingleGetWithTransaction() {
 		// shopuld ignore the cache settings
@@ -244,8 +237,20 @@ public class CacheTest extends AbstractEntityManagerTest {
 			// ok
 		}
 	}
-	
-	@Test
+
+    @Test(expected=InconsistentCacheException.class)
+    public void testInconsistentCacheException() {
+        Level1Cache.setCacheInstance();
+        entityManager.put(ImmutableList.of(Dummy1.create()));
+        SimpleQuery query = entityManager.createQuery(Dummy1.class)
+            .greaterThan(Attrs.DATE, new Date(1000))
+            .withCacheSeconds(10);
+        Dummy1 dummy1 = query.asSingleResult();
+        datastoreService.delete(dummy1.getKey());
+        query.asSingleResult();
+        fail("Expected " + InconsistentCacheException.class);
+    }
+        @Test
 	public void testCacheQueryMultipleResult() {
 		cacheSeconds(0, true);
 		cacheSeconds(10, true);
