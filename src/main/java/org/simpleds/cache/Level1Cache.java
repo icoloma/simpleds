@@ -1,15 +1,14 @@
 package org.simpleds.cache;
 
+import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Maps;
 
 /** 
  * The thread-bound Level 1 cache container.
@@ -17,7 +16,7 @@ import com.google.common.collect.Maps;
  * @author Nacho
  *
  */
-class Level1Cache {
+public class Level1Cache {
 	
 	/** the thread-bound instance */
 	private static ThreadLocal<Level1Cache> threadLocal = new ThreadLocal<Level1Cache>();
