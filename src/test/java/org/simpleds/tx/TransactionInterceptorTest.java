@@ -38,7 +38,7 @@ public class TransactionInterceptorTest extends AbstractDatastoreTest {
 	
 	@Test
 	public void testCommit() throws Exception {
-		assertTrue(transactionalService.getClass().getName().startsWith("$Proxy"));
+		//assertTrue(transactionalService.getClass().getName().startsWith("$Proxy"));
 		assertCommit("saveSuccess");
 	}
 	

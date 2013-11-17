@@ -76,6 +76,9 @@ public class Level1Cache {
 		}
 	}
 
+    /**
+     * Return the list of values from cache. Only entries with non-null value will be returned
+     */
 	@SuppressWarnings("unchecked")
 	public <T> Map<Serializable, T> get(Collection<? extends Serializable> keys) {
 		Map<Serializable, T> result = Maps.newHashMapWithExpectedSize(keys.size());
@@ -98,5 +101,9 @@ public class Level1Cache {
 			contents.put(itKey.next(), itJava.next());
 		}
 	}
+
+    public void clear() {
+        this.contents.clear();
+    }
 	
 }

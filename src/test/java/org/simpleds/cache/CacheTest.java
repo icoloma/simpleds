@@ -6,6 +6,7 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSetMultimap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,8 +44,8 @@ public class CacheTest extends AbstractEntityManagerTest {
 		cachedEntity = CacheableEntity.create();
 		noncachedEntity = CacheableEntity.create();
 		entityManager.put(ImmutableList.of(cachedEntity, noncachedEntity));
-		cacheManager.delete(noncachedEntity.getKey());
-		metadata = entityManager.getClassMetadata(CacheableEntity.class);
+        metadata = entityManager.getClassMetadata(CacheableEntity.class);
+        cacheManager.delete(ImmutableSetMultimap.of(metadata.getCacheNamespace(), noncachedEntity.getKey()));
 		assertTrue(metadata.isCacheable());
 		assertEquals(120, metadata.getCacheSeconds());
 	}
@@ -121,7 +122,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 	
 	@Test
 	public void testNotCacheableData() {
-		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService(CacheManager.MEMCACHE_NAMESPACE);
+		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService(CacheManager.ENTITIES_NAMESPACE);
 		memcache.clearAll();
 		Dummy1 dummy = Dummy1.create();
 		entityManager.put(dummy);
@@ -197,7 +198,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 		entityManager.put(ImmutableList.of(Dummy1.create()));
 		SimpleQuery query = entityManager.createQuery(Dummy1.class)
 			.greaterThan(Attrs.DATE, new Date(1000))
-			.withCacheSeconds(cacheSeconds);
+			.withCacheSeconds("foobar", cacheSeconds);
 		
 		// cache failure
 		Dummy1 dummy1 = query.asSingleResult();
@@ -244,7 +245,7 @@ public class CacheTest extends AbstractEntityManagerTest {
         entityManager.put(ImmutableList.of(Dummy1.create()));
         SimpleQuery query = entityManager.createQuery(Dummy1.class)
             .greaterThan(Attrs.DATE, new Date(1000))
-            .withCacheSeconds(10);
+            .withCacheSeconds("foo", 10);
         Dummy1 dummy1 = query.asSingleResult();
         datastoreService.delete(dummy1.getKey());
         query.asSingleResult();
@@ -261,7 +262,7 @@ public class CacheTest extends AbstractEntityManagerTest {
     public void testPopulate() {
         SimpleQuery query = entityManager.createQuery(CacheableEntity.class)
                 .equal(Attrs.NAME, "xxxyyyzzz")
-                .withCacheSeconds(100)
+                .withCacheSeconds("foo", 100)
                 ;
         query.populateCache(ImmutableList.of(cachedEntity.getKey()));
         CacheableEntity result = query.asSingleResult();
@@ -277,7 +278,7 @@ public class CacheTest extends AbstractEntityManagerTest {
 
 		entityManager.put(ImmutableList.of(Dummy1.create(), Dummy1.create()));
 		SimpleQuery query = entityManager.createQuery(Dummy1.class)
-			.withCacheSeconds(cacheSeconds);
+			.withCacheSeconds("foo", cacheSeconds);
 		List<Dummy1> list = query.asList();
 		assertEquals(2, query.count());
 		assertEquals(2, list.size());
@@ -326,10 +327,10 @@ public class CacheTest extends AbstractEntityManagerTest {
 	}
 	
 	private void assertInCache(CacheableEntity entity) {
-		assertNotNull(cacheManager.get(entity.getKey(), metadata));
+		assertNotNull(cacheManager.get(metadata, entity.getKey()));
 	}
 	private void assertNotInCache(CacheableEntity entity) {
-		assertNull(cacheManager.get(entity.getKey(), metadata));
+		assertNull(cacheManager.get(metadata, entity.getKey()));
 	}
 	
 	private void assertCacheKeys(String expectedDataKey, SimpleQuery query) throws Exception {

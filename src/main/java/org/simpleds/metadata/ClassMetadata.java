@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.simpleds.annotations.Property;
 import org.simpleds.annotations.Transient;
+import org.simpleds.cache.CacheManager;
 import org.simpleds.exception.ConfigException;
 import org.simpleds.exception.DuplicateException;
 import org.simpleds.exception.RequiredFieldException;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.memcache.Expiration;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -47,6 +47,9 @@ public class ClassMetadata {
 	
 	/** the number of seconds that this class can be cached in memcache */
 	private Integer cacheSeconds;
+
+    /** the cache namespace to use. If null, a shared namespace will be used */
+    private String cacheNamespace = CacheManager.ENTITIES_NAMESPACE;
 	
 	/** manages a ny Version attribute. May be null */
 	private VersionManager versionManager;
@@ -244,13 +247,6 @@ public class ClassMetadata {
 		this.cacheSeconds = cacheSeconds;
 	}
 
-	/**
-	 * Create a Expiration instance to be used with memcache 
-	 */
-	public Expiration createCacheExpiration() {
-		return Expiration.byDeltaSeconds(cacheSeconds);
-	}
-
 	public boolean useLevel2Cache() {
 		return cacheSeconds != null && cacheSeconds > 0;
 	}
@@ -266,4 +262,11 @@ public class ClassMetadata {
 		return versionManager;
 	}
 
+    public String getCacheNamespace() {
+        return cacheNamespace;
+    }
+
+    public void setCacheNamespace(String cacheNamespace) {
+        this.cacheNamespace = cacheNamespace;
+    }
 }

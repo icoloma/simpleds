@@ -80,8 +80,6 @@ public class SimpledsModule extends AbstractModule {
 
 	protected void initCacheManager() {
 		CacheManagerImpl cmi = new CacheManagerImpl();
-		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService(CacheManager.MEMCACHE_NAMESPACE);
-		cmi.setMemcache(memcache);
 		bind(CacheManager.class).toInstance(cmi);
 	}
 

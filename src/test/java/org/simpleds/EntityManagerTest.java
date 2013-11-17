@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.google.appengine.api.datastore.Entity;
 import org.junit.Test;
 import org.simpleds.exception.RequiredFieldException;
 import org.simpleds.functions.EntityToKeyFunction;
@@ -84,8 +85,9 @@ public class EntityManagerTest extends AbstractEntityManagerTest {
 		entityManager.put(l);
 		
 		// modify the datastore value to check it is using the cached version
-		cacheableEntity.setName("xxx");
-		datastoreService.put(entityManager.javaToDatastore(cacheableEntity));
+        Entity e = entityManager.javaToDatastore(cacheableEntity);
+        e.setProperty(Attrs.NAME, "xxx");
+        datastoreService.put(e);
 		assertEquals((Long) 0L, vc.getVersion());
 		
 		Collection keys = Collections2.transform(l, new EntityToKeyFunction());

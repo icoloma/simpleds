@@ -187,16 +187,22 @@ public interface ParameterQuery {
 	public ParameterQuery withDeadline(double deadline);
 	
 	/**
-	 * Set the number of seconds to store the query results into memcache. Possible values are: 
+	 * Set the number of seconds to store the query results into memcache:
 	 * <ul>
 	 * <li>-1 (the default): do not cache</li> 
 	 * <li>0: store only in the Level 1 cache</li> 
 	 * <li>any other value will be used as the memcache timeout</li>
-	 * </ul> 
-	 * @param cacheSeconds the number of seconds to store the data in memcache 
+	 * </ul>
+     * Cached queries will store the result keys in the provided namespace. Each query will store
+     * in the cache a set of datastore keys using a cache key composed of the serialization of
+     * kind, parameters, fetch_options and cursor.
+     * To drop cached results for this query, invoke {@link #clearCache()} passing this namespace.
+     *
+	 * @param namespace the namespace to use for the Level 2 cache.
+	 * @param cacheSeconds the number of seconds to store the data in memcache
 	 * @return this instance
 	 */
-	public ParameterQuery withCacheSeconds(int cacheSeconds);
+	public ParameterQuery withCacheSeconds(String namespace, int cacheSeconds);
 	
 	/**
 	 * @return the value of the transaction applied with this query, if any

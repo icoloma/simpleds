@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.collect.*;
 import org.simpleds.cache.CacheManager;
 import org.simpleds.cache.NonCachedPredicate;
 import org.simpleds.metadata.ClassMetadata;
@@ -25,14 +26,6 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.TransactionOptions;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
 @Singleton
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -361,11 +354,11 @@ public class EntityManagerImpl implements EntityManager {
 	
 	@Override
 	public void delete(Transaction transaction, Iterable<Key> keys) {
-		List<Key> cacheableKeys = Lists.newArrayListWithCapacity(keys instanceof Collection? ((Collection<Key>) keys).size() : 10);
+        SetMultimap<String, Key> cacheableKeys = HashMultimap.create();
 		for (Key key : keys) {
 			ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
 			if (metadata.isCacheable()) {
-				cacheableKeys.add(key);
+				cacheableKeys.put(metadata.getCacheNamespace(), key);
 			}
 		}
 		datastoreService.delete(transaction, keys);
@@ -385,7 +378,7 @@ public class EntityManagerImpl implements EntityManager {
 			ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
 			T javaObject;
 			if (metadata.isCacheable() && transaction == null) { // ignore cache if a transaction is active
-				javaObject = (T) cacheManager.get(key, metadata);
+				javaObject = (T) cacheManager.get(metadata, key);
 				if (javaObject != null) {
 					return javaObject;
 				}
@@ -422,19 +415,19 @@ public class EntityManagerImpl implements EntityManager {
 	}
 	
 	@Override
-	public <T> Map<Key, T> get(Transaction transaction, Iterable<Key> unsortedKeys) {
-		Multimap<ClassMetadata, Key> sortedKeys = ArrayListMultimap.create();
+	public <T> Map<Key, T> get(Transaction transaction, Iterable<Key> uk) {
+        Set<Key> unsortedKeys = uk instanceof Set? (Set<Key>) uk : Sets.newHashSet(uk);
+		SetMultimap<ClassMetadata, Key> cacheKeys = HashMultimap.create();
 		for (Key key : unsortedKeys) {
 			ClassMetadata metadata = persistenceMetadataRepository.get(key.getKind());
-			sortedKeys.put(metadata, key);
+			cacheKeys.put(metadata, key);
 		}
 		
 		// retrieve values from cache only if tx != null
-		Map<Key, Object> cachedValues = transaction != null? (Map)ImmutableMap.of() : cacheManager.get(sortedKeys);
+		Map<Key, Object> cachedValues = transaction != null? (Map)ImmutableMap.of() : cacheManager.get(cacheKeys);
 		
 		// retrieve values from database
-		Iterable<Key> cacheMissKeys = Iterables.filter(unsortedKeys, new NonCachedPredicate(cachedValues.keySet()));
-		Map<Key, Entity> cacheMissEntities = datastoreService.get(transaction, cacheMissKeys);
+		Map<Key, Entity> cacheMissEntities = datastoreService.get(transaction, Sets.difference(unsortedKeys, cachedValues.keySet()));
 		
 		// transform into java objects
 		ListMultimap<ClassMetadata, Object> populateCacheValues = ArrayListMultimap.create();

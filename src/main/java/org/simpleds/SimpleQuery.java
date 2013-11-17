@@ -8,9 +8,7 @@ import com.google.appengine.api.datastore.Query.SortPredicate;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import org.simpleds.cache.CacheManager;
 import org.simpleds.exception.EntityNotFoundException;
 import org.simpleds.exception.InconsistentCacheException;
@@ -52,7 +50,10 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	/** the number of seconds to store data in the memcache. Default (0) will only use the Level 1 cache */
 	private int cacheSeconds = NO_CACHE;
-	
+
+    /** the namespace to use for this query, if cacheSeconds != 0 */
+    private String cacheNamespace;
+
 	/** Predicate to filter using Java code */
 	private Predicate predicate;
 	
@@ -381,7 +382,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		// is the result of the query cached?
 		if (isCacheable() && transaction == null) {
 			cacheKey = getCacheKey();
-			List<Key> keys = getCacheManager().get(cacheKey);
+			List<Key> keys = getCacheManager().get(cacheNamespace, cacheKey);
 			if (keys != null) {
 				if (isKeysOnly()) {
 					return (List) keys;
@@ -410,7 +411,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	
 	@Override
 	public void clearCache() {
-		getCacheManager().delete(ImmutableList.of(getCacheKey()));
+        getCacheManager().clear(cacheNamespace);
 	}
 	
 	private boolean isCacheable() {
@@ -435,7 +436,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		T javaObject = null;
 		String cacheKey = getCacheKey();
 		if (isCacheable() && transaction == null) {
-			Collection<Key> keys = getCacheManager().get(cacheKey);
+			Collection<Key> keys = getCacheManager().get(cacheNamespace, cacheKey);
 			if (keys != null && keys.size() > 0) {
 				Key key = keys.iterator().next();
 				try {
@@ -460,7 +461,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	}
 
     private void populateCache(String cacheKey, List<Key> elements) {
-        getCacheManager().put(cacheKey, elements, cacheSeconds);
+        getCacheManager().put(cacheNamespace, cacheKey, elements, cacheSeconds);
     }
 
     @Override
@@ -564,11 +565,12 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 	}
 	
 	@Override
-	public SimpleQuery withCacheSeconds(int cacheSeconds) {
+	public SimpleQuery withCacheSeconds(String namespace, int cacheSeconds) {
+        this.cacheNamespace = namespace;
 		this.cacheSeconds = cacheSeconds;
 		return this;
 	}
-	
+
 	private CacheManager getCacheManager() {
 		return entityManager.getCacheManager();
 	}

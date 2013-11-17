@@ -46,10 +46,7 @@ public class SpringEntityManagerFactory implements FactoryBean<EntityManager> {
 			throw new IllegalArgumentException("persistenceMetadataRepository cannot be null");
 		}
 		if (cacheManager == null) {
-			CacheManagerImpl cmi = new CacheManagerImpl();
-			MemcacheService memcache = MemcacheServiceFactory.getMemcacheService(CacheManager.MEMCACHE_NAMESPACE);
-			cmi.setMemcache(memcache);
-			cacheManager = cmi;
+			cacheManager = new CacheManagerImpl();
 		}
 		EntityManagerImpl emi = new EntityManagerImpl();
 		emi.setDatastoreService(datastoreService);

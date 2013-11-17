@@ -87,6 +87,7 @@ public class ClassMetadataFactory {
 			if (clazz.getAnnotation(Cacheable.class) != null) {
 				Cacheable cacheable = clazz.getAnnotation(Cacheable.class);
 				classMetadata.setCacheSeconds(cacheable.value());
+                classMetadata.setCacheNamespace(cacheable.namespace());
 			}
 			
 			// add standard javabean properties

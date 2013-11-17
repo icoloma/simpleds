@@ -59,8 +59,6 @@ public class AbstractEntityManagerTest extends AbstractDatastoreTest {
 		transactionManager.setDatastoreService(datastoreService);
 		
 		CacheManagerImpl cmi = new CacheManagerImpl();
-		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService(CacheManager.MEMCACHE_NAMESPACE);
-		cmi.setMemcache(memcache);
 		cmi.setPersistenceMetadataRepository(repository);
 
 		entityManager = new EntityManagerImpl();
