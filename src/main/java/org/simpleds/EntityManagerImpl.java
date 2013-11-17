@@ -408,8 +408,13 @@ public class EntityManagerImpl implements EntityManager {
 			throw new org.simpleds.exception.EntityNotFoundException(e);
 		}
 	}
-	
-	@Override
+
+    @Override
+    public <T> Map<Key, T> get(Key... keys) {
+        return get(ImmutableList.copyOf(keys));
+    }
+
+    @Override
 	public <T> Map<Key, T> get(Iterable<Key> keys) {
 		return get(null, keys);
 	}

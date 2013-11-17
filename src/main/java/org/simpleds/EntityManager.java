@@ -132,6 +132,15 @@ public interface EntityManager {
 	 */
 	<T> Map<Key, T> get(Iterable<Key> keys);
 	
+
+	/**
+	 * Return a collection of persistent entities, by key
+	 * @param keys the keys of the persistent entities to retrieve
+	 * @return a Map of retrieved entities. If any entity was not found, its value would be null.
+	 * @throws EntityNotFoundException if any entity could not be found
+	 */
+	<T> Map<Key, T> get(Key... keys);
+
 	/**
 	 * Return a collection of persistent entities. If transaction is not null any {@link Cacheable}
 	 * settings will be ignored. 
