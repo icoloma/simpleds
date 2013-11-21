@@ -571,7 +571,15 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
 		return this;
 	}
 
-	private CacheManager getCacheManager() {
+    /**
+     * This is not a good idea. Use your own namespace specific to your query.
+     */
+    @Override
+    public ParameterQuery withCacheSeconds(int cacheSeconds) {
+        return withCacheSeconds("_sds_queries", cacheSeconds);
+    }
+
+    private CacheManager getCacheManager() {
 		return entityManager.getCacheManager();
 	}
 	

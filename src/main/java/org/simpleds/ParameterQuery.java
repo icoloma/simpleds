@@ -203,7 +203,12 @@ public interface ParameterQuery {
 	 * @return this instance
 	 */
 	public ParameterQuery withCacheSeconds(String namespace, int cacheSeconds);
-	
+
+    /**
+     * @deprecated use {@link #withCacheSeconds(String, int)} instead.
+     */
+	public ParameterQuery withCacheSeconds(int cacheSeconds);
+
 	/**
 	 * @return the value of the transaction applied with this query, if any
 	 */
