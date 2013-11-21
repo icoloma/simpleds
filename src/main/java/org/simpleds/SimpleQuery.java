@@ -575,7 +575,7 @@ public class SimpleQuery implements ParameterQuery, Cloneable {
      * This is not a good idea. Use your own namespace specific to your query.
      */
     @Override
-    public ParameterQuery withCacheSeconds(int cacheSeconds) {
+    public SimpleQuery withCacheSeconds(int cacheSeconds) {
         return withCacheSeconds("_sds_queries", cacheSeconds);
     }
 
