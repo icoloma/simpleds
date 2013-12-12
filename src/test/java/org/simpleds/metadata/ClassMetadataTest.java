@@ -1,14 +1,8 @@
 package org.simpleds.metadata;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Date;
-import java.util.Set;
-
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.simpleds.AbstractEntityManagerTest;
@@ -19,11 +13,12 @@ import org.simpleds.exception.ConfigException;
 import org.simpleds.exception.DuplicateException;
 import org.simpleds.testdb.Attrs;
 import org.simpleds.testdb.Dummy1;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import org.simpleds.testdb.Kinds;
+
+import java.util.Date;
+import java.util.Set;
+
+import static org.junit.Assert.*;
 
 public class ClassMetadataTest extends AbstractEntityManagerTest {
 
@@ -39,9 +34,26 @@ public class ClassMetadataTest extends AbstractEntityManagerTest {
 		Set<String> rp = metadata.getRequiredProperties();
 		assertTrue(rp.contains(Attrs.NAME));
 		assertTrue(rp.contains(Attrs.DATE));
+
+        assertTrue(validateEntity("foo", new Date()));
+        assertFalse(validateEntity("", new Date()));
+        assertFalse(validateEntity("foo", null));
 	}
-	
-	@Test
+
+    private boolean validateEntity(String name, Date date) {
+        Entity entity = new Entity(KeyFactory.createKey(Kinds.DUMMY1, 1));
+        entity.setProperty(Attrs.NAME, name);
+        entity.setProperty(Attrs.DATE, date);
+        try {
+            metadata.validateConstraints(entity);
+            return true;
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            return false;
+        }
+    }
+
+    @Test
 	public void testUnindexedProperties() throws Exception {
 		assertTrue(metadata.getProperty(Attrs.NAME).isIndexed());
 		assertFalse(metadata.getProperty(Attrs.BIG_STRING).isIndexed());
@@ -74,6 +86,7 @@ public class ClassMetadataTest extends AbstractEntityManagerTest {
 		entity.setProperty("i2", Long.valueOf(2));
 		entity.setProperty(Attrs.BIG_STRING, "foobar");
 		entity.setProperty("xxx", "foobar"); // ignored property that is not mapped
+
 		Dummy1 dummy = metadata.datastoreToJava(entity);
 		assertEquals(key, dummy.getKey());
 		assertEquals("foo", dummy.getName());

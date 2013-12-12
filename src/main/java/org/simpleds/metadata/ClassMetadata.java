@@ -101,7 +101,8 @@ public class ClassMetadata {
 	 */
 	public void validateConstraints(Entity entity) {
 		for (String propertyName : requiredProperties) {
-			if (entity.getProperty(propertyName) == null) {
+            Object value = entity.getProperty(propertyName);
+			if (value == null || (value instanceof String && ((String) value).length() == 0)) {
 				throw new RequiredFieldException("Required property '" + this.persistentClass.getSimpleName() + "." + propertyName + "' is not set");
 			}
 		}
