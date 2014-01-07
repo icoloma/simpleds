@@ -6,7 +6,9 @@ classes.
 You can explore the details about SimpleDS at [our presentation for
 Codemotion 2012](http://www.slideshare.net/icoloma/codemotion-appengine).
 
-There is also a [demo application at GitHub](https://github.com/icoloma/simpleds-kickstart).
+There is also a [demo application on GitHub](https://github.com/icoloma/simpleds-kickstart).
+
+[![Analytics](https://ga-beacon.appspot.com/UA-3159223-5/icoloma/simpleds)](https://github.com/icoloma/simpleds)
 
 ## Features
 
