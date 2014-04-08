@@ -1,9 +1,9 @@
 package org.simpleds.test;
 
+import com.google.apphosting.api.ApiProxy;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.google.apphosting.api.ApiProxy;
 
 /**
  * AppEngine test environment as defined in
@@ -47,7 +47,12 @@ public class TestEnvironment implements ApiProxy.Environment {
 		return appId;
 	}
 
-	public void setAppId(String appId) {
+    @Override
+    public String getModuleId() {
+        return null;
+    }
+
+    public void setAppId(String appId) {
 		this.appId = appId;
 	}
 
