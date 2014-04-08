@@ -1,5 +1,7 @@
 package org.simpleds.cache;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +10,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.concurrent.TimeUnit;
 
 /** 
  * The thread-bound Level 1 cache container.
@@ -22,7 +24,7 @@ public class Level1Cache {
 	private static ThreadLocal<Level1Cache> threadLocal = new ThreadLocal<Level1Cache>();
 
 	/** the cache contents (the key can be a Key or a String) */
-	private Map<Serializable, Object> contents = new WeakHashMap<Serializable, Object>();
+	private Cache<Serializable, Object> contents;
 	
 	private static Logger log = LoggerFactory.getLogger(Level1Cache.class);
 	
@@ -50,9 +52,27 @@ public class Level1Cache {
 		return threadLocal.get();
 	}
 
+    public Level1Cache() {
+        this.initCache();
+    }
+
+    /**
+     * Initializes the Level 1 cache. Override to customize the cache parameters.
+     * A Level1 cache instance is consumed by a single thread and will be cleared after processing
+     * the current request, so overriding this method is usually not needed. It should be considered
+     * only if you are using Task Queues or Backends that work with a lot of cached data.
+     * @return a Cache implementation with a maximum of 1000 entities and 1-minute timeout.
+     */
+    protected void initCache() {
+        contents = CacheBuilder.newBuilder()
+                .maximumSize(1000)
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build();
+    }
+
 	@SuppressWarnings("unchecked")
 	public <T> T get(Serializable key) {
-		T value = (T) contents.get(key);
+		T value = (T) contents.getIfPresent(key);
 		if (log.isDebugEnabled() && value != null) {
 			log.debug("Level 1 cache hit: " + key);
 		}
@@ -64,13 +84,11 @@ public class Level1Cache {
 	}
 
 	public void delete(Serializable key) {
-		contents.remove(key);
+		contents.invalidate(key);
 	}
 
 	public void delete(Collection<? extends Serializable> keys) {
-		for (Serializable key : keys) {
-			contents.remove(key);
-		}
+        contents.invalidateAll(keys);
 		if (log.isDebugEnabled()) {
 			log.debug("Deleted from Level 1 cache: " + keys);
 		}
@@ -83,13 +101,13 @@ public class Level1Cache {
 	public <T> Map<Serializable, T> get(Collection<? extends Serializable> keys) {
 		Map<Serializable, T> result = Maps.newHashMapWithExpectedSize(keys.size());
 		for (Serializable key : keys) {
-			T value = (T) contents.get(key);
+			T value = (T) contents.getIfPresent(key);
 			if (value != null) {
 				result.put(key, value);
 			}
 		}
 		if (log.isDebugEnabled() && !result.isEmpty()) {
-			log.debug("Level 1 cache multiple hit: " + result.keySet());
+			log.debug("Level 1 cache multiple hit: {}", result.keySet());
 		}
 		return result;
 	}
@@ -103,7 +121,7 @@ public class Level1Cache {
 	}
 
     public void clear() {
-        this.contents.clear();
+        this.contents.invalidateAll();
     }
 	
 }
