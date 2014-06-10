@@ -15,6 +15,7 @@ public class Attrs {
     public static final String LIST = "l";
     public static final String SET = "s";
     public static final String MAP = "m";
+    public static final String POLY = "p";
     public static final String JSON = "j";
     public static final String OVERRIDEN_CONVERTER = "oc";
 }

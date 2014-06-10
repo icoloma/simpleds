@@ -1,15 +1,14 @@
 package org.simpleds.testdb;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.appengine.api.datastore.Key;
 import org.simpleds.annotations.AsJSON;
 import org.simpleds.annotations.Entity;
 import org.simpleds.annotations.Id;
-
-import com.google.appengine.api.datastore.Key;
 import org.simpleds.annotations.Property;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Entity(Kinds.JSON_STORED)
 public class JsonStored {
@@ -26,7 +25,16 @@ public class JsonStored {
 	@AsJSON @Property(Attrs.MAP)
 	private Map<String, Dummy1> map;
 
-	
+    @AsJSON @Property(Attrs.POLY)
+    private List<Plugin> polyList;
+
+    public List<Plugin> getPolyList() {
+        return polyList;
+    }
+
+    public void setPolyList(List<Plugin> polyList) {
+        this.polyList = polyList;
+    }
 
 	public List<Dummy1> getList() {
 		return list;

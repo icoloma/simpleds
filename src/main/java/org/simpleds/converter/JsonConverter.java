@@ -1,11 +1,11 @@
 package org.simpleds.converter;
 
-import java.io.IOException;
-
+import com.google.appengine.api.datastore.Text;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.type.JavaType;
 
-import com.google.appengine.api.datastore.Text;
+import java.io.IOException;
 
 /**
  * Converts a property into its JSON representation, using Jackson to perform the transformation
@@ -20,11 +20,14 @@ public class JsonConverter<J> implements Converter<J, Text>{
 	
 	/** the ObjectMapper instance used for serializing/deserializing */
 	private ObjectMapper objectMapper;
-	
-	public JsonConverter(JavaType javaType, ObjectMapper objectMapper) {
+
+    private ObjectWriter writer;
+
+    public JsonConverter(JavaType javaType, ObjectMapper objectMapper) {
 		this.javaType = javaType;
 		this.objectMapper = objectMapper;
-	}
+        this.writer = objectMapper.writerWithType(javaType);
+    }
 	
 	public JavaType getJsonJavaType() {
 		return javaType;
@@ -48,7 +51,7 @@ public class JsonConverter<J> implements Converter<J, Text>{
 			if (value == null) {
 				return null;
 			}
-			return new Text(objectMapper.writeValueAsString(value));
+			return new Text(writer.writeValueAsString(value));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

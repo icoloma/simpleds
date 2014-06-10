@@ -1,18 +1,9 @@
 package org.simpleds.converter;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import com.google.appengine.api.blobstore.BlobKey;
+import com.google.appengine.api.datastore.*;
+import com.google.appengine.api.users.User;
+import com.google.common.collect.Maps;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.codehaus.jackson.type.JavaType;
@@ -21,19 +12,12 @@ import org.simpleds.metadata.SinglePropertyMetadata;
 import org.simpleds.util.GenericCollectionTypeResolver;
 import org.simpleds.util.MethodParameter;
 
-import com.google.appengine.api.blobstore.BlobKey;
-import com.google.appengine.api.datastore.Blob;
-import com.google.appengine.api.datastore.Email;
-import com.google.appengine.api.datastore.GeoPt;
-import com.google.appengine.api.datastore.IMHandle;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Link;
-import com.google.appengine.api.datastore.PhoneNumber;
-import com.google.appengine.api.datastore.PostalAddress;
-import com.google.appengine.api.datastore.Rating;
-import com.google.appengine.api.datastore.Text;
-import com.google.appengine.api.users.User;
-import com.google.common.collect.Maps;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Singleton
 @SuppressWarnings("rawtypes")
@@ -95,9 +79,9 @@ public class ConverterFactory {
 				Class[] mapKeyValue = guessMapGenericType(metadata);
 				type = typeFactory.constructMapType(Map.class, mapKeyValue[0], mapKeyValue[1]);
 			} else if (Set.class.isAssignableFrom(propertyType)) {
-				type = typeFactory.constructCollectionType(Set.class, guessCollectionGenericType(metadata));
+				type = typeFactory.constructCollectionType(Set.class, typeFactory.constructType(guessCollectionGenericType(metadata)));
 			} else if (Collection.class.isAssignableFrom(propertyType)) {
-					type = typeFactory.constructCollectionType(List.class, guessCollectionGenericType(metadata));
+					type = typeFactory.constructCollectionType(List.class, typeFactory.constructType(guessCollectionGenericType(metadata)));
 			} else {
 				type = typeFactory.uncheckedSimpleType(propertyType);
 			}
