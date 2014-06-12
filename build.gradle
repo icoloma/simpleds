@@ -89,7 +89,7 @@ uploadArchives {
         uniqueVersion = true // 'false' failing due to http://jira.codehaus.org/browse/GRADLE-629
         configuration = configurations.archives
         
-        snapshotRepository(url: 'http://oss.sonatype.org/content/repositories/snapshots') {
+        snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
             authentication(userName: sonatypeUsername, password: sonatypePassword)
         }
         
