@@ -6,7 +6,7 @@ apply plugin: 'signing'
 apply from: 'https://raw.github.com/icoloma/gradle-plugins/master/providedCompile.gradle'
 apply from: 'https://raw.github.com/icoloma/gradle-plugins/master/artifacts.gradle'
 
-project.version='1.4-SNAPSHOT'
+project.version='1.5'
 project.group='org.extrema-sistemas'
 
 repositories {
